@@ -1,0 +1,16 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "CrackCGPSC",
+  "orientation": "any",
+  "scope": "/FreeTestSeries/",
+  "short_name": "CrackCGPSC",
+  "start_url": "/FreeTestSeries/",
+  "theme_color": "#ffffff",
+  "id": "FreeTestSeries",
+  "description": "Free online test series for CGPSC, CGVYAPAM, CGSSB, SSC, UPSC &amp;  other Government Exam",
+  "categories": [
+    "education"
+  ]
+}

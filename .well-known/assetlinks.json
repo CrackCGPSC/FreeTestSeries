@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "io.github.crackcgpsc.twa",
-        "sha256_cert_fingerprints": ["6A:1C:DB:18:67:E0:55:1D:44:70:0A:14:FA:F8:F5:ED:03:E4:0B:BB:DD:23:A9:7B:07:1C:D3:F3:72:0E:D8:4A"]
+        "sha256_cert_fingerprints": ["14:18:BD:E1:74:A1:8E:30:E6:CF:BC:C5:17:6D:C0:2E:56:A2:16:27:07:CB:02:16:0D:B8:92:93:A0:7F:62:0A"]
       }
     }]

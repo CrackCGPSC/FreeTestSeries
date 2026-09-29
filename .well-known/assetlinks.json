@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.crackcgpsc.twa",
+        "sha256_cert_fingerprints": ["A0:A6:B2:47:0E:91:7B:F0:73:33:BD:E4:23:59:B3:06:B1:4E:1C:36:6B:99:AB:3A:E7:6C:4C:F6:05:9C:F6:B2"]
+      }
+    }]

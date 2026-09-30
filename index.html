@@ -491,19 +491,19 @@
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top:14px;">
             <div>
               <label>1. Subject</label>
-              <select id="testSub" onchange="cascadeTopics('testSub', 'testTop', 'testSubtop')"></select>
+              <select id="testSub" onchange="cascadeTopics('testSub', 'testTop', 'testSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>2. Topic / Chapter</label>
-              <select id="testTop" onchange="cascadeSubtopics('testSub', 'testTop', 'testSubtop')"></select>
+              <select id="testTop" onchange="cascadeSubtopics('testSub', 'testTop', 'testSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>3. Sub-Topic</label>
-              <select id="testSubtop"><option value="ALL">All Sub-Topics</option></select>
+              <select id="testSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Sub-Topics</option></select>
             </div>
             <div>
               <label>4. Test Duration (Timer)</label>
-              <select id="testDurationTopic" onchange="checkCustomTimerSelect('testDurationTopic', 'customTopicTimeWrap')">
+              <select id="testDurationTopic" onchange="checkCustomTimerSelect('testDurationTopic', 'customTopicTimeWrap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="0">No Time Limit (Practice Mode)</option>
                 <option value="10">10 Minutes (0.17 Hour)</option>
                 <option value="30" selected>30 Minutes (0.5 Hour)</option>
@@ -527,23 +527,23 @@
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
             <div>
               <label>1. Book Name</label>
-              <select id="ncertTestBook" onchange="cascadeNcertClassesForPortal('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')"></select>
+              <select id="ncertTestBook" onchange="cascadeNcertClassesForPortal('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>2. Class</label>
-              <select id="ncertTestClass" onchange="cascadeNcertSubjects('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')"></select>
+              <select id="ncertTestClass" onchange="cascadeNcertSubjects('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>3. Subject</label>
-              <select id="ncertTestSub" onchange="cascadeNcertChapters('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')"></select>
+              <select id="ncertTestSub" onchange="cascadeNcertChapters('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>4. Chapter Name</label>
-              <select id="ncertTestChap"><option value="ALL">All Chapters</option></select>
+              <select id="ncertTestChap" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Chapters</option></select>
             </div>
             <div>
               <label>5. Test Duration (Timer)</label>
-              <select id="testDurationNcert" onchange="checkCustomTimerSelect('testDurationNcert', 'customNcertTimeWrap')">
+              <select id="testDurationNcert" onchange="checkCustomTimerSelect('testDurationNcert', 'customNcertTimeWrap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="0">No Time Limit (Practice Mode)</option>
                 <option value="10">10 Minutes (0.17 Hour)</option>
                 <option value="30" selected>30 Minutes (0.5 Hour)</option>
@@ -567,37 +567,37 @@
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
             <div>
               <label>1. Exam Name</label>
-              <select id="examTestName" onchange="cascadeExamYears('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')">
+              <select id="examTestName" onchange="cascadeExamYears('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Exams</option>
               </select>
             </div>
             <div>
               <label>2. Year</label>
-              <select id="examTestYear" onchange="cascadeExamSubjects('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')">
+              <select id="examTestYear" onchange="cascadeExamSubjects('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Years</option>
               </select>
             </div>
             <div>
               <label>3. Subjects</label>
-              <select id="examTestSub" onchange="cascadeExamTopicsForPortal('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')">
+              <select id="examTestSub" onchange="cascadeExamTopicsForPortal('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Subjects</option>
               </select>
             </div>
             <div>
               <label>4. Topic / Chapter</label>
-              <select id="examTestTop" onchange="cascadeExamSubtopicsForPortal('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')">
+              <select id="examTestTop" onchange="cascadeExamSubtopicsForPortal('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Topics</option>
               </select>
             </div>
             <div>
               <label>5. Sub-Topic</label>
-              <select id="examTestSubtop">
+              <select id="examTestSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Sub-Topics</option>
               </select>
             </div>
             <div>
               <label>6. Test Duration (Timer)</label>
-              <select id="testDurationExam" onchange="checkCustomTimerSelect('testDurationExam', 'customExamTimeWrap')">
+              <select id="testDurationExam" onchange="checkCustomTimerSelect('testDurationExam', 'customExamTimeWrap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="0">No Time Limit (Practice Mode)</option>
                 <option value="10">10 Minutes (0.17 Hour)</option>
                 <option value="30" selected>30 Minutes (0.5 Hour)</option>
@@ -673,9 +673,9 @@
         <div class="card" id="panelPracTopic" style="margin-top:20px;">
           <h3 style="color:#10b981;">Instant Practice & Quiz Mode</h3>
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top:14px;">
-            <div><label>Subject</label><select id="pracSub" onchange="cascadeTopics('pracSub', 'pracTop', 'pracSubtop')"></select></div>
-            <div><label>Topic / Chapter</label><select id="pracTop" onchange="cascadeSubtopics('pracSub', 'pracTop', 'pracSubtop')"></select></div>
-            <div><label>Sub-Topic</label><select id="pracSubtop"><option value="ALL">All Sub-Topics</option></select></div>
+            <div><label>Subject</label><select id="pracSub" onchange="cascadeTopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select></div>
+            <div><label>Topic / Chapter</label><select id="pracTop" onchange="cascadeSubtopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select></div>
+            <div><label>Sub-Topic</label><select id="pracSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Sub-Topics</option></select></div>
           </div>
           <button class="btn btn-success" style="margin-top: 16px;" onclick="startEngine('practice')">Start Practice</button>
         </div>
@@ -687,19 +687,19 @@
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
             <div>
               <label>1. Book Name</label>
-              <select id="ncertPracBook" onchange="cascadeNcertClassesForPortal('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')"></select>
+              <select id="ncertPracBook" onchange="cascadeNcertClassesForPortal('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>2. Class</label>
-              <select id="ncertPracClass" onchange="cascadeNcertSubjects('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')"></select>
+              <select id="ncertPracClass" onchange="cascadeNcertSubjects('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>3. Subject</label>
-              <select id="ncertPracSub" onchange="cascadeNcertChapters('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')"></select>
+              <select id="ncertPracSub" onchange="cascadeNcertChapters('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
               <label>4. Chapter Name</label>
-              <select id="ncertPracChap"><option value="ALL">All Chapters</option></select>
+              <select id="ncertPracChap" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Chapters</option></select>
             </div>
           </div>
           <button class="btn btn-success" style="margin-top: 16px;" onclick="startNcertEngine('practice')">Start NCERT Practice Quiz</button>
@@ -712,31 +712,31 @@
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;">
             <div>
               <label>1. Exam Name</label>
-              <select id="examPracName" onchange="cascadeExamYears('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')">
+              <select id="examPracName" onchange="cascadeExamYears('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Exams</option>
               </select>
             </div>
             <div>
               <label>2. Year</label>
-              <select id="examPracYear" onchange="cascadeExamSubjects('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')">
+              <select id="examPracYear" onchange="cascadeExamSubjects('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Years</option>
               </select>
             </div>
             <div>
               <label>3. Subjects</label>
-              <select id="examPracSub" onchange="cascadeExamTopicsForPortal('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')">
+              <select id="examPracSub" onchange="cascadeExamTopicsForPortal('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Subjects</option>
               </select>
             </div>
             <div>
               <label>4. Topic / Chapter</label>
-              <select id="examPracTop" onchange="cascadeExamSubtopicsForPortal('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')">
+              <select id="examPracTop" onchange="cascadeExamSubtopicsForPortal('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Topics</option>
               </select>
             </div>
             <div>
               <label>5. Sub-Topic</label>
-              <select id="examPracSubtop">
+              <select id="examPracSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="ALL">All Sub-Topics</option>
               </select>
             </div>
@@ -1186,7 +1186,6 @@
     
     setProgress(40);
     
-    // Instant Load from Cache first if available, then fetch fresh data in background
     if(questions.length > 0) {
       syncDynamicSubjects();
       populateAllSubjectDropdowns();
@@ -1214,19 +1213,23 @@
     initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     setProgress(100);
 
-    // Background Auto-Refresh interval every 10 seconds for real-time questions and score updates
+    // Smart Background Sync with Interaction & Test Session Lock (Every 15s)
     setInterval(async () => {
       if (document.visibilityState === "visible") {
+        if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block' || document.getElementById('revision-quiz-player').style.display === 'block') {
+          return; // Skip sync if user is actively interacting with dropdowns or taking a test/quiz
+        }
         await fetchQuestionsFromCloud(true);
         if (currentUser) {
           await fetchUsersFromCloud(true);
         }
       }
-    }, 10000);
+    }, 15000);
   }
 
   document.addEventListener("visibilitychange", async function() {
     if (document.visibilityState === "visible") {
+      if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
       await fetchQuestionsFromCloud(true);
       if (currentUser) {
         await fetchUsersFromCloud();
@@ -1239,6 +1242,7 @@
   });
 
   window.addEventListener("focus", async function() {
+    if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
     await fetchQuestionsFromCloud(true);
     if (currentUser) {
       await fetchUsersFromCloud();
@@ -1737,7 +1741,6 @@
       populateAllSubjectDropdowns();
     } catch(err) {
       console.error("Error fetching questions:", err);
-      // Fallback to cache if offline or slow network
       let cached = localStorage.getItem('cg_cached_questions');
       if(cached && questions.length === 0) {
         try { questions = JSON.parse(cached); } catch(e) {}
@@ -1963,6 +1966,7 @@
     if(tabId === 'tab-results') document.getElementById('fNavRes').classList.add('active');
 
     fetchUsersFromCloud();
+    fetchQuestionsFromCloud(true);
 
     if(tabId === 'tab-home') {
       renderHomeDashboard();

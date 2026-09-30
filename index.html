@@ -31,6 +31,7 @@
       color: var(--text);
       padding-bottom: 90px;
       min-height: 100vh;
+      overflow-x: hidden;
       background-image: 
         radial-gradient(circle at 10% 20%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
@@ -50,7 +51,7 @@
       box-shadow: 0 0 10px #38bdf8;
     }
 
-    header { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 8px; }
+    header { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 8px; width: 100%; overflow: hidden; }
     
     .brand { 
       font-size: 0.85rem; 
@@ -86,7 +87,7 @@
     .static-bottom-box { background: var(--card-inner); border: 1px solid var(--border); padding: 14px 18px; border-radius: 14px; margin-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; backdrop-filter: blur(12px); }
     .static-user-info { font-size: 0.88rem; font-weight: 600; color: #93c5fd; }
 
-    .container { max-width: 1100px; margin: 15px auto 20px auto; padding: 0 15px; }
+    .container { max-width: 1100px; margin: 15px auto 20px auto; padding: 0 15px; width: 100%; }
     @media(min-width: 1024px) { .container { max-width: 1280px; padding: 0 30px; } }
     
     .nav-bar { display: none; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px; scrollbar-width: none; }
@@ -1155,7 +1156,7 @@
   ];
 
   let subjects = JSON.parse(localStorage.getItem('cg_subs')) || defaultSubs;
-  let questions = [];
+  let questions = JSON.parse(localStorage.getItem('cg_cached_questions')) || [];
 
   let members = [];
   let attemptedQIds = JSON.parse(localStorage.getItem('cg_attempted_qids')) || [];
@@ -1184,6 +1185,14 @@
     }
     
     setProgress(40);
+    
+    // Instant Load from Cache first if available, then fetch fresh data in background
+    if(questions.length > 0) {
+      syncDynamicSubjects();
+      populateAllSubjectDropdowns();
+      buildFltSubjectInputs();
+    }
+
     await fetchQuestionsFromCloud();
     await fetchUsersFromCloud();
     
@@ -1205,24 +1214,32 @@
     initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     setProgress(100);
 
+    // Background Auto-Refresh interval every 10 seconds for real-time questions and score updates
     setInterval(async () => {
-      if (currentUser && document.visibilityState === "visible") {
-        await fetchUsersFromCloud(true);
+      if (document.visibilityState === "visible") {
+        await fetchQuestionsFromCloud(true);
+        if (currentUser) {
+          await fetchUsersFromCloud(true);
+        }
       }
-    }, 8000);
+    }, 10000);
   }
 
   document.addEventListener("visibilitychange", async function() {
-    if (document.visibilityState === "visible" && currentUser) {
-      await fetchUsersFromCloud();
-      syncOnlineLeaderboard();
-      if(document.getElementById('tab-results').style.display === 'block') {
-        renderRadarAnalytics();
+    if (document.visibilityState === "visible") {
+      await fetchQuestionsFromCloud(true);
+      if (currentUser) {
+        await fetchUsersFromCloud();
+        syncOnlineLeaderboard();
+        if(document.getElementById('tab-results').style.display === 'block') {
+          renderRadarAnalytics();
+        }
       }
     }
   });
 
   window.addEventListener("focus", async function() {
+    await fetchQuestionsFromCloud(true);
     if (currentUser) {
       await fetchUsersFromCloud();
       syncOnlineLeaderboard();
@@ -1679,7 +1696,7 @@
     }, 1000);
   }
 
-  async function fetchQuestionsFromCloud() {
+  async function fetchQuestionsFromCloud(isBackground = false) {
     try {
       let res = await fetch(QUESTIONS_API_URL + "?action=getQuestions");
       let data = await res.json();
@@ -1706,9 +1723,12 @@
           }
         });
         questions = Array.from(uniqueMap.values());
-      } else {
+        localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
+      } else if(!isBackground && questions.length === 0) {
         questions = [];
       }
+      
+      syncDynamicSubjects();
       buildFltSubjectInputs();
       initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
       initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
@@ -1717,7 +1737,11 @@
       populateAllSubjectDropdowns();
     } catch(err) {
       console.error("Error fetching questions:", err);
-      questions = [];
+      // Fallback to cache if offline or slow network
+      let cached = localStorage.getItem('cg_cached_questions');
+      if(cached && questions.length === 0) {
+        try { questions = JSON.parse(cached); } catch(e) {}
+      }
     }
   }
 
@@ -2289,7 +2313,8 @@
     } else if(isStmtType) {
       bodyHtml = renderStatementQuestionHtml(q);
     } else if(q.type === 'match') {
-      bodyHtml = 'Match the following:';
+      let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
+      bodyHtml = `<div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>`;
       let rows = q.matchRows;
       if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
       if(rows) {
@@ -2309,7 +2334,7 @@
     }
 
     let bodyContainer = document.getElementById('t-body');
-    if(isStmtType || q.type === 'ar') {
+    if(isStmtType || q.type === 'ar' || q.type === 'match') {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;
@@ -2429,7 +2454,8 @@
     } else if(isStmtType) {
       bodyHtml = renderStatementQuestionHtml(q);
     } else if(q.type === 'match') {
-      bodyHtml = 'Match the following:';
+      let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
+      bodyHtml = `<div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>`;
       let rows = q.matchRows;
       if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
       if(rows) {
@@ -2449,7 +2475,7 @@
     }
 
     let bodyContainer = document.getElementById('p-body');
-    if(isStmtType || q.type === 'ar') {
+    if(isStmtType || q.type === 'ar' || q.type === 'match') {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;
@@ -2618,7 +2644,8 @@
     if(matchWrap) matchWrap.innerHTML = '';
 
     if(q.type === 'match') {
-      bodyHtml = 'Match the following:';
+      let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
+      bodyHtml = `<div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>`;
       let rows = q.matchRows;
       if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
       if(rows && matchWrap) {
@@ -2656,7 +2683,7 @@
     }
 
     const bodyContainer = document.getElementById('rq-body');
-    if(q.type === 'statement' || q.type === 'ar') {
+    if(q.type === 'statement' || q.type === 'ar' || q.type === 'match') {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;
@@ -2935,11 +2962,12 @@
       
       let qBodyHtml = q.text || q.assertion || '';
       if(q.type === 'match') {
+        let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
         let rows = q.matchRows;
         if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
         if(rows) {
           qBodyHtml = `
-            Match the following:
+            <div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>
             <div class="match-table-wrapper">
               <table class="match-table">
                 <thead><tr><th>#</th><th>${q.matchHead1 || 'List I'}</th><th>Seq</th><th>${q.matchHead2 || 'List II'}</th></tr></thead>
@@ -2960,6 +2988,8 @@
             <div class="ar-item"><span class="ar-label">Reason (R):</span> <span class="ar-text">${reasonText}</span></div>
           </div>
         `;
+      } else if(q.type === 'statement') {
+        qBodyHtml = renderStatementQuestionHtml(q);
       }
 
       return `

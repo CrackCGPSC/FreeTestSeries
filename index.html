@@ -77,23 +77,29 @@
     .brand-subtitle {
       font-size: 0.62rem;
       font-weight: 600;
-      color: #c4b5fd;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-top: 1px;
+      color: #10b981;
+      text-transform: none;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: linear-gradient(135deg, #c4b5fd, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      width: fit-content;
+      -webkit-background-clip: initial;
+      -webkit-text-fill-color: initial;
+      color: #34d399;
     }
     .brand:hover { 
       filter: brightness(1.2);
     }
     @media(min-width: 480px) { 
       .brand { font-size: 1.1rem; } 
-      .brand-subtitle { font-size: 0.7rem; }
+      .brand-subtitle { font-size: 0.68rem; }
     }
 
     .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
@@ -919,7 +925,7 @@
             <span class="badge badge-sub" id="rq-hier-badge"></span>
           </div>
           <div class="q-header-right">
-            <button class="btn btn-danger btn-sm" onclick="removeCurrentRevQuestion()" title="Remove from this list">🗑️ Remove</button>
+            <button class="btn btn-danger btn-sm" onclick="removeCurrentRevQuestion()" title="Remove from this list">🗑️️ Remove</button>
             <button class="btn btn-warning btn-sm" onclick="toggleRevPaletteDrawer()" title="Question Palette">📋 Palette</button>
             <button class="btn btn-secondary btn-sm" onclick="exitRevisionQuizPlayer()" title="Exit">Exit</button>
           </div>
@@ -1236,7 +1242,7 @@
     initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     setProgress(100);
 
-    // Smart Background Sync with Interaction, FLT Input Focus & Test Session Lock (Every 15s)
+    // Smart Background Sync with Interaction & Test Session Lock (Every 15s)
     setInterval(async () => {
       if (document.visibilityState === "visible") {
         if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block' || document.getElementById('revision-quiz-player').style.display === 'block') {
@@ -1244,7 +1250,7 @@
         }
         let activeEl = document.activeElement;
         if (activeEl && activeEl.classList && activeEl.classList.contains('flt-num-input')) {
-          return; // Skip sync if user is currently typing in FLT builder inputs
+          return; // Skip sync if user is typing in FLT inputs
         }
         await fetchQuestionsFromCloud(true);
         if (currentUser) {
@@ -2046,20 +2052,20 @@
   }
 
   function populateAllSubjectDropdowns() {
+    if (window.isDropdownInteracting) return; // Prevent overwriting while user interacts
     syncDynamicSubjects();
     const fill = (id) => {
       const el = document.getElementById(id);
       if(el) {
+        let currentVal = el.value;
         el.innerHTML = subjects.map(s => {
           let count = questions.filter(q => q.subject === s).length;
           return `<option value="${s}">${s} (${count} Qs)</option>`;
         }).join('');
+        if(currentVal) el.value = currentVal;
       }
     };
     ['testSub', 'pracSub'].forEach(fill);
-
-    cascadeTopics('testSub', 'testTop', 'testSubtop');
-    cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
   }
 
   function cascadeTopics(subId, topId, subtopId) {
@@ -2068,10 +2074,12 @@
     let subPool = questions.filter(q => q.subject === sub);
     const relatedTopics = [...new Set(subPool.map(q => q.topic))];
     if(topEl && topEl.tagName.toLowerCase() === 'select') {
+      let currentTopVal = topEl.value;
       topEl.innerHTML = '<option value="ALL">All Topics</option>' + relatedTopics.map(t => {
         let tCount = subPool.filter(q => q.topic === t).length;
         return `<option value="${t}">${t} (${tCount} Qs)</option>`;
       }).join('');
+      if(currentTopVal) topEl.value = currentTopVal;
       cascadeSubtopics(subId, topId, subtopId);
     }
   }
@@ -2093,10 +2101,12 @@
     pool = pool.filter(q => q.topic === top);
     const relatedSubtopics = [...new Set(pool.map(q => q.subtopic))];
     if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
+      let currentSubtopVal = subtopEl.value;
       subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>' + relatedSubtopics.map(st => {
         let stCount = pool.filter(q => q.subtopic === st).length;
         return `<option value="${st}">${st} (${stCount} Qs)</option>`;
       }).join('');
+      if(currentSubtopVal) subtopEl.value = currentSubtopVal;
     }
   }
 
@@ -2184,7 +2194,6 @@
     let allocated = {};
     let remainingTarget = totalTarget;
 
-    // First pass: Allocate according to weightage or available pool max
     subjects.forEach(sub => {
       let avail = questions.filter(q => q.subject === sub).length;
       let idealShare = weightageMap[sub] || 5;
@@ -2193,7 +2202,6 @@
       remainingTarget -= assign;
     });
 
-    // Second pass: Distribute remaining target to subjects that have more available pool
     if(remainingTarget > 0) {
       subjects.forEach(sub => {
         if(remainingTarget <= 0) return;
@@ -2208,7 +2216,6 @@
       });
     }
 
-    // Apply values to input fields
     subjects.forEach(sub => {
       let el = document.getElementById(`flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}`);
       if(el) {

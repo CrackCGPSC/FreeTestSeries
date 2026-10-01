@@ -6,7 +6,7 @@
   <title>Govt Exam Free Test Series</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #030712;
@@ -54,14 +54,26 @@
     header { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 8px; width: 100%; overflow: hidden; }
     
     .brand-container {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 6px;
+      row-gap: 1px;
+      align-items: center;
       cursor: pointer;
       flex-shrink: 0;
       max-width: 65%;
       padding-left: 2px;
     }
+    .brand-icon {
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 1.15rem;
+      line-height: 1;
+    }
     .brand { 
+      grid-column: 2;
+      grid-row: 1;
+      font-family: 'Orbitron', sans-serif;
       font-size: 1.15rem; 
       font-weight: 700; 
       color: #60a5fa; 
@@ -73,15 +85,16 @@
       overflow: hidden; 
       text-overflow: ellipsis; 
       transition: 0.3s ease; 
-      letter-spacing: 0.4px;
+      letter-spacing: 0.8px;
     }
     .brand-subtitle {
+      grid-column: 2;
+      grid-row: 2;
       font-size: 0.65rem;
       font-weight: 500;
       color: #34d399;
       text-transform: none;
       letter-spacing: 0.3px;
-      margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -90,13 +103,12 @@
       padding: 0;
       display: block;
       width: 100%;
-      -webkit-background-clip: initial;
-      -webkit-text-fill-color: initial;
     }
     .brand:hover { 
       filter: brightness(1.2);
     }
     @media(min-width: 480px) { 
+      .brand-icon { font-size: 1.35rem; }
       .brand { font-size: 1.35rem; } 
       .brand-subtitle { font-size: 0.72rem; }
     }
@@ -297,7 +309,8 @@
 
 <header>
   <div class="brand-container" onclick="navigate('tab-home')">
-    <div class="brand">🚀 Crack CGPSC</div>
+    <div class="brand-icon">🚀</div>
+    <div class="brand">Crack CGPSC</div>
     <div class="brand-subtitle">Govt Exam Free Test Series</div>
   </div>
   <div class="header-right">

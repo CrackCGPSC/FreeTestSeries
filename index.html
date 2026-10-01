@@ -53,8 +53,15 @@
 
     header { background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; gap: 8px; width: 100%; overflow: hidden; }
     
+    .brand-container {
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      flex-shrink: 0;
+      max-width: 65%;
+    }
     .brand { 
-      font-size: 0.85rem; 
+      font-size: 0.95rem; 
       font-weight: 700; 
       color: #60a5fa; 
       white-space: nowrap; 
@@ -62,19 +69,32 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       text-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 35px rgba(139, 92, 246, 0.4);
-      flex-shrink: 0; 
       overflow: hidden; 
       text-overflow: ellipsis; 
-      max-width: 62%; 
-      cursor: pointer; 
       transition: 0.3s ease; 
       letter-spacing: 0.3px;
     }
+    .brand-subtitle {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: #c4b5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: linear-gradient(135deg, #c4b5fd, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
     .brand:hover { 
       filter: brightness(1.2);
-      text-shadow: 0 0 25px rgba(59, 130, 246, 0.9), 0 0 45px rgba(139, 92, 246, 0.7);
     }
-    @media(min-width: 480px) { .brand { font-size: 1.1rem; max-width: 72%; } }
+    @media(min-width: 480px) { 
+      .brand { font-size: 1.1rem; } 
+      .brand-subtitle { font-size: 0.7rem; }
+    }
 
     .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     
@@ -271,7 +291,10 @@
 <div id="topProgressBar"></div>
 
 <header>
-  <div class="brand" onclick="navigate('tab-home')">🚀 Govt Exam Free Test Series</div>
+  <div class="brand-container" onclick="navigate('tab-home')">
+    <div class="brand">🚀 Crack CGPSC</div>
+    <div class="brand-subtitle">Govt Exam Free Test Series</div>
+  </div>
   <div class="header-right">
     <div id="google_translate_element"></div>
   </div>
@@ -406,7 +429,7 @@
                 <span style="font-size: 1.5rem;">🔥</span>
               </div>
               <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.2rem;">Full Mock Test</h3>
-              <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 14px;">100 questions from all subjects with randomized sequence!</p>
+              <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 14px;">100 questions from all subjects with randomized sequence (2 Hours Timer)!</p>
             </div>
             <div>
               <button class="btn btn-warning" style="font-size: 0.95rem; padding: 10px 18px; font-weight: bold; background: #facc15; color: #000; width: 100%; justify-content: center;" onclick="startFullFreeMockTest()">🚀 Start Test</button>
@@ -781,10 +804,10 @@
             <h3>Create Your Custom Full Length Test</h3>
             <p style="color: var(--muted); font-size: 0.85rem; margin-top:4px;">customize Full Length Test With number of questions per subjects in your syllabus.</p>
           </div>
-          <div style="display:flex; gap:8px; align-items:center;">
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
             <span id="fltTotalHeaderCountBadge" style="background:rgba(59,130,246,0.2); border:1px solid var(--primary); color:#38bdf8; padding:6px 12px; border-radius:10px; font-size:0.82rem; font-weight:bold;">Total Qs: 0</span>
             <button class="btn btn-secondary" onclick="resetFltInputs()">Reset All</button>
-            <button class="btn btn-secondary" onclick="setEqualFltDistribution()">Equal Spread</button>
+            <button class="btn btn-warning btn-sm" style="background:#facc15; color:#000; font-weight:bold;" onclick="applyAutoSmartPaperDesign()">⚡ Auto Smart Paper Design</button>
           </div>
         </div>
 
@@ -1213,11 +1236,15 @@
     initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     setProgress(100);
 
-    // Smart Background Sync with Interaction & Test Session Lock (Every 15s)
+    // Smart Background Sync with Interaction, FLT Input Focus & Test Session Lock (Every 15s)
     setInterval(async () => {
       if (document.visibilityState === "visible") {
         if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block' || document.getElementById('revision-quiz-player').style.display === 'block') {
           return; // Skip sync if user is actively interacting with dropdowns or taking a test/quiz
+        }
+        let activeEl = document.activeElement;
+        if (activeEl && activeEl.classList && activeEl.classList.contains('flt-num-input')) {
+          return; // Skip sync if user is currently typing in FLT builder inputs
         }
         await fetchQuestionsFromCloud(true);
         if (currentUser) {
@@ -2091,10 +2118,13 @@
     
     let totalDbQ = questions.length;
     let badgeEl = document.getElementById('fltTotalHeaderCountBadge');
-    if(badgeEl) badgeEl.innerText = `Total Qs in DB: ${totalDbQ}`;
+    if(badgeEl) badgeEl.innerText = `Total Qs: ${totalDbQ}`;
 
     grid.innerHTML = subjects.map(sub => {
       const availCount = questions.filter(q => q.subject === sub).length;
+      let existingInputEl = document.getElementById(`flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      let currentVal = existingInputEl ? existingInputEl.value : "0";
+
       return `
         <div class="flt-sub-item">
           <div class="sub-meta">
@@ -2102,7 +2132,7 @@
             <span class="sub-count">Available: ${availCount} Qs</span>
           </div>
           <input type="number" class="flt-num-input" id="flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}" 
-                 min="0" max="${availCount}" value="0" oninput="updateFltTotalCount()">
+                 min="0" max="${availCount}" value="${currentVal}" oninput="updateFltTotalCount()">
         </div>
       `;
     }).join('');
@@ -2115,7 +2145,8 @@
       const el = document.getElementById(`flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}`);
       if(el) total += parseInt(el.value || 0, 10);
     });
-    document.getElementById('fltTotalSelectedCount').innerText = total;
+    const totalCountEl = document.getElementById('fltTotalSelectedCount');
+    if(totalCountEl) totalCountEl.innerText = total;
   }
 
   function resetFltInputs() {
@@ -2126,13 +2157,67 @@
     updateFltTotalCount();
   }
 
-  function setEqualFltDistribution() {
+  function applyAutoSmartPaperDesign() {
+    syncDynamicSubjects();
+    let totalTarget = 100;
+    
+    // CGPSC/CGVYAPAM Real Exam Weightage Distribution Ratios
+    let weightageMap = {
+      "CG General Knowledge": 15,
+      "CG History": 8,
+      "CG Geography": 7,
+      "CG Tribes": 5,
+      "CG Art & Culture": 5,
+      "CG Language": 5,
+      "CG Administration": 3,
+      "CG Panchayati Raj": 2,
+      "Indian History": 12,
+      "Polity": 10,
+      "Economy": 8,
+      "General Science": 8,
+      "Indian Geography": 7,
+      "Computer": 5,
+      "Hindi": 5,
+      "English": 5
+    };
+
+    let allocated = {};
+    let remainingTarget = totalTarget;
+
+    // First pass: Allocate according to weightage or available pool max
     subjects.forEach(sub => {
-      const el = document.getElementById(`flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}`);
-      const availCount = questions.filter(q => q.subject === sub).length;
-      if(el) el.value = Math.min(5, availCount);
+      let avail = questions.filter(q => q.subject === sub).length;
+      let idealShare = weightageMap[sub] || 5;
+      let assign = Math.min(avail, idealShare);
+      allocated[sub] = assign;
+      remainingTarget -= assign;
     });
+
+    // Second pass: Distribute remaining target to subjects that have more available pool
+    if(remainingTarget > 0) {
+      subjects.forEach(sub => {
+        if(remainingTarget <= 0) return;
+        let avail = questions.filter(q => q.subject === sub).length;
+        let current = allocated[sub] || 0;
+        let canTake = avail - current;
+        if(canTake > 0) {
+          let addNow = Math.min(canTake, remainingTarget);
+          allocated[sub] += addNow;
+          remainingTarget -= addNow;
+        }
+      });
+    }
+
+    // Apply values to input fields
+    subjects.forEach(sub => {
+      let el = document.getElementById(`flt-count-${sub.replace(/[^a-zA-Z0-9]/g, '_')}`);
+      if(el) {
+        el.value = allocated[sub] || 0;
+      }
+    });
+
     updateFltTotalCount();
+    alert('⚡ Auto Smart Paper Design applied successfully following CGPSC/CGVYAPAM weightage pattern! You can further adjust if needed.');
   }
 
   function startCustomFLT() {
@@ -2186,7 +2271,7 @@
     userResponses = {};
     currentQIdx = 0;
 
-    startTestTimer(90);
+    startTestTimer(120); // 2 Hours timer for Full Mock Test
 
     document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
     document.getElementById('tab-test').style.display = 'block';

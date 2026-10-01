@@ -61,7 +61,7 @@
       max-width: 65%;
     }
     .brand { 
-      font-size: 0.95rem; 
+      font-size: 1.05rem; 
       font-weight: 700; 
       color: #60a5fa; 
       white-space: nowrap; 
@@ -75,31 +75,29 @@
       letter-spacing: 0.3px;
     }
     .brand-subtitle {
-      font-size: 0.62rem;
+      font-size: 0.58rem;
       font-weight: 600;
-      color: #10b981;
+      color: #34d399;
       text-transform: none;
-      letter-spacing: 0.5px;
-      margin-top: 2px;
+      letter-spacing: 0.4px;
+      margin-top: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      padding: 1px 6px;
-      border-radius: 4px;
+      background: none;
+      border: none;
+      padding: 0;
       display: inline-block;
       width: fit-content;
       -webkit-background-clip: initial;
       -webkit-text-fill-color: initial;
-      color: #34d399;
     }
     .brand:hover { 
       filter: brightness(1.2);
     }
     @media(min-width: 480px) { 
-      .brand { font-size: 1.1rem; } 
-      .brand-subtitle { font-size: 0.68rem; }
+      .brand { font-size: 1.25rem; } 
+      .brand-subtitle { font-size: 0.65rem; }
     }
 
     .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
@@ -925,7 +923,7 @@
             <span class="badge badge-sub" id="rq-hier-badge"></span>
           </div>
           <div class="q-header-right">
-            <button class="btn btn-danger btn-sm" onclick="removeCurrentRevQuestion()" title="Remove from this list">🗑️️ Remove</button>
+            <button class="btn btn-danger btn-sm" onclick="removeCurrentRevQuestion()" title="Remove from this list">🗑 Remove</button>
             <button class="btn btn-warning btn-sm" onclick="toggleRevPaletteDrawer()" title="Question Palette">📋 Palette</button>
             <button class="btn btn-secondary btn-sm" onclick="exitRevisionQuizPlayer()" title="Exit">Exit</button>
           </div>
@@ -1246,11 +1244,11 @@
     setInterval(async () => {
       if (document.visibilityState === "visible") {
         if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block' || document.getElementById('revision-quiz-player').style.display === 'block') {
-          return; // Skip sync if user is actively interacting with dropdowns or taking a test/quiz
+          return;
         }
         let activeEl = document.activeElement;
         if (activeEl && activeEl.classList && activeEl.classList.contains('flt-num-input')) {
-          return; // Skip sync if user is typing in FLT inputs
+          return;
         }
         await fetchQuestionsFromCloud(true);
         if (currentUser) {
@@ -2052,9 +2050,9 @@
   }
 
   function populateAllSubjectDropdowns() {
-    if (window.isDropdownInteracting) return; // Prevent overwriting while user interacts
+    if (window.isDropdownInteracting) return;
     syncDynamicSubjects();
-    const fill = (id) => {
+    const fill = (id, topId, subtopId) => {
       const el = document.getElementById(id);
       if(el) {
         let currentVal = el.value;
@@ -2062,10 +2060,18 @@
           let count = questions.filter(q => q.subject === s).length;
           return `<option value="${s}">${s} (${count} Qs)</option>`;
         }).join('');
-        if(currentVal) el.value = currentVal;
+        if(currentVal && subjects.includes(currentVal)) {
+          el.value = currentVal;
+        } else if(subjects.length > 0) {
+          el.value = subjects[0];
+        }
+        if(topId && subtopId) {
+          cascadeTopics(id, topId, subtopId);
+        }
       }
     };
-    ['testSub', 'pracSub'].forEach(fill);
+    fill('testSub', 'testTop', 'testSubtop');
+    fill('pracSub', 'pracTop', 'pracSubtop');
   }
 
   function cascadeTopics(subId, topId, subtopId) {
@@ -2079,7 +2085,11 @@
         let tCount = subPool.filter(q => q.topic === t).length;
         return `<option value="${t}">${t} (${tCount} Qs)</option>`;
       }).join('');
-      if(currentTopVal) topEl.value = currentTopVal;
+      if(currentTopVal && relatedTopics.includes(currentTopVal)) {
+        topEl.value = currentTopVal;
+      } else if(relatedTopics.length > 0) {
+        topEl.value = relatedTopics[0];
+      }
       cascadeSubtopics(subId, topId, subtopId);
     }
   }
@@ -2171,7 +2181,6 @@
     syncDynamicSubjects();
     let totalTarget = 100;
     
-    // CGPSC/CGVYAPAM Real Exam Weightage Distribution Ratios
     let weightageMap = {
       "CG General Knowledge": 15,
       "CG History": 8,
@@ -2278,7 +2287,7 @@
     userResponses = {};
     currentQIdx = 0;
 
-    startTestTimer(120); // 2 Hours timer for Full Mock Test
+    startTestTimer(120);
 
     document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
     document.getElementById('tab-test').style.display = 'block';

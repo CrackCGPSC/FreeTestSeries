@@ -6,7 +6,7 @@
   <title>Govt Exam Free Test Series</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #030712;
@@ -24,7 +24,7 @@
       --glow-blue: 0 0 25px rgba(59, 130, 246, 0.3);
       --glow-neon: 0 0 15px rgba(139, 92, 246, 0.5);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', 'Noto Sans Devanagari', system-ui, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Noto Sans Devanagari', system-ui, sans-serif; }
     
     body {
       background-color: var(--bg);
@@ -59,9 +59,10 @@
       cursor: pointer;
       flex-shrink: 0;
       max-width: 65%;
+      padding-left: 2px;
     }
     .brand { 
-      font-size: 1.05rem; 
+      font-size: 1.15rem; 
       font-weight: 700; 
       color: #60a5fa; 
       white-space: nowrap; 
@@ -72,23 +73,23 @@
       overflow: hidden; 
       text-overflow: ellipsis; 
       transition: 0.3s ease; 
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
     }
     .brand-subtitle {
-      font-size: 0.58rem;
-      font-weight: 600;
+      font-size: 0.65rem;
+      font-weight: 500;
       color: #34d399;
       text-transform: none;
-      letter-spacing: 0.4px;
-      margin-top: 1px;
+      letter-spacing: 0.3px;
+      margin-top: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       background: none;
       border: none;
       padding: 0;
-      display: inline-block;
-      width: fit-content;
+      display: block;
+      width: 100%;
       -webkit-background-clip: initial;
       -webkit-text-fill-color: initial;
     }
@@ -96,8 +97,8 @@
       filter: brightness(1.2);
     }
     @media(min-width: 480px) { 
-      .brand { font-size: 1.25rem; } 
-      .brand-subtitle { font-size: 0.65rem; }
+      .brand { font-size: 1.35rem; } 
+      .brand-subtitle { font-size: 0.72rem; }
     }
 
     .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
@@ -794,10 +795,26 @@
           <div id="p-expl" style="display:none;" class="expl-box"></div>
           <div style="display: flex; justify-content: space-between; margin-top: 22px;">
             <button class="btn btn-secondary" onclick="movePracQ(-1, event)">Previous</button>
-            <button class="btn" onclick="movePracQ(1, event)">Next</button>
+            <button class="btn" id="pracNextBtn" onclick="movePracQ(1, event)">Next</button>
           </div>
         </div>
       </div>
+
+      <!-- PRACTICE TEMPORARY RESULT CARD -->
+      <div id="prac-result-card" class="card" style="display:none; text-align:center; padding:30px;">
+        <h2 style="color:#10b981; margin-bottom:12px;">🎉 Quiz / Practice Completed!</h2>
+        <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">Here is your temporary performance summary with negative marking (-1/4th):</p>
+        
+        <div class="stats-grid" style="max-width:650px; margin:0 auto 20px auto;">
+          <div class="stat-card"><span>Final Score</span><h4 id="pracResMarks" style="color:#60a5fa;">0</h4><span id="pracResTotalSub">/ 0</span></div>
+          <div class="stat-card"><span>Correct</span><h4 id="pracResCorrect" style="color:var(--success);">0</h4></div>
+          <div class="stat-card"><span>Wrong (-1/4th)</span><h4 id="pracResWrong" style="color:var(--danger);">0</h4></div>
+          <div class="stat-card"><span>Accuracy</span><h4 id="pracResAcc" style="color:var(--warning);">0%</h4></div>
+        </div>
+
+        <button class="btn btn-primary" onclick="exitPracMode()">Back to Practice Config</button>
+      </div>
+
     </div>
 
     <!-- 4. CUSTOM FULL LENGTH TEST (FLT) BUILDER -->
@@ -1992,7 +2009,11 @@
 
     if(tabId === 'tab-home') document.getElementById('fNavHome').classList.add('active');
     if(tabId === 'tab-test') document.getElementById('fNavTest').classList.add('active');
-    if(tabId === 'tab-practice') document.getElementById('fNavPrac').classList.add('active');
+    if(tabId === 'tab-practice') {
+      document.getElementById('fNavPrac').classList.add('active');
+      document.getElementById('prac-result-card').style.display = 'none';
+      document.getElementById('pracConfigWrapper').style.display = 'block';
+    }
     if(tabId === 'tab-revision') document.getElementById('fNavRev').classList.add('active');
     if(tabId === 'tab-results') document.getElementById('fNavRes').classList.add('active');
 
@@ -2011,6 +2032,7 @@
     if(tabId === 'tab-practice') {
       document.getElementById('pracConfigWrapper').style.display = 'block';
       document.getElementById('prac-player').style.display = 'none';
+      document.getElementById('prac-result-card').style.display = 'none';
       initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
       initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     }
@@ -2080,16 +2102,11 @@
     let subPool = questions.filter(q => q.subject === sub);
     const relatedTopics = [...new Set(subPool.map(q => q.topic))];
     if(topEl && topEl.tagName.toLowerCase() === 'select') {
-      let currentTopVal = topEl.value;
       topEl.innerHTML = '<option value="ALL">All Topics</option>' + relatedTopics.map(t => {
         let tCount = subPool.filter(q => q.topic === t).length;
         return `<option value="${t}">${t} (${tCount} Qs)</option>`;
       }).join('');
-      if(currentTopVal && relatedTopics.includes(currentTopVal)) {
-        topEl.value = currentTopVal;
-      } else if(relatedTopics.length > 0) {
-        topEl.value = relatedTopics[0];
-      }
+      topEl.value = 'ALL';
       cascadeSubtopics(subId, topId, subtopId);
     }
   }
@@ -2104,6 +2121,7 @@
     if (!top || top === 'ALL') {
       if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
         subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>';
+        subtopEl.value = 'ALL';
       }
       return;
     }
@@ -2111,12 +2129,11 @@
     pool = pool.filter(q => q.topic === top);
     const relatedSubtopics = [...new Set(pool.map(q => q.subtopic))];
     if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
-      let currentSubtopVal = subtopEl.value;
       subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>' + relatedSubtopics.map(st => {
         let stCount = pool.filter(q => q.subtopic === st).length;
         return `<option value="${st}">${st} (${stCount} Qs)</option>`;
       }).join('');
-      if(currentSubtopVal) subtopEl.value = currentSubtopVal;
+      subtopEl.value = 'ALL';
     }
   }
 
@@ -2331,6 +2348,7 @@
 
     if(mode === 'practice') {
       document.getElementById('pracConfigWrapper').style.display = 'none';
+      document.getElementById('prac-result-card').style.display = 'none';
       document.getElementById('prac-player').style.display = 'block';
       renderPracticeView();
     } else {
@@ -2516,6 +2534,7 @@
 
   function exitPracMode() {
     document.getElementById('prac-player').style.display = 'none';
+    document.getElementById('prac-result-card').style.display = 'none';
     document.getElementById('pracConfigWrapper').style.display = 'block';
   }
 
@@ -2524,6 +2543,15 @@
     document.getElementById('p-counter').innerText = `Practice Q ${currentQIdx + 1} / ${activeQuestions.length}`;
     document.getElementById('p-exam-badge').innerText = q.exam || 'PYQ';
     document.getElementById('p-hier-badge').innerText = `${q.subject} > ${q.topic} > ${q.subtopic}`;
+
+    const nextBtn = document.getElementById('pracNextBtn');
+    if(currentQIdx === activeQuestions.length - 1) {
+      nextBtn.innerText = 'Finish Quiz';
+      nextBtn.setAttribute('onclick', 'finishPracticeQuiz(event)');
+    } else {
+      nextBtn.innerText = 'Next';
+      nextBtn.setAttribute('onclick', 'movePracQ(1, event)');
+    }
 
     const starBtn = document.getElementById('p-star-btn');
     if(!currentUser) currentUser = { revision_store: { wrong: [], unatt: [], saved: [] } };
@@ -2650,6 +2678,34 @@
       renderPracticeView(); 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } 
+  }
+
+  function finishPracticeQuiz(event) {
+    if(event) event.preventDefault();
+    let correct = 0;
+    let wrong = 0;
+    let totalQ = activeQuestions.length;
+
+    activeQuestions.forEach((q, i) => {
+      let resp = userResponses[i];
+      if(resp) {
+        if(resp === q.ans) correct++;
+        else wrong++;
+      }
+    });
+
+    let finalMarks = Math.max(0, correct - (wrong * 0.25)).toFixed(2);
+    let accuracy = (correct + wrong) > 0 ? ((correct / (correct + wrong)) * 100).toFixed(1) : 0;
+
+    document.getElementById('prac-player').style.display = 'none';
+    document.getElementById('prac-result-card').style.display = 'block';
+
+    document.getElementById('pracResMarks').innerText = finalMarks;
+    document.getElementById('pracResTotalSub').innerText = `/ ${totalQ}`;
+    document.getElementById('pracResCorrect').innerText = correct;
+    document.getElementById('pracResWrong').innerText = wrong;
+    document.getElementById('pracResAcc').innerText = accuracy + '%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   let activeRevisionCategory = 'wrong';

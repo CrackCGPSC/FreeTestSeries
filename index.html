@@ -107,7 +107,7 @@
       padding: 0;
       display: block;
       width: 100%;
-      padding-left: 3px; /* Halka sa right shift alignment ke liye */
+      padding-left: 3px;
     }
     .brand:hover { 
       filter: brightness(1.25);
@@ -423,8 +423,8 @@
 
       <!-- Game-Like Dynamic Progress & Revision Summary Card -->
       <div class="card" style="background: linear-gradient(145deg, rgba(30,27,75,0.85), rgba(15,23,42,0.9)); border: 1px solid rgba(124,58,237,0.3);">
-        <h3 style="color:#a78bfa; margin-bottom: 14px; text-align: left; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-          <span>📈</span> Test Section Progress & Revisions
+        <h3 style="color:#a78bfa; margin-bottom: 14px; text-align: left; font-size: 1.15rem; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.35rem; display: inline-flex; align-items: center;">📈</span> Test Section Progress & Revisions
         </h3>
         
         <div style="display: flex; justify-content: space-between; gap: 12px; margin-bottom: 15px; flex-wrap: wrap;">
@@ -447,7 +447,7 @@
         <!-- Visual Progress Bar with Mirror Running Emoji -->
         <div style="position: relative; background: rgba(45,45,68,0.8); border-radius: 8px; height: 16px; width: 100%; overflow: visible; margin-bottom: 14px; border: 1px solid var(--border);">
           <div id="dynamicProgressBar" style="background: linear-gradient(90deg, #3b82f6, #4ade80); height: 100%; width: 0%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
-          <div id="progressEmojiThumb" style="position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%); font-size: 1rem; transition: left 0.5s ease-in-out; filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));">
+          <div id="progressEmojiThumb" style="position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%); font-size: 1.15rem; transition: left 0.5s ease-in-out; filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));">
             <span style="display: inline-block; transform: scaleX(-1);">🏃‍♂️</span>
           </div>
         </div>
@@ -3361,20 +3361,15 @@
             localStorage.setItem(getUserKey('persistent_unatt'), JSON.stringify(rStore.unatt || []));
             localStorage.setItem(getUserKey('persistent_saved'), JSON.stringify(rStore.saved || []));
 
-            let totalCorrectSum = 0;
-            if(currentUser.subject_progress) {
-              for(let s in currentUser.subject_progress) {
-                totalCorrectSum += (currentUser.subject_progress[s].correct || 0);
-              }
-            }
             let totalDbQ = questions.length > 0 ? questions.length : 100;
             let currentPct = myData.current_percentage || 0;
+            let calculatedCorrectCount = Math.round((currentPct / 100) * totalDbQ);
 
             document.getElementById('currentPercentageVal').innerText = `${currentPct}%`;
             document.getElementById('revisionCountVal').innerText = myData.revision_count || 0;
             document.getElementById('dynamicProgressBar').style.width = `${currentPct}%`;
             document.getElementById('progressEmojiThumb').style.left = `${currentPct}%`;
-            document.getElementById('progressStartLabel').innerText = `${totalCorrectSum} Correct Qs`;
+            document.getElementById('progressStartLabel').innerText = `${calculatedCorrectCount} Correct Qs`;
             document.getElementById('progressEndLabel').innerText = `Total DB Qs: ${totalDbQ}`;
 
             if(myIndex >= 10) {

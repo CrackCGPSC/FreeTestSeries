@@ -526,7 +526,7 @@
         <div class="selector-grid" id="testSelectorGrid" onscroll="updateSwipeIndicator('testSelectorGrid', 'testSwipeDots')">
           <div class="selector-card active" id="selTestTopic" onclick="switchTestMode('topic')">
             <h4 style="color:#60a5fa; margin-bottom:6px;">Topic-Wise Mock Test</h4>
-            <p style="color:var(--muted); font-size:0.8rem; margin:0;">Practice questions using 3-level cascading filters.</p>
+            <p style="color:var(--muted); font-size:0.8rem; margin:0;">Practice questions using category and cascading filters.</p>
           </div>
           <div class="selector-card" id="selTestNcert" onclick="switchTestMode('ncert')">
             <h4 style="color:#38bdf8; margin-bottom:6px;">NCERT Based PYQ</h4>
@@ -544,22 +544,41 @@
         </div>
 
         <div class="card" id="panelTestTopic" style="margin-top:20px;">
-          <h3 style="color:#60a5fa;">Topic-Wise Mock Test (3-Level Filter)</h3>
+          <h3 style="color:#60a5fa;">Topic-Wise Mock Test</h3>
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top:14px;">
             <div>
-              <label>1. Subject</label>
-              <select id="testSub" onchange="cascadeTopics('testSub', 'testTop', 'testSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
+              <label>GS Category</label>
+              <select id="testGsCategory" onchange="updateTestSubjectOptions()" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
+                <option value="indian">🇮🇳 Indian GS</option>
+                <option value="cg">🏛️ Chhattisgarh GS</option>
+                <option value="other">📚 Other Subjects</option>
+              </select>
             </div>
             <div>
-              <label>2. Topic / Chapter</label>
+              <label>Subject</label>
+              <select id="testSub" onchange="cascadeTopics('testSub', 'testTop', 'testSubtop'); toggleTestHistoryEraDropdown();" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
+            </div>
+            
+            <div id="testHistoryEraContainer" style="display:none; grid-column: 1 / -1; background:var(--card-inner); padding:10px; border-radius:10px; border:1px solid var(--border);">
+              <label style="color:#facc15; font-weight:bold; margin-bottom:4px;">⏳ Filter by Historical Era</label>
+              <select id="testEraFilter" onchange="cascadeTopics('testSub', 'testTop', 'testSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
+                <option value="ALL">All Eras</option>
+                <option value="Ancient">Ancient History</option>
+                <option value="Medieval">Medieval History</option>
+                <option value="Modern">Modern History</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Topic / Chapter</label>
               <select id="testTop" onchange="cascadeSubtopics('testSub', 'testTop', 'testSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
             </div>
             <div>
-              <label>3. Sub-Topic</label>
+              <label>Sub-Topic</label>
               <select id="testSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Sub-Topics</option></select>
             </div>
             <div>
-              <label>4. Test Duration (Timer)</label>
+              <label>Test Duration (Timer)</label>
               <select id="testDurationTopic" onchange="checkCustomTimerSelect('testDurationTopic', 'customTopicTimeWrap')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
                 <option value="0">No Time Limit (Practice Mode)</option>
                 <option value="10">10 Minutes (0.17 Hour)</option>
@@ -730,9 +749,37 @@
         <div class="card" id="panelPracTopic" style="margin-top:20px;">
           <h3 style="color:#10b981;">Instant Practice & Quiz Mode</h3>
           <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top:14px;">
-            <div><label>Subject</label><select id="pracSub" onchange="cascadeTopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select></div>
-            <div><label>Topic / Chapter</label><select id="pracTop" onchange="cascadeSubtopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select></div>
-            <div><label>Sub-Topic</label><select id="pracSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Sub-Topics</option></select></div>
+            <div>
+              <label>GS Category</label>
+              <select id="pracGsCategory" onchange="updatePracSubjectOptions()" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
+                <option value="indian">🇮🇳 Indian GS</option>
+                <option value="cg">🏛️ Chhattisgarh GS</option>
+                <option value="other">📚 Other Subjects</option>
+              </select>
+            </div>
+            <div>
+              <label>Subject</label>
+              <select id="pracSub" onchange="cascadeTopics('pracSub', 'pracTop', 'pracSubtop'); togglePracHistoryEraDropdown();" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
+            </div>
+            
+            <div id="pracHistoryEraContainer" style="display:none; grid-column: 1 / -1; background:var(--card-inner); padding:10px; border-radius:10px; border:1px solid var(--border);">
+              <label style="color:#facc15; font-weight:bold; margin-bottom:4px;">⏳ Filter by Historical Era</label>
+              <select id="pracEraFilter" onchange="cascadeTopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;">
+                <option value="ALL">All Eras</option>
+                <option value="Ancient">Ancient History</option>
+                <option value="Medieval">Medieval History</option>
+                <option value="Modern">Modern History</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Topic / Chapter</label>
+              <select id="pracTop" onchange="cascadeSubtopics('pracSub', 'pracTop', 'pracSubtop')" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"></select>
+            </div>
+            <div>
+              <label>Sub-Topic</label>
+              <select id="pracSubtop" onfocus="window.isDropdownInteracting=true;" onblur="window.isDropdownInteracting=false;"><option value="ALL">All Sub-Topics</option></select>
+            </div>
           </div>
           <button class="btn btn-success" style="margin-top: 16px;" onclick="startEngine('practice')">Start Practice</button>
         </div>
@@ -1221,14 +1268,11 @@
   const QUESTIONS_API_URL = "https://script.google.com/macros/s/AKfycbx7QhvQi1_Am1I6nRT9mH9dPdU1q3pTN9-nvM0Cg9flFxQrtFHOd4OCI9gcjNenKI8C/exec";
   const USERS_API_URL = "https://script.google.com/macros/s/AKfycbzuPQnDdlaeutLZvuQpqMMQDOjY-u_xH0e9CtOmmQKE-dV7IAuhqG0dDgXryO-VpdK_/exec";
 
-  let defaultSubs = [
-    "Indian History", "Polity", "Economy", "General Science",
-    "Indian Geography", "Computer", "Hindi", "English",
-    "CG History", "CG Geography", "CG Tribes", "CG Art & Culture",
-    "CG Language", "CG Administration", "CG Panchayati Raj", "CG General Knowledge"
-  ];
+  let indianGsSubs = ["Indian History", "Polity", "Economy", "General Science", "Indian Geography", "Computer", "Hindi", "English"];
+  let cgGsSubs = ["CG History", "CG Geography", "CG Tribes", "CG Art & Culture", "CG Language", "CG Administration", "CG Panchayati Raj", "CG Economy", "CG General Knowledge"];
+  let otherSubs = ["CDP", "General Mental Ability", "Maths", "Current Affairs"];
 
-  let subjects = JSON.parse(localStorage.getItem('cg_subs')) || defaultSubs;
+  let subjects = JSON.parse(localStorage.getItem('cg_subs')) || [...indianGsSubs, ...cgGsSubs, ...otherSubs];
   let questions = JSON.parse(localStorage.getItem('cg_cached_questions')) || [];
 
   let members = [];
@@ -1286,7 +1330,6 @@
     initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
     setProgress(100);
 
-    // Smart Background Sync with Interaction & Test Session Lock (Every 15s)
     setInterval(async () => {
       if (document.visibilityState === "visible") {
         if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block' || document.getElementById('revision-quiz-player').style.display === 'block') {
@@ -2093,45 +2136,97 @@
   }
 
   function syncDynamicSubjects() {
-    let combined = new Set([...defaultSubs]);
+    let combined = new Set([...indianGsSubs, ...cgGsSubs, ...otherSubs]);
     questions.forEach(q => {
       if(q.subject && q.subject.trim()) combined.add(q.subject.trim());
     });
     subjects = Array.from(combined);
   }
 
+  function updateTestSubjectOptions() {
+    const cat = document.getElementById('testGsCategory').value;
+    const subEl = document.getElementById('testSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    
+    subEl.innerHTML = list.map(s => {
+      let count = questions.filter(q => q.subject === s).length;
+      return `<option value="${s}">${s} (${count} Qs)</option>`;
+    }).join('');
+    
+    cascadeTopics('testSub', 'testTop', 'testSubtop');
+    toggleTestHistoryEraDropdown();
+  }
+
+  function updatePracSubjectOptions() {
+    const cat = document.getElementById('pracGsCategory').value;
+    const subEl = document.getElementById('pracSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    
+    subEl.innerHTML = list.map(s => {
+      let count = questions.filter(q => q.subject === s).length;
+      return `<option value="${s}">${s} (${count} Qs)</option>`;
+    }).join('');
+    
+    cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
+    togglePracHistoryEraDropdown();
+  }
+
+  function toggleTestHistoryEraDropdown() {
+    const sub = document.getElementById('testSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('testHistoryEraContainer');
+    if(container) {
+      container.style.display = isHistory ? 'block' : 'none';
+    }
+  }
+
+  function togglePracHistoryEraDropdown() {
+    const sub = document.getElementById('pracSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('pracHistoryEraContainer');
+    if(container) {
+      container.style.display = isHistory ? 'block' : 'none';
+    }
+  }
+
   function populateAllSubjectDropdowns() {
     if (window.isDropdownInteracting) return;
     syncDynamicSubjects();
-    const fill = (id, topId, subtopId) => {
-      const el = document.getElementById(id);
-      if(el) {
-        let currentVal = el.value;
-        el.innerHTML = subjects.map(s => {
-          let count = questions.filter(q => q.subject === s).length;
-          return `<option value="${s}">${s} (${count} Qs)</option>`;
-        }).join('');
-        if(currentVal && subjects.includes(currentVal)) {
-          el.value = currentVal;
-        } else if(subjects.length > 0) {
-          el.value = subjects[0];
-        }
-        if(topId && subtopId) {
-          cascadeTopics(id, topId, subtopId);
-        }
-      }
-    };
-    fill('testSub', 'testTop', 'testSubtop');
-    fill('pracSub', 'pracTop', 'pracSubtop');
+    updateTestSubjectOptions();
+    updatePracSubjectOptions();
   }
 
   function cascadeTopics(subId, topId, subtopId) {
     const sub = document.getElementById(subId).value;
     const topEl = document.getElementById(topId);
     let subPool = questions.filter(q => q.subject === sub);
-    const relatedTopics = [...new Set(subPool.map(q => q.topic))];
+    
+    const subLower = (sub || "").toLowerCase();
+    if(subLower.includes('history')) {
+      let eraElId = subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter';
+      const eraEl = document.getElementById(eraElId);
+      if(eraEl && eraEl.value && eraEl.value !== 'ALL') {
+        subPool = subPool.filter(q => q.era && q.era.toLowerCase() === eraEl.value.toLowerCase());
+      }
+    }
+
+    let relatedTopics = [...new Set(subPool.map(q => q.topic).filter(Boolean))];
+    if(subLower.includes('history')) {
+      relatedTopics.sort((a, b) => {
+        let qA = subPool.find(q => q.topic === a);
+        let qB = subPool.find(q => q.topic === b);
+        let tA = qA ? (parseFloat(qA.timeline_year) || 0) : 0;
+        let tB = qB ? (parseFloat(qB.timeline_year) || 0) : 0;
+        if(tA !== tB) return tA - tB;
+        return a.localeCompare(b);
+      });
+    } else {
+      relatedTopics.sort((a, b) => a.localeCompare(b));
+    }
+
     if(topEl && topEl.tagName.toLowerCase() === 'select') {
-      topEl.innerHTML = '<option value="ALL">All Topics</option>' + relatedTopics.map(t => {
+      let allCount = subPool.length;
+      topEl.innerHTML = `<option value="ALL">All Topics (${allCount} Qs)</option>` + relatedTopics.map(t => {
         let tCount = subPool.filter(q => q.topic === t).length;
         return `<option value="${t}">${t} (${tCount} Qs)</option>`;
       }).join('');
@@ -2146,6 +2241,14 @@
     const subtopEl = document.getElementById(subtopId);
     
     let pool = questions.filter(q => q.subject === sub);
+    const subLower = (sub || "").toLowerCase();
+    if(subLower.includes('history')) {
+      let eraElId = subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter';
+      const eraEl = document.getElementById(eraElId);
+      if(eraEl && eraEl.value && eraEl.value !== 'ALL') {
+        pool = pool.filter(q => q.era && q.era.toLowerCase() === eraEl.value.toLowerCase());
+      }
+    }
     
     if (!top || top === 'ALL') {
       if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
@@ -2156,9 +2259,9 @@
     }
 
     pool = pool.filter(q => q.topic === top);
-    const relatedSubtopics = [...new Set(pool.map(q => q.subtopic))];
+    const relatedSubtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
-      subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>' + relatedSubtopics.map(st => {
+      subtopEl.innerHTML = '<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>' + relatedSubtopics.map(st => {
         let stCount = pool.filter(q => q.subtopic === st).length;
         return `<option value="${st}">${st} (${stCount} Qs)</option>`;
       }).join('');
@@ -2351,6 +2454,15 @@
       const top = document.getElementById('testTop').value;
       const subtop = document.getElementById('testSubtop').value;
       pool = pool.filter(q => q.subject === sub);
+      
+      const subLower = (sub || "").toLowerCase();
+      if(subLower.includes('history')) {
+        const eraFilter = document.getElementById('testEraFilter').value;
+        if(eraFilter && eraFilter !== 'ALL') {
+          pool = pool.filter(q => q.era && q.era.toLowerCase() === eraFilter.toLowerCase());
+        }
+      }
+
       if(top !== 'ALL') pool = pool.filter(q => q.topic === top);
       if(subtop !== 'ALL') pool = pool.filter(q => q.subtopic === subtop);
     } else if(mode === 'practice') {
@@ -2358,6 +2470,15 @@
       const top = document.getElementById('pracTop').value;
       const subtop = document.getElementById('pracSubtop').value;
       pool = pool.filter(q => q.subject === sub);
+      
+      const subLower = (sub || "").toLowerCase();
+      if(subLower.includes('history')) {
+        const eraFilter = document.getElementById('pracEraFilter').value;
+        if(eraFilter && eraFilter !== 'ALL') {
+          pool = pool.filter(q => q.era && q.era.toLowerCase() === eraFilter.toLowerCase());
+        }
+      }
+
       if(top !== 'ALL') pool = pool.filter(q => q.topic === top);
       if(subtop !== 'ALL') pool = pool.filter(q => q.subtopic === subtop);
     }
@@ -2368,7 +2489,22 @@
 
     if(finalPool.length === 0) return alert('No questions available in this selection.');
 
-    activeQuestions = [...finalPool].sort(() => Math.random() - 0.5);
+    // Sort chronologically for history, random for others
+    const checkSub = mode === 'test' ? document.getElementById('testSub').value : document.getElementById('pracSub').value;
+    if(checkSub && checkSub.toLowerCase().includes('history')) {
+      finalPool.sort((a, b) => {
+        let tA = parseFloat(a.timeline_year) || 0;
+        let tB = parseFloat(b.timeline_year) || 0;
+        if(tA !== tB) return tA - tB;
+        let stA = parseFloat(a.sub_timeline_year) || 0;
+        let stB = parseFloat(b.sub_timeline_year) || 0;
+        return stA - stB;
+      });
+    } else {
+      finalPool.sort(() => Math.random() - 0.5);
+    }
+
+    activeQuestions = finalPool;
     userResponses = {};
     currentQIdx = 0;
 

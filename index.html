@@ -1092,7 +1092,7 @@
       <!-- SUB-TAB 2: SUBJECT-WISE STRENGTH ANALYSIS -->
       <div id="results-sub-radar" class="results-sub-view" style="display:none;">
         <div class="card" style="border: 1px solid rgba(139, 92, 246, 0.4);">
-          <h3 style="color:#a78bfa;">🕷️ Subject-Wise Radar Strength Analysis</h3>
+          <h3 style="color:#a78bfa;">🕷️️ Subject-Wise Radar Strength Analysis</h3>
           <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Visual breakdown of your performance across all available subjects (Live database synchronized).</p>
           <div id="subject-radar-container"></div>
         </div>
@@ -2252,7 +2252,7 @@
     
     if (!top || top === 'ALL') {
       if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
-        subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>';
+        subtopEl.innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>`;
         subtopEl.value = 'ALL';
       }
       return;
@@ -2261,7 +2261,7 @@
     pool = pool.filter(q => q.topic === top);
     const relatedSubtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     if(subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
-      subtopEl.innerHTML = '<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>' + relatedSubtopics.map(st => {
+      subtopEl.innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>` + relatedSubtopics.map(st => {
         let stCount = pool.filter(q => q.subtopic === st).length;
         return `<option value="${st}">${st} (${stCount} Qs)</option>`;
       }).join('');
@@ -2489,7 +2489,6 @@
 
     if(finalPool.length === 0) return alert('No questions available in this selection.');
 
-    // Sort chronologically for history, random for others
     const checkSub = mode === 'test' ? document.getElementById('testSub').value : document.getElementById('pracSub').value;
     if(checkSub && checkSub.toLowerCase().includes('history')) {
       finalPool.sort((a, b) => {

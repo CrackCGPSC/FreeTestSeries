@@ -1092,7 +1092,7 @@
       <!-- SUB-TAB 2: SUBJECT-WISE STRENGTH ANALYSIS -->
       <div id="results-sub-radar" class="results-sub-view" style="display:none;">
         <div class="card" style="border: 1px solid rgba(139, 92, 246, 0.4);">
-          <h3 style="color:#a78bfa;">🕷️️ Subject-Wise Radar Strength Analysis</h3>
+          <h3 style="color:#a78bfa;">🕷 Subject-Wise Radar Strength Analysis</h3>
           <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Visual breakdown of your performance across all available subjects (Live database synchronized).</p>
           <div id="subject-radar-container"></div>
         </div>
@@ -1299,21 +1299,24 @@
     if (currentUser) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('portal-screen').style.display = 'block';
+      
+      // INSTANT RENDER FROM LOCALSTORAGE CACHE FOR LIGHTNING-FAST LOAD
+      if(questions.length > 0) {
+        syncDynamicSubjects();
+        populateAllSubjectDropdowns();
+        buildFltSubjectInputs();
+        syncOnlineLeaderboard();
+      }
     }
     
-    setProgress(40);
+    setProgress(50);
     
-    if(questions.length > 0) {
-      syncDynamicSubjects();
-      populateAllSubjectDropdowns();
-      buildFltSubjectInputs();
-    }
-
-    await fetchQuestionsFromCloud();
-    await fetchUsersFromCloud();
+    // Background silent fetch
+    await fetchQuestionsFromCloud(true);
+    await fetchUsersFromCloud(true);
     
     syncDynamicSubjects();
-    setProgress(70);
+    setProgress(80);
     
     if(currentUser) {
       showPortal();
@@ -1352,7 +1355,7 @@
       if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
       await fetchQuestionsFromCloud(true);
       if (currentUser) {
-        await fetchUsersFromCloud();
+        await fetchUsersFromCloud(true);
         syncOnlineLeaderboard();
         if(document.getElementById('tab-results').style.display === 'block') {
           renderRadarAnalytics();
@@ -1365,7 +1368,7 @@
     if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
     await fetchQuestionsFromCloud(true);
     if (currentUser) {
-      await fetchUsersFromCloud();
+      await fetchUsersFromCloud(true);
       syncOnlineLeaderboard();
       if(document.getElementById('tab-results').style.display === 'block') {
         renderRadarAnalytics();
@@ -1820,7 +1823,7 @@
     }, 1000);
   }
 
-  async function fetchQuestionsFromCloud(isBackground = false) {
+  async function fetchQuestionsFromCloud(isSilent = false) {
     try {
       let res = await fetch(QUESTIONS_API_URL + "?action=getQuestions");
       let data = await res.json();
@@ -1848,8 +1851,6 @@
         });
         questions = Array.from(uniqueMap.values());
         localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
-      } else if(!isBackground && questions.length === 0) {
-        questions = [];
       }
       
       syncDynamicSubjects();
@@ -1859,12 +1860,9 @@
       initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
       initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
       populateAllSubjectDropdowns();
+      if(currentUser) syncOnlineLeaderboard();
     } catch(err) {
       console.error("Error fetching questions:", err);
-      let cached = localStorage.getItem('cg_cached_questions');
-      if(cached && questions.length === 0) {
-        try { questions = JSON.parse(cached); } catch(e) {}
-      }
     }
   }
 
@@ -1907,15 +1905,9 @@
             localStorage.setItem(getUserKey('persistent_unatt'), JSON.stringify(rStore.unatt || []));
             localStorage.setItem(getUserKey('persistent_saved'), JSON.stringify(rStore.saved || []));
 
-            if(!isSilent) {
-              syncOnlineLeaderboard();
-              if(document.getElementById('tab-results').style.display === 'block') {
-                renderRadarAnalytics();
-              }
-            } else {
-              if(document.getElementById('tab-results').style.display === 'block') {
-                renderRadarAnalytics();
-              }
+            syncOnlineLeaderboard();
+            if(document.getElementById('tab-results').style.display === 'block') {
+              renderRadarAnalytics();
             }
           }
         }
@@ -3497,7 +3489,15 @@
             localStorage.setItem(getUserKey('persistent_saved'), JSON.stringify(rStore.saved || []));
 
             let totalDbQ = questions.length > 0 ? questions.length : 100;
-            let currentPct = myData.current_percentage || 0;
+            
+            // LIVE CLIENT-SIDE PERCENTAGE RE-CALCULATION FOR ACCURACY WHEN Qs ARE ADDED
+            let totalUserCorrect = 0;
+            if(currentUser.subject_progress) {
+              for(let s in currentUser.subject_progress) {
+                totalUserCorrect += (currentUser.subject_progress[s].correct || 0);
+              }
+            }
+            let currentPct = totalDbQ > 0 ? Math.min(100, Math.round((totalUserCorrect / totalDbQ) * 100)) : (myData.current_percentage || 0);
             let calculatedCorrectCount = Math.round((currentPct / 100) * totalDbQ);
 
             document.getElementById('currentPercentageVal').innerText = `${currentPct}%`;
@@ -3512,7 +3512,7 @@
                 <tr style="background:rgba(59,130,246,0.25); border-top:2px dashed var(--primary);">
                   <td style="padding:10px; border:1px solid var(--border); color:#facc15; font-weight:bold;">#${myIndex + 1}</td>
                   <td style="padding:10px; border:1px solid var(--border); font-weight:bold; color:#38bdf8;">${myData.name || 'You'} [You]</td>
-                  <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#4ade80; font-weight:bold;">${myData.current_percentage || 0}%</td>
+                  <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#4ade80; font-weight:bold;">${currentPct}%</td>
                   <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#facc15; font-weight:bold;">${myData.revision_count || 0}</td>
                 </tr>
               `;

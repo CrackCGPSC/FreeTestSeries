@@ -1300,7 +1300,6 @@
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('portal-screen').style.display = 'block';
       
-      // INSTANT RENDER FROM LOCALSTORAGE CACHE FOR LIGHTNING-FAST LOAD
       if(questions.length > 0) {
         syncDynamicSubjects();
         populateAllSubjectDropdowns();
@@ -1311,7 +1310,6 @@
     
     setProgress(50);
     
-    // Background silent fetch
     await fetchQuestionsFromCloud(true);
     await fetchUsersFromCloud(true);
     
@@ -2630,8 +2628,8 @@
     ['A', 'B', 'C', 'D'].forEach(k => {
       const isChecked = userResponses[currentQIdx] === k ? 'checked' : '';
       optContainer.innerHTML += `
-        <label class="test-opt">
-          <input type="radio" name="testOpt" value="${k}" ${isChecked} onchange="userResponses[currentQIdx] = '${k}'; renderExamPalette();">
+        <label class="test-opt" onclick="handleOptionClick(event, '${k}')">
+          <input type="radio" name="testOpt" value="${k}" ${isChecked} autocomplete="off">
           <div class="test-opt-label">
             <span class="opt-letter">(${k})</span>
             <span class="opt-text">${(opts && opts[k]) ? opts[k] : ''}</span>
@@ -2639,6 +2637,22 @@
         </label>
       `;
     });
+    renderExamPalette();
+  }
+
+  function handleOptionClick(event, k) {
+    if(event.target.tagName.toLowerCase() === 'input') return;
+    event.preventDefault();
+    const radioInput = event.currentTarget.querySelector('input[type="radio"]');
+    if(!radioInput) return;
+
+    if(userResponses[currentQIdx] === k) {
+      delete userResponses[currentQIdx];
+      radioInput.checked = false;
+    } else {
+      userResponses[currentQIdx] = k;
+      radioInput.checked = true;
+    }
     renderExamPalette();
   }
 
@@ -3387,10 +3401,11 @@
     }
 
     radarBox.innerHTML = subjects.map(sub => {
-      let totalDbSubQ = questions.filter(q => q.subject === sub).length;
+      let totalDbSubQ = questions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase()).length;
       if(totalDbSubQ === 0) totalDbSubQ = 10;
       
-      let subData = userSubProgress[sub] || { correct: 0, revisions: 0 };
+      let matchedSubKey = Object.keys(userSubProgress).find(k => k.trim().toLowerCase() === sub.trim().toLowerCase());
+      let subData = matchedSubKey ? userSubProgress[matchedSubKey] : { correct: 0, revisions: 0 };
       let userCorrect = subData.correct || 0;
 
       let subPercent = 0;
@@ -3446,13 +3461,24 @@
         });
 
         let topTen = usersData.slice(0, 10);
-        let htmlRows = topTen.map((u, idx) => `
-          <tr style="${currentUser && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase() ? 'background:rgba(59,130,246,0.15);' : ''}">
-            <td style="padding:10px; border:1px solid var(--border);">#${idx + 1}</td>
-            <td style="padding:10px; border:1px solid var(--border); font-weight:600; color:#93c5fd;">${u.name || 'User'}</td>
-            <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#4ade80;">${u.current_percentage || 0}%</td>
-            <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#facc15; font-weight:bold;">${u.revision_count || 0}</td>
-          </tr>`).join('');
+        let htmlRows = topTen.map((u, idx) => {
+          let uTotalCorrect = 0;
+          let uSubProg = u.subject_progress;
+          if(typeof uSubProg === 'string') { try { uSubProg = JSON.parse(uSubProg); } catch(e){} }
+          if(uSubProg && typeof uSubProg === 'object') {
+            for(let s in uSubProg) { uTotalCorrect += (uSubProg[s].correct || 0); }
+          }
+          let dbQCount = questions.length > 0 ? questions.length : 100;
+          let calculatedPct = dbQCount > 0 ? Math.min(100, Math.round((uTotalCorrect / dbQCount) * 100)) : (u.current_percentage || 0);
+
+          return `
+            <tr style="${currentUser && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase() ? 'background:rgba(59,130,246,0.15);' : ''}">
+              <td style="padding:10px; border:1px solid var(--border);">#${idx + 1}</td>
+              <td style="padding:10px; border:1px solid var(--border); font-weight:600; color:#93c5fd;">${u.name || 'User'}</td>
+              <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#4ade80;">${calculatedPct}%</td>
+              <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#facc15; font-weight:bold;">${u.revision_count || 0}</td>
+            </tr>`;
+        }).join('');
 
         if(currentUser) {
           let myIndex = usersData.findIndex(u => u.username && u.username.toLowerCase() === currentUser.username.toLowerCase());
@@ -3490,7 +3516,6 @@
 
             let totalDbQ = questions.length > 0 ? questions.length : 100;
             
-            // LIVE CLIENT-SIDE PERCENTAGE RE-CALCULATION FOR ACCURACY WHEN Qs ARE ADDED
             let totalUserCorrect = 0;
             if(currentUser.subject_progress) {
               for(let s in currentUser.subject_progress) {

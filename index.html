@@ -1826,38 +1826,74 @@
       let res = await fetch(QUESTIONS_API_URL + "?action=getQuestions");
       let data = await res.json();
       if(Array.isArray(data) && data.length > 0) {
-        let uniqueMap = new Map();
+        let flatList = [];
         data.forEach(q => {
-          if(q.id) {
-            let parsedOpts = q.options;
-            if(typeof parsedOpts === 'string') {
-              try { parsedOpts = JSON.parse(parsedOpts); } catch(e) {}
-            }
-            if(!parsedOpts || typeof parsedOpts !== 'object') {
-              parsedOpts = { A: q.optionA || "", B: q.optionB || "", C: q.optionC || "", D: q.optionD || "" };
-            }
-            q.options = parsedOpts;
+          let opts = q.options;
+          if(typeof opts === 'string') { try { opts = JSON.parse(opts); } catch(e){} }
+          if(!opts || typeof opts !== 'object') {
+            opts = { A: q.optionA || "", B: q.optionB || "", C: q.optionC || "", D: q.optionD || "" };
+          }
+          q.options = opts;
 
-            if(typeof q.matchRows === 'string') {
-              try { q.matchRows = JSON.parse(q.matchRows); } catch(e){}
-            }
-            if(typeof q.statements === 'string') {
-              try { q.statements = JSON.parse(q.statements); } catch(e){}
-            }
-            uniqueMap.set(q.id.toString(), q);
+          let st = q.statements;
+          if(typeof st === 'string' && st.trim() !== '') {
+            try { st = JSON.parse(st); } catch(e){ st = []; }
+          }
+          q.statements = Array.isArray(st) ? st : [];
+
+          let mr = q.matchRows;
+          if(typeof mr === 'string' && mr.trim() !== '') {
+            try { mr = JSON.parse(mr); } catch(e){ mr = []; }
+          }
+          q.matchRows = Array.isArray(mr) ? mr : [];
+
+          let pq = q.passageQuestions;
+          if(typeof pq === 'string' && pq.trim() !== '') {
+            try { pq = JSON.parse(pq); } catch(e){ pq = []; }
+          }
+          q.passageQuestions = Array.isArray(pq) ? pq : [];
+
+          if(q.type === 'passage' && Array.isArray(pq) && pq.length > 0) {
+            pq.forEach((subQ, pIdx) => {
+              let subOpts = subQ.options || { A: subQ.optionA || '', B: subQ.optionB || '', C: subQ.optionC || '', D: subQ.optionD || '' };
+              flatList.push({
+                ...q,
+                id: `${q.id}_p${pIdx+1}`,
+                originalId: q.id,
+                isPassageSubQ: true,
+                passageSubIdx: pIdx + 1,
+                passageTotal: pq.length,
+                passageText: q.passageText || q.text,
+                text: subQ.qText,
+                options: subOpts,
+                ans: subQ.ans,
+                expl: subQ.expl
+              });
+            });
+          } else {
+            flatList.push(q);
           }
         });
-        questions = Array.from(uniqueMap.values());
-        localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
+
+        // Smart Merge: Do not overwrite active user selections if dropdowns are currently focused/interacted
+        if(!window.isDropdownInteracting && document.getElementById('test-player').style.display !== 'block' && document.getElementById('prac-player').style.display !== 'block') {
+          questions = flatList;
+          localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
+        } else {
+          // Keep questions array updated in memory without re-rendering active config UI
+          questions = flatList;
+        }
       }
       
-      syncDynamicSubjects();
-      buildFltSubjectInputs();
-      initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
-      initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
-      initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
-      initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
-      populateAllSubjectDropdowns();
+      if(!window.isDropdownInteracting) {
+        syncDynamicSubjects();
+        buildFltSubjectInputs();
+        initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
+        initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
+        initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
+        initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
+        populateAllSubjectDropdowns();
+      }
       if(currentUser) syncOnlineLeaderboard();
     } catch(err) {
       console.error("Error fetching questions:", err);
@@ -2589,6 +2625,16 @@
       `;
     } else if(isStmtType) {
       bodyHtml = renderStatementQuestionHtml(q);
+    } else if(q.isPassageSubQ) {
+      bodyHtml = `
+        <div style="background:rgba(59,130,246,0.12); padding:10px 14px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px; text-align: left;">
+          <strong style="color:#60a5fa; font-size:0.9rem; text-align: left; display: block;">📖 Passage / Comprehension (Read for Q.${q.passageSubIdx} of ${q.passageTotal}):</strong>
+          <p style="margin-top:4px; line-height:1.45; font-size:0.92rem; text-align: left;">${q.passageText}</p>
+        </div>
+        <div style="font-weight:600; font-size:1rem; color:#f9fafb; margin-bottom:8px; text-align: left;">
+          Q${q.passageSubIdx}: ${q.text}
+        </div>
+      `;
     } else if(q.type === 'match') {
       let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
       bodyHtml = `<div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>`;
@@ -2611,7 +2657,7 @@
     }
 
     let bodyContainer = document.getElementById('t-body');
-    if(isStmtType || q.type === 'ar' || q.type === 'match') {
+    if(isStmtType || q.type === 'ar' || q.type === 'match' || q.isPassageSubQ) {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;
@@ -2756,6 +2802,16 @@
       `;
     } else if(isStmtType) {
       bodyHtml = renderStatementQuestionHtml(q);
+    } else if(q.isPassageSubQ) {
+      bodyHtml = `
+        <div style="background:rgba(59,130,246,0.12); padding:10px 14px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px; text-align: left;">
+          <strong style="color:#60a5fa; font-size:0.9rem; text-align: left; display: block;">📖 Passage / Comprehension (Read for Q.${q.passageSubIdx} of ${q.passageTotal}):</strong>
+          <p style="margin-top:4px; line-height:1.45; font-size:0.92rem; text-align: left;">${q.passageText}</p>
+        </div>
+        <div style="font-weight:600; font-size:1rem; color:#f9fafb; margin-bottom:8px; text-align: left;">
+          Q${q.passageSubIdx}: ${q.text}
+        </div>
+      `;
     } else if(q.type === 'match') {
       let instructionText = q.text && q.text.trim() !== '' ? q.text : 'Match the following:';
       bodyHtml = `<div style="margin-bottom:8px;"><strong>${instructionText}</strong></div>`;
@@ -2778,7 +2834,7 @@
     }
 
     let bodyContainer = document.getElementById('p-body');
-    if(isStmtType || q.type === 'ar' || q.type === 'match') {
+    if(isStmtType || q.type === 'ar' || q.type === 'match' || q.isPassageSubQ) {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;
@@ -3009,12 +3065,22 @@
       `;
     } else if(q.type === 'statement') {
       bodyHtml = renderStatementQuestionHtml(q);
+    } else if(q.isPassageSubQ) {
+      bodyHtml = `
+        <div style="background:rgba(59,130,246,0.12); padding:10px 14px; border-radius:10px; border:1px solid var(--border); margin-bottom:10px; text-align: left;">
+          <strong style="color:#60a5fa; font-size:0.9rem; text-align: left; display: block;">📖 Passage / Comprehension (Read for Q.${q.passageSubIdx} of ${q.passageTotal}):</strong>
+          <p style="margin-top:4px; line-height:1.45; font-size:0.92rem; text-align: left;">${q.passageText}</p>
+        </div>
+        <div style="font-weight:600; font-size:1rem; color:#f9fafb; margin-bottom:8px; text-align: left;">
+          Q${q.passageSubIdx}: ${q.text}
+        </div>
+      `;
     } else {
       bodyHtml = q.text || q.assertion || '';
     }
 
     const bodyContainer = document.getElementById('rq-body');
-    if(q.type === 'statement' || q.type === 'ar' || q.type === 'match') {
+    if(q.type === 'statement' || q.type === 'ar' || q.type === 'match' || q.isPassageSubQ) {
       bodyContainer.innerHTML = bodyHtml;
     } else {
       bodyContainer.innerText = bodyHtml;

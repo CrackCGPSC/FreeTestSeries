@@ -368,7 +368,7 @@
               <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 14px;">CGVYAPAM / CGPSC pattern ke mutabiq Section-wise Full Mock Test (2 Hours Timer)!</p>
             </div>
             <div>
-              <button class="btn btn-warning" style="font-size: 0.95rem; padding: 10px 18px; font-weight: bold; background: #facc15; color: #000; width: 100%; justify-content: center;" onclick="startFullFreeMockTest()">🚀 Start Sectional Test</button>
+              <button class="btn btn-warning" style="font-size: 0.95rem; padding: 10px 18px; font-weight: bold; background: #facc15; color: #000; width: 100%; justify-content: center;" onclick="startFullSectionalMockTest()">🚀 Start Sectional Test</button>
             </div>
           </div>
         </div>
@@ -1495,10 +1495,31 @@
     startEngineWithPool(finalClean, 'test', testName);
   }
 
-  function startFullFreeMockTest() {
-    if(questions.length === 0) return alert('No questions available.');
-    let cleanPool = getUniqueSemanticPool(questions);
-    startEngineWithPool(cleanPool.slice(0, 100), 'test', 'Full Mock Test (CGVYAPAM/CGPSC Pattern)');
+  function startFullSectionalMockTest() {
+    if(questions.length === 0) return alert('No questions available in database.');
+    let sectionsMap = {
+      "Chhattisgarh GS": questions.filter(q => q.subject && q.subject.toLowerCase().includes('cg')),
+      "Indian GS & History": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('indian') || q.subject.toLowerCase().includes('history') || q.subject.toLowerCase().includes('polity') || q.subject.toLowerCase().includes('economy') || q.subject.toLowerCase().includes('geography'))),
+      "General Science & Computer": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('science') || q.subject.toLowerCase().includes('computer'))),
+      "General Mental Ability & Maths": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('maths') || q.subject.toLowerCase().includes('mental') || q.subject.toLowerCase().includes('ability'))),
+      "Hindi & English Language": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('hindi') || q.subject.toLowerCase().includes('english')))
+    };
+
+    let assembledMock = [];
+    for(let secName in sectionsMap) {
+      let secPool = getUniqueSemanticPool(sectionsMap[secName]);
+      if(secPool.length > 0) {
+        secPool.forEach(q => q.sectionName = secName);
+        assembledMock.push(...secPool.slice(0, 20));
+      }
+    }
+
+    if(assembledMock.length === 0) {
+      assembledMock = getUniqueSemanticPool(questions).slice(0, 100);
+      assembledMock.forEach(q => q.sectionName = "General Section");
+    }
+
+    startEngineWithPool(assembledMock, 'test', 'Full Sectional Mock Test (CGVYAPAM/CGPSC)');
   }
 
   function startTestTimer(minutes) {
@@ -1521,7 +1542,7 @@
     document.getElementById('t-counter').innerText = `Question ${currentQIdx + 1} of ${activeQuestions.length}`;
     document.getElementById('t-exam-badge').innerText = q.exam || 'PYQ';
     document.getElementById('t-hier-badge').innerText = `${q.subject} > ${q.topic}`;
-    document.getElementById('t-section-badge').innerText = q.subject || 'Section';
+    document.getElementById('t-section-badge').innerText = q.sectionName || q.subject || 'Section';
 
     let bodyHtml = q.text || q.assertion || '';
     if(q.type === 'match' && q.matchRows) {
@@ -1652,6 +1673,7 @@
     let finalMarks = Math.max(0, correct - (wrong * 0.25));
     lastAttemptSummary = { marks: finalMarks.toFixed(2), totalMarks: activeQuestions.length, correct, wrong, unattempted, accuracy: ((correct/(correct+wrong || 1))*100).toFixed(1)+'%', wrongQs, correctQs, unattemptedQs, subject: window.currentCustomTestLabel || 'Mock Test' };
 
+    if(!currentUser.history) currentUser.history = [];
     currentUser.history.unshift({ subject: lastAttemptSummary.subject, marks: parseFloat(finalMarks.toFixed(2)), totalMarks: activeQuestions.length, correct, wrong, date: new Date().toLocaleDateString() });
     localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
     updateUserProgressToCloud(correct, testSubMap, currentUser.revision_store);
@@ -1764,212 +1786,229 @@
 
   init();
 </script>
-  <Script>
-  // ADVANCED SECTIONAL FULL MOCK TEST ENGINE & UI HANDLERS
-  function startFullSectionalMockTest() {
-    if(questions.length === 0) return alert('No questions available in database.');
-    
-    // Group questions by section categories following CGVYAPAM / CGPSC patterns
-    let sectionsMap = {
-      "Chhattisgarh GS": questions.filter(q => q.subject && q.subject.toLowerCase().includes('cg')),
-      "Indian GS & History": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('indian') || q.subject.toLowerCase().includes('history') || q.subject.toLowerCase().includes('polity') || q.subject.toLowerCase().includes('economy') || q.subject.toLowerCase().includes('geography'))),
-      "General Science & Computer": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('science') || q.subject.toLowerCase().includes('computer'))),
-      "General Mental Ability & Maths": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('maths') || q.subject.toLowerCase().includes('mental') || q.subject.toLowerCase().includes('ability'))),
-      "Hindi & English Language": questions.filter(q => q.subject && (q.subject.toLowerCase().includes('hindi') || q.subject.toLowerCase().includes('english')))
-    };
+<script>
+    // --- ADDITIONAL COMPREHENSIVE UTILITIES & RENDER HANDLERS ---
+  
+  function checkCustomTimerSelect(selectId, wrapId) {
+    const sel = document.getElementById(selectId);
+    const wrap = document.getElementById(wrapId);
+    if (!sel || !wrap) return;
+    wrap.style.display = sel.value === 'custom' ? 'block' : 'none';
+  }
 
-    let assembledMock = [];
-    for(let secName in sectionsMap) {
-      let secPool = getUniqueSemanticPool(sectionsMap[secName]);
-      if(secPool.length > 0) {
-        // Tag section name into question objects for section badge rendering
-        secPool.forEach(q => q.sectionName = secName);
-        assembledMock.push(...secPool.slice(0, 20)); // 20 questions per section = 100 Qs total
+  function getSelectedTimerMinutes(selectId, customInputId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return 30;
+    if (sel.value === 'custom') {
+      const val = parseInt(document.getElementById(customInputId).value || 30, 10);
+      return val > 0 ? val : 30;
+    }
+    return parseInt(sel.value, 10);
+  }
+
+  function updateSwipeIndicator(gridId, dotsBarId) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    const scrollLeft = grid.scrollLeft;
+    const cardWidth = grid.querySelector('.selector-card').offsetWidth + 15;
+    const activeIdx = Math.round(scrollLeft / cardWidth);
+    const dots = document.querySelectorAll(`#${dotsBarId} .swipe-dot`);
+    dots.forEach((dot, idx) => {
+      dot.classList.toggle('active', idx === activeIdx);
+    });
+  }
+
+  function scrollToCard(gridId, idx) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    const cardWidth = grid.querySelector('.selector-card').offsetWidth + 15;
+    grid.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
+  }
+
+  function extractExamYear(examStr) {
+    if (!examStr) return '';
+    const m = examStr.match(/\b(19\d{2}|20\d{2})\b/);
+    return m ? m[0] : '';
+  }
+
+  function extractCleanExamName(examStr) {
+    if (!examStr) return '';
+    return examStr.replace(/\b(19\d{2}|20\d{2})\b/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  function syncDynamicSubjects() {
+    let combined = new Set([...indianGsSubs, ...cgGsSubs, ...otherSubs]);
+    questions.forEach(q => {
+      if (q.subject && q.subject.trim()) combined.add(q.subject.trim());
+    });
+    subjects = Array.from(combined);
+  }
+
+  function updateTestSubjectOptions() {
+    const cat = document.getElementById('testGsCategory').value;
+    const subEl = document.getElementById('testSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    
+    subEl.innerHTML = list.map(s => {
+      let count = questions.filter(q => q.subject === s).length;
+      return `<option value="${s}">${s} (${count} Qs)</option>`;
+    }).join('');
+    
+    cascadeTopics('testSub', 'testTop', 'testSubtop');
+    toggleTestHistoryEraDropdown();
+  }
+
+  function updatePracSubjectOptions() {
+    const cat = document.getElementById('pracGsCategory').value;
+    const subEl = document.getElementById('pracSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    
+    subEl.innerHTML = list.map(s => {
+      let count = questions.filter(q => q.subject === s).length;
+      return `<option value="${s}">${s} (${count} Qs)</option>`;
+    }).join('');
+    
+    cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
+    togglePracHistoryEraDropdown();
+  }
+
+  function toggleTestHistoryEraDropdown() {
+    const sub = document.getElementById('testSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('testHistoryEraContainer');
+    if (container) container.style.display = isHistory ? 'block' : 'none';
+  }
+
+  function togglePracHistoryEraDropdown() {
+    const sub = document.getElementById('pracSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('pracHistoryEraContainer');
+    if (container) container.style.display = isHistory ? 'block' : 'none';
+  }
+
+  function populateAllSubjectDropdowns() {
+    if (window.isDropdownInteracting) return;
+    syncDynamicSubjects();
+    updateTestSubjectOptions();
+    updatePracSubjectOptions();
+  }
+
+  function cascadeTopics(subId, topId, subtopId) {
+    const sub = document.getElementById(subId).value;
+    const topEl = document.getElementById(topId);
+    let subPool = questions.filter(q => q.subject === sub);
+    
+    const subLower = (sub || "").toLowerCase();
+    if (subLower.includes('history')) {
+      let eraElId = subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter';
+      const eraEl = document.getElementById(eraElId);
+      if (eraEl && eraEl.value && eraEl.value !== 'ALL') {
+        subPool = subPool.filter(q => q.era && q.era.toLowerCase() === eraEl.value.toLowerCase());
       }
     }
 
-    if(assembledMock.length === 0) {
-      assembledMock = getUniqueSemanticPool(questions).slice(0, 100);
-      assembledMock.forEach(q => q.sectionName = "General Section");
-    }
-
-    activeQuestions = getUniqueSemanticPool(assembledMock);
-    activeEngineMode = 'full_mock';
-    userResponses = {};
-    currentQIdx = 0;
-    window.currentCustomTestLabel = 'Full Sectional Mock Test (CGVYAPAM/CGPSC)';
-
-    startTestTimer(120); // 2 Hours timer
-
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    renderTestView();
-  }
-
-  // REVISION QUIZ & LOCAL STORAGE SYNC MODULE
-  let activeRevisionCategory = 'wrong';
-
-  function startRevisionQuizEngine(type) {
-    activeRevisionCategory = type;
-    let listKey = type === 'wrong' ? 'persistent_wrong' : (type === 'unattempted' ? 'persistent_unatt' : 'persistent_saved');
-    let list = currentUser && currentUser.revision_store && currentUser.revision_store[type === 'wrong' ? 'wrong' : (type === 'unattempted' ? 'unatt' : 'saved')] ? currentUser.revision_store[type === 'wrong' ? 'wrong' : (type === 'unattempted' ? 'unatt' : 'saved')] : (JSON.parse(localStorage.getItem(getUserKey(listKey))) || []);
-    
-    if(list.length === 0) return alert('No questions found in this revision category!');
-    
-    revQuizQuestions = getUniqueSemanticPool(list);
-    revQuizResponses = {};
-    revQuizIdx = 0;
-    
-    document.getElementById('revisionSelectorGrid').style.display = 'none';
-    document.getElementById('revisionSwipeDots').style.display = 'none';
-    document.getElementById('rev-sub-wrong').style.display = 'none';
-    document.getElementById('rev-sub-unatt').style.display = 'none';
-    document.getElementById('rev-sub-saved').style.display = 'none';
-    document.getElementById('revision-quiz-player').style.display = 'block';
-    renderRevisionQuizView();
-  }
-
-  function exitRevisionQuizPlayer() {
-    document.getElementById('revision-quiz-player').style.display = 'none';
-    document.getElementById('revisionSelectorGrid').style.display = 'flex';
-    document.getElementById('revisionSwipeDots').style.display = 'flex';
-    switchRevisionSubTab(activeRevisionCategory);
-    renderRevisionNeededSection();
-  }
-
-  function toggleRevPaletteDrawer() {
-    const drawer = document.getElementById('revPaletteDrawer');
-    if(!drawer) return;
-    drawer.style.display = drawer.style.display === 'none' ? 'block' : 'none';
-    renderRevPaletteGrid();
-  }
-
-  function renderRevPaletteGrid() {
-    const grid = document.getElementById('revPaletteGrid');
-    if(!grid) return;
-    grid.innerHTML = revQuizQuestions.map((_, i) => {
-      let cls = 'palette-box';
-      if(i === revQuizIdx) cls += ' current';
-      if(revQuizResponses[i]) cls += ' answered';
-      return `<div class="${cls}" onclick="jumpToRevQuestion(${i})">${i + 1}</div>`;
-    }).join('');
-  }
-
-  function jumpToRevQuestion(idx) {
-    revQuizIdx = idx;
-    renderRevisionQuizView();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function removeCurrentRevQuestion() {
-    if(revQuizQuestions.length === 0) return;
-    let qToRemove = revQuizQuestions[revQuizIdx];
-    let listKey = activeRevisionCategory === 'wrong' ? 'persistent_wrong' : (activeRevisionCategory === 'unattempted' ? 'persistent_unatt' : 'persistent_saved');
-    let list = currentUser && currentUser.revision_store && currentUser.revision_store[activeRevisionCategory === 'wrong' ? 'wrong' : (activeRevisionCategory === 'unattempted' ? 'unatt' : 'saved')] ? currentUser.revision_store[activeRevisionCategory === 'wrong' ? 'wrong' : (activeRevisionCategory === 'unattempted' ? 'unatt' : 'saved')] : (JSON.parse(localStorage.getItem(getUserKey(listKey))) || []);
-    
-    list = list.filter(item => item.id.toString() !== qToRemove.id.toString());
-    localStorage.setItem(getUserKey(listKey), JSON.stringify(list));
-
-    if(currentUser) {
-      if(!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
-      if(activeRevisionCategory === 'wrong') currentUser.revision_store.wrong = list;
-      else if(activeRevisionCategory === 'unattempted') currentUser.revision_store.unatt = list;
-      else if(activeRevisionCategory === 'saved') currentUser.revision_store.saved = list;
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      updateUserProgressToCloud(0, {}, currentUser.revision_store);
-    }
-
-    revQuizQuestions.splice(revQuizIdx, 1);
-    alert('Question successfully removed from this list!');
-
-    if(revQuizQuestions.length === 0) {
-      alert('All questions in this list have been cleared.');
-      exitRevisionQuizPlayer();
+    let relatedTopics = [...new Set(subPool.map(q => q.topic).filter(Boolean))];
+    if (subLower.includes('history')) {
+      relatedTopics.sort((a, b) => {
+        let qA = subPool.find(q => q.topic === a);
+        let qB = subPool.find(q => q.topic === b);
+        let tA = qA ? (parseFloat(qA.timeline_year) || 0) : 0;
+        let tB = qB ? (parseFloat(qB.timeline_year) || 0) : 0;
+        if (tA !== tB) return tA - tB;
+        return a.localeCompare(b);
+      });
     } else {
-      if(revQuizIdx >= revQuizQuestions.length) revQuizIdx = revQuizQuestions.length - 1;
-      renderRevisionQuizView();
+      relatedTopics.sort((a, b) => a.localeCompare(b));
+    }
+
+    if (topEl && topEl.tagName.toLowerCase() === 'select') {
+      let allCount = subPool.length;
+      topEl.innerHTML = `<option value="ALL">All Topics (${allCount} Qs)</option>` + relatedTopics.map(t => {
+        let tCount = subPool.filter(q => q.topic === t).length;
+        return `<option value="${t}">${t} (${tCount} Qs)</option>`;
+      }).join('');
+      topEl.value = 'ALL';
+      cascadeSubtopics(subId, topId, subtopId);
     }
   }
 
-  function renderRevisionQuizView() {
-    const q = revQuizQuestions[revQuizIdx];
-    document.getElementById('rq-counter').innerText = `Revision Q ${revQuizIdx + 1} of ${revQuizQuestions.length}`;
-    document.getElementById('rq-hier-badge').innerText = `${q.subject} > ${q.topic}`;
+  function cascadeSubtopics(subId, topId, subtopId) {
+    const sub = document.getElementById(subId).value;
+    const top = document.getElementById(topId).value;
+    const subtopEl = document.getElementById(subtopId);
+    
+    let pool = questions.filter(q => q.subject === sub);
+    const subLower = (sub || "").toLowerCase();
+    if (subLower.includes('history')) {
+      let eraElId = subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter';
+      const eraEl = document.getElementById(eraElId);
+      if (eraEl && eraEl.value && eraEl.value !== 'ALL') {
+        pool = pool.filter(q => q.era && q.era.toLowerCase() === eraEl.value.toLowerCase());
+      }
+    }
+    
+    if (!top || top === 'ALL') {
+      if (subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
+        subtopEl.innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>`;
+        subtopEl.value = 'ALL';
+      }
+      return;
+    }
 
-    let bodyHtml = q.text || q.assertion || '';
-    document.getElementById('rq-body').innerText = bodyHtml;
-
-    let opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD });
-    const optContainer = document.getElementById('rq-opts');
-    const explBox = document.getElementById('rq-expl');
-    optContainer.innerHTML = '';
-    explBox.style.display = 'none';
-
-    const chosen = revQuizResponses[revQuizIdx];
-    ['A', 'B', 'C', 'D'].forEach(k => {
-      let extraClass = chosen ? (k === q.ans ? 'opt-correct' : (k === chosen ? 'opt-wrong' : '')) : '';
-      optContainer.innerHTML += `
-        <div class="test-opt ${extraClass}" onclick="handleRevisionQuizClick('${k}')">
-          <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k] || ''}</span></div>
-        </div>
-      `;
-    });
-    if(chosen) { explBox.style.display = 'block'; explBox.innerHTML = `<strong>Explanation:</strong>\n${q.expl || ''}`; }
-    renderRevPaletteGrid();
-  }
-
-  function handleRevisionQuizClick(k) {
-    if(revQuizResponses[revQuizIdx]) return;
-    revQuizResponses[revQuizIdx] = k;
-    renderRevisionQuizView();
-  }
-
-  function moveRevisionQuizQ(step) {
-    if(revQuizIdx + step >= 0 && revQuizIdx + step < revQuizQuestions.length) {
-      revQuizIdx += step;
-      renderRevisionQuizView();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    pool = pool.filter(q => q.topic === top);
+    const relatedSubtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    if (subtopEl && subtopEl.tagName.toLowerCase() === 'select') {
+      subtopEl.innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>` + relatedSubtopics.map(st => {
+        let stCount = pool.filter(q => q.subtopic === st).length;
+        return `<option value="${st}">${st} (${stCount} Qs)</option>`;
+      }).join('');
+      subtopEl.value = 'ALL';
     }
   }
 
-  // INITIALIZATION AND USER AUTHENTICATION CONTROLLER
-  async function memberRegister() {
-    const name = document.getElementById('memRegName').value.trim();
-    const user = document.getElementById('memRegUser').value.trim().toLowerCase();
-    const dob = document.getElementById('memRegDob').value;
-    const pass = document.getElementById('memRegPass').value.trim();
-
-    if(!name || !user || !dob || !pass) return alert('Please fill all fields!');
-    if(members.find(m => m.username && m.username.toLowerCase() === user)) return alert('Username already taken!');
-
-    let newUserDoc = {
-      username: user, name: name, dob: dob, pass: pass,
-      subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] },
-      history: [], combined_score: 0, revision_count: 0, current_percentage: 0,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    try {
-      await db.collection("users").doc(user).set(newUserDoc);
-      members.push(newUserDoc);
-      currentUser = { name, username: user, role: 'member', subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] }, history: [] };
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      showPortal();
-    } catch(err) { alert("Registration error."); }
+  function checkUsernameAvailability(usernameVal) {
+    const msgEl = document.getElementById('usernameAvailabilityMsg');
+    const cleanUser = usernameVal.trim().toLowerCase();
+    if (!cleanUser) { msgEl.innerText = ''; return; }
+    const exists = members.find(m => m.username && m.username.toLowerCase() === cleanUser);
+    if (exists || cleanUser === 'adminsaket') {
+      msgEl.style.color = 'var(--danger)';
+      msgEl.innerText = '❌ Username already taken!';
+    } else {
+      msgEl.style.color = 'var(--success)';
+      msgEl.innerText = '✔ Username available!';
+    }
   }
 
-  function memberLogin() {
-    const user = document.getElementById('memLogUser').value.trim().toLowerCase();
-    const pass = document.getElementById('memLogPass').value.trim();
-    const found = members.find(m => m.username && m.username.toLowerCase() === user && m.pass === pass);
+  function toggleRegister(show) {
+    document.getElementById('mem-login-box').style.display = show ? 'none' : 'block';
+    document.getElementById('mem-reg-box').style.display = show ? 'block' : 'none';
+  }
 
-    if(found) {
-      currentUser = { ...found };
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      showPortal();
-    } else { alert('Invalid username or password!'); }
+  function togglePasswordVisibility(fieldId, iconEl) {
+    const field = document.getElementById(fieldId);
+    if (field.type === "password") {
+      field.type = "text";
+      iconEl.style.opacity = "1";
+    } else {
+      field.type = "password";
+      iconEl.style.opacity = "0.8";
+    }
+  }
+
+  function showAuth() {
+    document.getElementById('auth-screen').style.display = 'block';
+    document.getElementById('portal-screen').style.display = 'none';
+    document.getElementById('footerUserBox').style.display = 'none';
+  }
+
+  function showPortal() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('portal-screen').style.display = 'block';
+    document.getElementById('footerUserBox').style.display = 'flex';
+    document.getElementById('footerUserBadge').innerText = `@${currentUser.username} (${currentUser.name})`;
+    let savedTab = localStorage.getItem('cg_active_tab') || 'tab-home';
+    navigate(savedTab);
   }
 
   function logout() {
@@ -1979,51 +2018,199 @@
     init();
   }
 
-  function navigate(tabId) {
-    if(document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') {
-      if(!confirm('A test is currently in progress! Do you want to leave?')) return;
-      if(testTimerInterval) clearInterval(testTimerInterval);
-      document.getElementById('test-player').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'none';
+    // --- FINAL ROUTING, SCORECARD & INITIALIZATION SCRIPT ---
+
+  function displayScorecard() {
+    if (!lastAttemptSummary) return;
+    document.getElementById('latest-scorecard').style.display = 'block';
+    document.getElementById('no-recent-scorecard').style.display = 'none';
+    document.getElementById('resMarks').innerText = lastAttemptSummary.marks;
+    document.getElementById('resTotalMarksSub').innerText = `/ ${lastAttemptSummary.totalMarks}`;
+    document.getElementById('resCorrect').innerText = lastAttemptSummary.correct;
+    document.getElementById('resWrong').innerText = lastAttemptSummary.wrong;
+    document.getElementById('resLeft').innerText = lastAttemptSummary.unattempted;
+    document.getElementById('resAcc').innerText = lastAttemptSummary.accuracy;
+
+    document.getElementById('countWrong').innerText = lastAttemptSummary.wrong;
+    document.getElementById('countCorrect').innerText = lastAttemptSummary.correct;
+    document.getElementById('countLeft').innerText = lastAttemptSummary.unattempted;
+    switchReviewFilter('wrong');
+  }
+
+  function switchReviewFilter(type) {
+    document.querySelectorAll('.review-tab-btn').forEach(b => b.classList.remove('active'));
+    if (type === 'wrong') document.getElementById('btnTabWrong').classList.add('active');
+    else if (type === 'correct') document.getElementById('btnTabCorrect').classList.add('active');
+    else if (type === 'unattempted') document.getElementById('btnTabLeft').classList.add('active');
+
+    const container = document.getElementById('review-questions-list');
+    let list = type === 'wrong' ? lastAttemptSummary.wrongQs : (type === 'correct' ? lastAttemptSummary.correctQs : lastAttemptSummary.unattemptedQs);
+    if (!list || list.length === 0) {
+      container.innerHTML = `<p style="padding:15px; color:var(--muted); text-align:center;">No questions found.</p>`;
+      return;
     }
 
-    localStorage.setItem('cg_active_tab', tabId);
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.f-nav-item').forEach(b => b.classList.remove('active'));
-    
-    const targetView = document.getElementById(tabId);
-    if(targetView) targetView.style.display = 'block';
+    container.innerHTML = list.map((item, idx) => {
+      const q = item.q;
+      let opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD });
+      return `
+        <div style="background:var(--card-inner); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+            <strong style="color:#60a5fa;">#${idx + 1} ${q.subject} > ${q.topic}</strong>
+            <span style="font-size:0.8rem; font-weight:600; color:${item.userAns === q.ans ? 'var(--success)' : 'var(--danger)'};">
+              Your Answer: ${item.userAns || 'Not Attempted'} | Correct: ${q.ans}
+            </span>
+          </div>
+          <div style="margin-bottom:8px; font-size:0.95rem;">${q.text || q.assertion || ''}</div>
+          <div style="font-size:0.85rem; color:var(--muted); background:rgba(7,10,18,0.7); padding:10px; border-radius:8px;">
+            <strong>Explanation:</strong> ${q.expl || ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
-    if(tabId === 'tab-home') document.getElementById('fNavHome')?.classList.add('active');
-    if(tabId === 'tab-test') document.getElementById('fNavTest')?.classList.add('active');
-    if(tabId === 'tab-practice') { document.getElementById('fNavPrac')?.classList.add('active'); document.getElementById('pracConfigWrapper').style.display = 'block'; }
-    if(tabId === 'tab-revision') document.getElementById('fNavRev')?.classList.add('active');
-    if(tabId === 'tab-results') document.getElementById('fNavRes')?.classList.add('active');
+  function renderRevisionNeededSection() {
+    if (!currentUser) currentUser = { revision_store: { wrong: [], unatt: [], saved: [] } };
+    if (!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
 
-    if(tabId === 'tab-test') {
-      document.getElementById('testConfigWrapper').style.display = 'block';
-      document.getElementById('test-player').style.display = 'none';
-    }
-    if(tabId === 'tab-flt') buildFltAdvancedBuilder();
-    if(tabId === 'tab-revision') {
-      document.getElementById('revision-quiz-player').style.display = 'none';
-      switchRevisionSubTab('wrong');
-      renderRevisionNeededSection();
-    }
-    if(tabId === 'tab-results') {
-      switchResultsSubTab('prev');
-      renderRadarAnalytics();
-      renderPastTestHistoryTable();
-      syncOnlineLeaderboard();
-      if(lastAttemptSummary) {
-        document.getElementById('latest-scorecard').style.display = 'block';
-        document.getElementById('no-recent-scorecard').style.display = 'none';
-      } else {
-        document.getElementById('latest-scorecard').style.display = 'none';
-        document.getElementById('no-recent-scorecard').style.display = 'block';
+    let pWrong = currentUser.revision_store.wrong || [];
+    let pUnatt = currentUser.revision_store.unatt || [];
+    let pSaved = currentUser.revision_store.saved || [];
+
+    document.getElementById('countRevWrong').innerText = pWrong.length;
+    document.getElementById('countRevUnatt').innerText = pUnatt.length;
+    document.getElementById('countRevSaved').innerText = pSaved.length;
+  }
+
+  function clearAllWrongQuestions() {
+    if (!currentUser) return;
+    currentUser.revision_store.wrong = [];
+    localStorage.setItem(getUserKey('persistent_wrong'), JSON.stringify([]));
+    renderRevisionNeededSection();
+    updateUserProgressToCloud(0, {}, currentUser.revision_store);
+  }
+
+  function clearAllUnattQuestions() {
+    if (!currentUser) return;
+    currentUser.revision_store.unatt = [];
+    localStorage.setItem(getUserKey('persistent_unatt'), JSON.stringify([]));
+    renderRevisionNeededSection();
+    updateUserProgressToCloud(0, {}, currentUser.revision_store);
+  }
+
+  function clearAllSavedQuestions() {
+    if (!currentUser) return;
+    currentUser.revision_store.saved = [];
+    localStorage.setItem(getUserKey('persistent_saved'), JSON.stringify([]));
+    renderRevisionNeededSection();
+    updateUserProgressToCloud(0, {}, currentUser.revision_store);
+  }
+
+  function renderPastTestHistoryTable() {
+    const tbody = document.getElementById('pastTestHistoryBody');
+    if (!tbody) return;
+    let hData = currentUser && currentUser.history ? currentUser.history : [];
+    tbody.innerHTML = hData.length === 0 ? `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--muted);">No attempts found.</td></tr>` : hData.map(h => `
+      <tr>
+        <td style="padding:10px; border:1px solid var(--border);">${h.date}</td>
+        <td style="padding:10px; border:1px solid var(--border);">${h.subject}</td>
+        <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#60a5fa;">${h.marks} / ${h.totalMarks || 100}</td>
+        <td style="padding:10px; border:1px solid var(--border); text-align:center; color:var(--success);">${h.correct}</td>
+        <td style="padding:10px; border:1px solid var(--border); text-align:center; color:var(--danger);">${h.wrong}</td>
+      </tr>`).join('');
+  }
+
+  function renderRadarAnalytics() {
+    const radarBox = document.getElementById('subject-radar-container');
+    if (!radarBox) return;
+    syncDynamicSubjects();
+    let userSubProgress = currentUser && currentUser.subject_progress ? currentUser.subject_progress : {};
+
+    radarBox.innerHTML = subjects.map(sub => {
+      let totalDbSubQ = questions.filter(q => q.subject && q.subject.trim().toLowerCase() === sub.trim().toLowerCase()).length;
+      if (totalDbSubQ === 0) totalDbSubQ = 10;
+      
+      let matchedSubKey = Object.keys(userSubProgress).find(k => k.trim().toLowerCase() === sub.trim().toLowerCase());
+      let subData = matchedSubKey ? userSubProgress[matchedSubKey] : { correct: 0, revisions: 0 };
+      let userCorrect = subData.correct || 0;
+      let subPercent = Math.min(100, Math.round((userCorrect / totalDbSubQ) * 100));
+      let subRevCount = subData.revisions || 0;
+
+      return `
+        <div style="margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.88rem; margin-bottom:5px; font-weight:600;">
+            <span>${sub}</span>
+            <span style="color:${subPercent >= 80 ? '#4ade80' : '#38bdf8'}">
+              ${subPercent}% <span style="font-size:0.75rem; color:var(--muted); margin-left:6px;">(Revisions: ${subRevCount})</span>
+            </span>
+          </div>
+          <div style="position: relative; background:rgba(7,10,18,0.8); height:12px; border-radius:6px; border:1px solid var(--border);">
+            <div style="background:linear-gradient(90deg, #3b82f6, #4ade80); width:${subPercent}%; height:100%; border-radius:6px;"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function syncOnlineLeaderboard() {
+    const tbody = document.getElementById('topTenLeaderboardBody');
+    if (!tbody) return;
+    try {
+      const snap = await db.collection("users").get();
+      if (!snap.empty) {
+        let usersData = [];
+        snap.forEach(doc => usersData.push({ id: doc.id, ...doc.data() }));
+        usersData.sort((a, b) => parseFloat(b.combined_score || 0) - parseFloat(a.combined_score || 0));
+
+        let topTen = usersData.slice(0, 10);
+        tbody.innerHTML = topTen.map((u, idx) => `
+          <tr style="${currentUser && u.username && u.username.toLowerCase() === currentUser.username.toLowerCase() ? 'background:rgba(59,130,246,0.15);' : ''}">
+            <td style="padding:10px; border:1px solid var(--border);">#${idx + 1}</td>
+            <td style="padding:10px; border:1px solid var(--border); font-weight:600; color:#93c5fd;">${u.name || 'User'}</td>
+            <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#4ade80;">${u.current_percentage || 0}%</td>
+            <td style="padding:10px; border:1px solid var(--border); text-align:center; color:#facc15; font-weight:bold;">${u.revision_count || 0}</td>
+          </tr>`).join('');
       }
-    }
+    } catch (err) { console.error(err); }
+  }
+
+  async function updateUserProgressToCloud(newCorrectCount, testSubMap, revisionObj) {
+    if (!currentUser) return;
+    try {
+      await db.collection("users").doc(currentUser.username.toLowerCase()).set(currentUser, { merge: true });
+      syncOnlineLeaderboard();
+    } catch (err) { console.error(err); }
+  }
+
+  async function fetchQuestionsFromCloud(isSilent = false) {
+    try {
+      const snap = await db.collection("questions").get();
+      if (!snap.empty) {
+        let uniqueMap = new Map();
+        snap.forEach(doc => {
+          let q = { id: doc.id, ...doc.data() };
+          uniqueMap.set(q.id.toString(), q);
+        });
+        questions = Array.from(uniqueMap.values());
+        localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
+      }
+    } catch (err) { console.error(err); }
+  }
+
+  async function fetchUsersFromCloud(isSilent = false) {
+    try {
+      const snap = await db.collection("users").get();
+      if (!snap.empty) {
+        let list = [];
+        snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+        members = list;
+        if (currentUser) {
+          let me = members.find(m => m.username.toLowerCase() === currentUser.username.toLowerCase());
+          if (me) currentUser = { ...currentUser, ...me };
+        }
+      }
+    } catch (err) { console.error(err); }
   }
 
   init();

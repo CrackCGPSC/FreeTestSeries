@@ -7,6 +7,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Poppins:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase App & Firestore SDKs (v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --bg: #030712;
@@ -109,9 +115,7 @@
       width: 100%;
       padding-left: 3px;
     }
-    .brand:hover { 
-      filter: brightness(1.25);
-    }
+    .brand:hover { filter: brightness(1.25); }
     @media(min-width: 480px) { 
       .brand-icon { font-size: 1.6rem; }
       .brand { font-size: 1.35rem; } 
@@ -150,47 +154,18 @@
     @media(min-width: 768px) { .card { padding: 32px; } }
 
     .selector-grid {
-      display: flex;
-      gap: 15px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-      scrollbar-width: none;
+      display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; margin-bottom: 20px; scrollbar-width: none;
     }
     .selector-grid::-webkit-scrollbar { display: none; }
     .selector-card {
-      flex: 0 0 82%;
-      scroll-snap-align: start;
-      background: var(--card-inner);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      cursor: pointer;
-      transition: 0.25s;
-      text-align: left;
+      flex: 0 0 82%; scroll-snap-align: start; background: var(--card-inner); border: 1px solid var(--border); border-radius: 16px; padding: 18px; cursor: pointer; transition: 0.25s; text-align: left;
     }
     @media(min-width: 768px) {
-      .selector-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        overflow-x: visible;
-        scroll-snap-type: none;
-      }
-      .selector-card {
-        flex: unset;
-      }
+      .selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); overflow-x: visible; scroll-snap-type: none; }
+      .selector-card { flex: unset; }
     }
-    .selector-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
-    }
-    .selector-card.active {
-      border-color: var(--primary);
-      background: rgba(59, 130, 246, 0.12);
-      box-shadow: var(--glow-blue);
-    }
+    .selector-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2); }
+    .selector-card.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.12); box-shadow: var(--glow-blue); }
 
     .swipe-indicator-bar { display: flex; justify-content: center; gap: 6px; margin-top: -10px; margin-bottom: 16px; }
     @media(min-width: 768px) { .swipe-indicator-bar { display: none; } }
@@ -198,32 +173,13 @@
     .swipe-dot.active { background: var(--primary); width: 36px; box-shadow: var(--glow-blue); }
 
     .dashboard-action-wrapper {
-      display: flex;
-      gap: 15px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-      scrollbar-width: none;
+      display: flex; gap: 15px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 12px; margin-bottom: 20px; scrollbar-width: none;
     }
     .dashboard-action-wrapper::-webkit-scrollbar { display: none; }
-    .dashboard-action-item {
-      flex: 0 0 88%;
-      scroll-snap-align: start;
-    }
+    .dashboard-action-item { flex: 0 0 88%; scroll-snap-align: start; }
     @media(min-width: 768px) {
-      .dashboard-action-wrapper {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        align-items: stretch;
-        overflow-x: visible;
-        scroll-snap-type: none;
-      }
-      .dashboard-action-item {
-        flex: unset;
-        display: flex;
-        flex-direction: column;
-      }
+      .dashboard-action-wrapper { display: grid; grid-template-columns: repeat(2, 1fr); align-items: stretch; overflow-x: visible; scroll-snap-type: none; }
+      .dashboard-action-item { flex: unset; display: flex; flex-direction: column; }
     }
 
     h2, h3, h4 { color: #f3f4f6; margin-bottom: 12px; font-weight: 600; }
@@ -438,13 +394,11 @@
           </div>
         </div>
 
-        <!-- Progress Bar Start/End Labels -->
         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 4px;">
           <span id="progressStartLabel" style="color: #60a5fa;">0 Correct Qs</span>
           <span id="progressEndLabel" style="color: #38bdf8;">Total DB Qs: 0</span>
         </div>
 
-        <!-- Visual Progress Bar with Mirror Running Emoji -->
         <div style="position: relative; background: rgba(45,45,68,0.8); border-radius: 8px; height: 16px; width: 100%; overflow: visible; margin-bottom: 14px; border: 1px solid var(--border);">
           <div id="dynamicProgressBar" style="background: linear-gradient(90deg, #3b82f6, #4ade80); height: 100%; width: 0%; border-radius: 8px; transition: width 0.5s ease-in-out;"></div>
           <div id="progressEmojiThumb" style="position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%); font-size: 1.15rem; transition: left 0.5s ease-in-out; filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));">
@@ -454,7 +408,6 @@
         <p style="font-size: 0.78rem; color: var(--muted); text-align: center;">100% test completion par progress reset hogi aur Revision Count +1 ho jayega!</p>
       </div>
 
-      <!-- Responsive Carousel / Swipeable action wrapper with Indicator Dots -->
       <div class="dashboard-action-wrapper" id="homeActionGrid" onscroll="updateSwipeIndicator('homeActionGrid', 'homeActionDots')">
         <div class="dashboard-action-item">
           <div class="card" style="background: linear-gradient(135deg, rgba(17,24,39,0.9), rgba(13,17,28,0.95)); border: 1px solid rgba(16,185,129,0.3); text-align: center; padding: 22px; margin-bottom: 0; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
@@ -491,7 +444,7 @@
         <div class="swipe-dot" onclick="scrollToCard('homeActionGrid', 1)"></div>
       </div>
 
-      <!-- Global Ranking Box (Top 10 + User's Standing Inside) -->
+      <!-- Global Ranking Box -->
       <div class="card" style="border: 1px solid rgba(59, 130, 246, 0.4);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
           <div>
@@ -519,10 +472,9 @@
 
     </div>
 
-    <!-- 1. TESTS SECTION (Interactive Accordion / Expandable Layout) -->
+    <!-- 1. TESTS SECTION -->
     <div id="tab-test" class="tab-view" style="display:none;">
       <div id="testConfigWrapper">
-        <!-- Top 3 Selector Cards -->
         <div class="selector-grid" id="testSelectorGrid" onscroll="updateSwipeIndicator('testSelectorGrid', 'testSwipeDots')">
           <div class="selector-card active" id="selTestTopic" onclick="switchTestMode('topic')">
             <h4 style="color:#60a5fa; margin-bottom:6px;">Topic-Wise Mock Test</h4>
@@ -722,10 +674,9 @@
       </div>
     </div>
 
-    <!-- 2. QUIZ SECTION (Interactive Accordion / Expandable Layout) -->
+    <!-- 2. QUIZ SECTION -->
     <div id="tab-practice" class="tab-view" style="display:none;">
       <div id="pracConfigWrapper">
-        <!-- Top 3 Selector Cards for Quiz -->
         <div class="selector-grid" id="pracSelectorGrid" onscroll="updateSwipeIndicator('pracSelectorGrid', 'pracSwipeDots')">
           <div class="selector-card active" id="selPracTopic" onclick="switchPracMode('topic')">
             <h4 style="color:#10b981; margin-bottom:6px;">Instant Practice & Quiz</h4>
@@ -876,7 +827,6 @@
         </div>
       </div>
 
-      <!-- PRACTICE TEMPORARY RESULT CARD -->
       <div id="prac-result-card" class="card" style="display:none; text-align:center; padding:30px;">
         <h2 style="color:#10b981; margin-bottom:12px;">🎉 Quiz / Practice Completed!</h2>
         <p style="color:var(--muted); font-size:0.9rem; margin-bottom:20px;">Here is your temporary performance summary with negative marking (-1/4th):</p>
@@ -938,8 +888,6 @@
 
     <!-- 5. REVISION NEEDED SECTION -->
     <div id="tab-revision" class="tab-view" style="display:none;">
-      
-      <!-- 3 Futuristic Selector Cards for Revision Sub-Navigation with Swipe Indicator -->
       <div class="selector-grid" id="revisionSelectorGrid" onscroll="updateSwipeIndicator('revisionSelectorGrid', 'revisionSwipeDots')">
         <div class="selector-card active" id="selRevWrong" onclick="switchRevisionSubTab('wrong')">
           <h4 style="color:#f87171; margin-bottom:4px;">🔄 Wrong Attempts (<span id="countRevWrong">0</span>)</h4>
@@ -960,7 +908,6 @@
         <div class="swipe-dot" onclick="scrollToCard('revisionSelectorGrid', 2)"></div>
       </div>
 
-      <!-- SUB-TAB 1: WRONG ATTEMPTS -->
       <div id="rev-sub-wrong" class="rev-sub-view">
         <div class="card" style="border: 1px solid rgba(239, 68, 68, 0.4);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -976,7 +923,6 @@
         </div>
       </div>
 
-      <!-- SUB-TAB 2: UNATTEMPTED QUESTIONS -->
       <div id="rev-sub-unatt" class="rev-sub-view" style="display:none;">
         <div class="card" style="border: 1px solid rgba(56, 189, 248, 0.4);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -992,7 +938,6 @@
         </div>
       </div>
 
-      <!-- SUB-TAB 3: SAVED QUESTIONS -->
       <div id="rev-sub-saved" class="rev-sub-view" style="display:none;">
         <div class="card" style="border: 1px solid rgba(250, 204, 21, 0.4);">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -1008,7 +953,6 @@
         </div>
       </div>
 
-      <!-- Revision Quiz Player Screen with Question Navigation Drawer & Remove Button -->
       <div id="revision-quiz-player" class="card" style="display:none; border: 1px solid var(--primary);">
         <div class="q-header-bar">
           <div class="q-header-left">
@@ -1022,7 +966,6 @@
           </div>
         </div>
 
-        <!-- Collapsible Question Palette Drawer for Revision Quiz -->
         <div id="revPaletteDrawer" style="display:none; background:var(--card-inner); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:14px;">
           <h4 style="font-size:0.85rem; color:#93c5fd; margin-bottom:6px;">Question Navigation Palette</h4>
           <div class="palette-grid" id="revPaletteGrid"></div>
@@ -1043,7 +986,6 @@
     <!-- 7. RESULTS & RADAR ANALYTICS SECTION -->
     <div id="tab-results" class="tab-view" style="display:none;">
       
-      <!-- 3 Futuristic Selector Cards for Results Sub-Navigation with Swipe Indicator -->
       <div class="selector-grid" id="resultsSelectorGrid" onscroll="updateSwipeIndicator('resultsSelectorGrid', 'resultsSwipeDots')">
         <div class="selector-card active" id="selResPrev" onclick="switchResultsSubTab('prev')">
           <h4 style="color:#60a5fa; margin-bottom:6px;">📝 Previous Test Result</h4>
@@ -1064,7 +1006,6 @@
         <div class="swipe-dot" onclick="scrollToCard('resultsSelectorGrid', 2)"></div>
       </div>
 
-      <!-- SUB-TAB 1: PREVIOUS TEST RESULT -->
       <div id="results-sub-prev" class="results-sub-view">
         <div class="card" id="latest-scorecard" style="display:none;">
           <h3>Recent Test Scorecard</h3>
@@ -1089,16 +1030,14 @@
         </div>
       </div>
 
-      <!-- SUB-TAB 2: SUBJECT-WISE STRENGTH ANALYSIS -->
       <div id="results-sub-radar" class="results-sub-view" style="display:none;">
         <div class="card" style="border: 1px solid rgba(139, 92, 246, 0.4);">
           <h3 style="color:#a78bfa;">🕷 Subject-Wise Radar Strength Analysis</h3>
-          <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Visual breakdown of your performance across all available subjects (Live database synchronized).</p>
+          <p style="color:var(--muted); font-size:0.85rem; margin-bottom:14px;">Visual breakdown of your performance across all available subjects (Firebase synchronized).</p>
           <div id="subject-radar-container"></div>
         </div>
       </div>
 
-      <!-- SUB-TAB 3: DETAILED TEST HISTORY LOG -->
       <div id="results-sub-history" class="results-sub-view" style="display:none;">
         <div class="card">
           <h3>📊 Detailed Test History Log</h3>
@@ -1149,6 +1088,21 @@
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
+  // EXACT FIREBASE PROJECT CONFIGURATION FOR crackcgpsc-2ca60
+  const firebaseConfig = {
+    apiKey: "AIzaSyAozn3dx9h874oCBX120p7MYye6dyjPKmE",
+    authDomain: "crackcgpsc-2ca60.firebaseapp.com",
+    projectId: "crackcgpsc-2ca60",
+    storageBucket: "crackcgpsc-2ca60.firebasestorage.app",
+    messagingSenderId: "421965977544",
+    appId: "1:421965977544:web:9265149dd667f205d892fd"
+  };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+
   let testTimerInterval = null;
   let testTimeRemaining = 0;
 
@@ -1264,9 +1218,6 @@
     const cardWidth = grid.querySelector('.selector-card').offsetWidth + 15;
     grid.scrollTo({ left: cardWidth * idx, behavior: 'smooth' });
   }
-
-  const QUESTIONS_API_URL = "https://script.google.com/macros/s/AKfycbx7QhvQi1_Am1I6nRT9mH9dPdU1q3pTN9-nvM0Cg9flFxQrtFHOd4OCI9gcjNenKI8C/exec";
-  const USERS_API_URL = "https://script.google.com/macros/s/AKfycbzuPQnDdlaeutLZvuQpqMMQDOjY-u_xH0e9CtOmmQKE-dV7IAuhqG0dDgXryO-VpdK_/exec";
 
   let indianGsSubs = ["Indian History", "Polity", "Economy", "General Science", "Indian Geography", "Computer", "Hindi", "English"];
   let cgGsSubs = ["CG History", "CG Geography", "CG Tribes", "CG Art & Culture", "CG Language", "CG Administration", "CG Panchayati Raj", "CG Economy", "CG General Knowledge"];
@@ -1821,31 +1772,30 @@
     }, 1000);
   }
 
+  // --- FIRESTORE CLOUD SYNC FOR QUESTIONS & USERS ---
   async function fetchQuestionsFromCloud(isSilent = false) {
     try {
-      let res = await fetch(QUESTIONS_API_URL + "?action=getQuestions");
-      let data = await res.json();
-      if(Array.isArray(data) && data.length > 0) {
+      const snap = await db.collection("questions").get();
+      if(!snap.empty) {
         let uniqueMap = new Map();
-        data.forEach(q => {
-          if(q.id) {
-            let parsedOpts = q.options;
-            if(typeof parsedOpts === 'string') {
-              try { parsedOpts = JSON.parse(parsedOpts); } catch(e) {}
-            }
-            if(!parsedOpts || typeof parsedOpts !== 'object') {
-              parsedOpts = { A: q.optionA || "", B: q.optionB || "", C: q.optionC || "", D: q.optionD || "" };
-            }
-            q.options = parsedOpts;
-
-            if(typeof q.matchRows === 'string') {
-              try { q.matchRows = JSON.parse(q.matchRows); } catch(e){}
-            }
-            if(typeof q.statements === 'string') {
-              try { q.statements = JSON.parse(q.statements); } catch(e){}
-            }
-            uniqueMap.set(q.id.toString(), q);
+        snap.forEach(doc => {
+          let q = { id: doc.id, ...doc.data() };
+          let parsedOpts = q.options;
+          if(typeof parsedOpts === 'string') {
+            try { parsedOpts = JSON.parse(parsedOpts); } catch(e) {}
           }
+          if(!parsedOpts || typeof parsedOpts !== 'object') {
+            parsedOpts = { A: q.optionA || "", B: q.optionB || "", C: q.optionC || "", D: q.optionD || "" };
+          }
+          q.options = parsedOpts;
+
+          if(typeof q.matchRows === 'string') {
+            try { q.matchRows = JSON.parse(q.matchRows); } catch(e){}
+          }
+          if(typeof q.statements === 'string') {
+            try { q.statements = JSON.parse(q.statements); } catch(e){}
+          }
+          uniqueMap.set(q.id.toString(), q);
         });
         questions = Array.from(uniqueMap.values());
         localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
@@ -1860,16 +1810,19 @@
       populateAllSubjectDropdowns();
       if(currentUser) syncOnlineLeaderboard();
     } catch(err) {
-      console.error("Error fetching questions:", err);
+      console.error("Firestore questions fetch error:", err);
     }
   }
 
   async function fetchUsersFromCloud(isSilent = false) {
     try {
-      let res = await fetch(USERS_API_URL + "?action=getUsers");
-      let data = await res.json();
-      if(Array.isArray(data)) {
-        members = data;
+      const snap = await db.collection("users").get();
+      if(!snap.empty) {
+        let list = [];
+        snap.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        members = list;
         if(currentUser) {
           let updatedMe = members.find(m => m.username && m.username.toLowerCase() === currentUser.username.toLowerCase());
           if(updatedMe) {
@@ -1911,7 +1864,7 @@
         }
       }
     } catch(err) {
-      console.error("Error fetching users:", err);
+      console.error("Firestore users fetch error:", err);
     }
   }
 
@@ -1980,14 +1933,23 @@
       return alert('Username already taken! Please choose a unique username.');
     }
 
-    let payload = { action: "registerUser", username: user, name: name, dob: dob, pass: pass };
+    let newUserDoc = {
+      username: user,
+      name: name,
+      dob: dob,
+      pass: pass,
+      subject_progress: {},
+      revision_store: { wrong: [], unatt: [], saved: [] },
+      history: [],
+      combined_score: 0,
+      revision_count: 0,
+      current_percentage: 0,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
     try {
-      await fetch(USERS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      members.push({ username: user, name: name, dob: dob, pass: pass, subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] }, history: [] });
+      await db.collection("users").doc(user).set(newUserDoc);
+      members.push(newUserDoc);
       currentUser = { name, username: user, role: 'member', subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] }, history: [] };
       localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
       showPortal();
@@ -3199,60 +3161,45 @@
       });
     }
 
-    let payload = {
+    let totalUserCorrect = 0;
+    if(currentUser.subject_progress) {
+      for(let s in currentUser.subject_progress) {
+        totalUserCorrect += (currentUser.subject_progress[s].correct || 0);
+      }
+    }
+    let pct = totalDbTestQuestions > 0 ? Math.min(100, Math.round((totalUserCorrect / totalDbTestQuestions) * 100)) : 0;
+    
+    let totalRevisions = 0;
+    if(currentUser.subject_progress) {
+      for(let s in currentUser.subject_progress) {
+        totalRevisions += (currentUser.subject_progress[s].revisions || 0);
+      }
+    }
+
+    let combinedScoreVal = totalUserCorrect + (totalRevisions * 100);
+
+    let updatedUserDoc = {
       username: currentUser.username,
-      correctAnswers: newCorrectCount,
-      totalDbQuestions: totalDbTestQuestions,
-      subMap: testSubMap,
-      subTotals: subTotalsObj,
-      historyData: revisionObj,
-      historyLog: currentUser.history || []
+      name: currentUser.name,
+      dob: currentUser.dob || "",
+      pass: currentUser.pass || "",
+      role: currentUser.role || "member",
+      subject_progress: currentUser.subject_progress || {},
+      revision_store: revisionObj || { wrong: [], unatt: [], saved: [] },
+      history: currentUser.history || [],
+      current_percentage: pct,
+      revision_count: totalRevisions,
+      combined_score: combinedScoreVal,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-      let res = await fetch(USERS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      let result = await res.json();
-      if(result.status === "success") {
-        if(result.subject_progress) {
-          try {
-            currentUser.subject_progress = typeof result.subject_progress === 'string' ? JSON.parse(result.subject_progress) : result.subject_progress;
-          } catch(e) {}
-        }
-        if(result.revision_store) {
-          try {
-            let rStore = typeof result.revision_store === 'string' ? JSON.parse(result.revision_store) : result.revision_store;
-            if(rStore && typeof rStore === 'object') {
-              currentUser.revision_store = rStore;
-              localStorage.setItem(getUserKey('persistent_wrong'), JSON.stringify(rStore.wrong || []));
-              localStorage.setItem(getUserKey('persistent_unatt'), JSON.stringify(rStore.unatt || []));
-              localStorage.setItem(getUserKey('persistent_saved'), JSON.stringify(rStore.saved || []));
-            }
-          } catch(e) {}
-        }
-        if(result.history) {
-          try {
-            let uHist = typeof result.history === 'string' ? JSON.parse(result.history) : result.history;
-            if(Array.isArray(uHist)) {
-              currentUser.history = uHist;
-              localStorage.setItem(getUserKey('history'), JSON.stringify(uHist));
-            }
-          } catch(e) {}
-        }
-        if(result.percentage !== undefined) {
-          currentUser.current_percentage = result.percentage;
-        }
-        if(result.revisions !== undefined) {
-          currentUser.revision_count = result.revisions;
-        }
-        localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-        renderRadarAnalytics();
-      }
+      await db.collection("users").doc(currentUser.username.toLowerCase()).set(updatedUserDoc, { merge: true });
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      renderRadarAnalytics();
+      syncOnlineLeaderboard();
     } catch(err) {
-      console.error("Cloud progress sync error:", err);
+      console.error("Firestore user progress sync error:", err);
     }
   }
 
@@ -3448,10 +3395,12 @@
     if (!tbody) return;
 
     try {
-      let res = await fetch(USERS_API_URL + "?action=getUsers");
-      let usersData = await res.json();
-      
-      if(Array.isArray(usersData) && usersData.length > 0) {
+      const snap = await db.collection("users").get();
+      if(!snap.empty) {
+        let usersData = [];
+        snap.forEach(doc => {
+          usersData.push({ id: doc.id, ...doc.data() });
+        });
         members = usersData;
         
         usersData.sort((a, b) => {

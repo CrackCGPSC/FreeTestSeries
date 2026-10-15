@@ -784,7 +784,6 @@
   let revQuizResponses = {};
   let revQuizIdx = 0;
 
-  // INSTANT LOAD FIX: Renders immediately from LocalStorage without waiting for network hang
   async function init() {
     setProgress(30);
     if (currentUser) {
@@ -799,7 +798,6 @@
     if(currentUser) showPortal(); else showAuth();
     setProgress(70);
 
-    // Background asynchronous sync with Firebase
     try {
       if(questions.length === 0) {
         await fetchQuestionsFromCloud(true);
@@ -811,819 +809,85 @@
     }
     setProgress(100);
   }
-  function switchTestMode(mode) {
-    document.getElementById('selTestTopic').classList.toggle('active', mode === 'topic');
-    document.getElementById('selTestNcert').classList.toggle('active', mode === 'ncert');
-    document.getElementById('selTestExam').classList.toggle('active', mode === 'exam');
-    document.getElementById('panelTestTopic').style.display = mode === 'topic' ? 'block' : 'none';
-    document.getElementById('panelTestNcert').style.display = mode === 'ncert' ? 'block' : 'none';
-    document.getElementById('panelTestExam').style.display = mode === 'exam' ? 'block' : 'none';
+
+  function syncDynamicSubjects() {
+    let combined = new Set([...indianGsSubs, ...cgGsSubs, ...otherSubs]);
+    questions.forEach(q => { if(q.subject && q.subject.trim()) combined.add(q.subject.trim()); });
+    subjects = Array.from(combined);
   }
 
-  function switchPracMode(mode) {
-    document.getElementById('selPracTopic').classList.toggle('active', mode === 'topic');
-    document.getElementById('selPracNcert').classList.toggle('active', mode === 'ncert');
-    document.getElementById('selPracExam').classList.toggle('active', mode === 'exam');
-    document.getElementById('panelPracTopic').style.display = mode === 'topic' ? 'block' : 'none';
-    document.getElementById('panelPracNcert').style.display = mode === 'ncert' ? 'block' : 'none';
-    document.getElementById('panelPracExam').style.display = mode === 'exam' ? 'block' : 'none';
+  function updateTestSubjectOptions() {
+    const cat = document.getElementById('testGsCategory').value;
+    const subEl = document.getElementById('testSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    subEl.innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join('');
+    cascadeTopics('testSub', 'testTop', 'testSubtop');
+    toggleTestHistoryEraDropdown();
   }
 
-  function initNcertCascades(bookId, classId, subId, chapId) {
-    cascadeNcertBooks(bookId, classId, subId, chapId);
+  function updatePracSubjectOptions() {
+    const cat = document.getElementById('pracGsCategory').value;
+    const subEl = document.getElementById('pracSub');
+    let list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    subEl.innerHTML = list.map(s => `<option value="${s}">${s}</option>`).join('');
+    cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
+    togglePracHistoryEraDropdown();
   }
 
-  function cascadeNcertBooks(bookId, classId, subId, chapId) {
-    let booksSet = new Set(['NCERT', 'CG SCERT']);
-    questions.forEach(q => { if((q.ncert_tag === "true" || q.ncert_tag === true) && q.ncert_book) booksSet.add(q.ncert_book); });
-    let books = Array.from(booksSet);
-    const bookEl = document.getElementById(bookId);
-    if(bookEl) bookEl.innerHTML = books.map(b => `<option value="${b}">${b}</option>`).join('');
-    cascadeNcertClassesForPortal(bookId, classId, subId, chapId);
+  function toggleTestHistoryEraDropdown() {
+    const sub = document.getElementById('testSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('testHistoryEraContainer');
+    if(container) container.style.display = isHistory ? 'block' : 'none';
   }
 
-  function cascadeNcertClassesForPortal(bookId, classId, subId, chapId) {
-    const bookVal = document.getElementById(bookId).value;
-    let classesSet = new Set();
-    questions.forEach(q => { if((q.ncert_tag === "true" || q.ncert_tag === true) && q.ncert_book === bookVal && q.ncert_class) classesSet.add(q.ncert_class); });
-    let classes = Array.from(classesSet).sort();
-    if(classes.length === 0) classes = ['Class 6th', 'Class 7th', 'Class 8th', 'Class 9th', 'Class 10th', 'Class 11th', 'Class 12th'];
-    const classEl = document.getElementById(classId);
-    if(classEl) classEl.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
-    cascadeNcertSubjects(bookId, classId, subId, chapId);
+  function togglePracHistoryEraDropdown() {
+    const sub = document.getElementById('pracSub').value;
+    const isHistory = sub && sub.toLowerCase().includes('history');
+    const container = document.getElementById('pracHistoryEraContainer');
+    if(container) container.style.display = isHistory ? 'block' : 'none';
   }
 
-  function cascadeNcertSubjects(bookId, classId, subId, chapId) {
-    const bookVal = document.getElementById(bookId).value;
-    const classVal = document.getElementById(classId).value;
-    const subEl = document.getElementById(subId);
-    let matchedPool = questions.filter(q => (q.ncert_tag === "true" || q.ncert_tag === true) && q.ncert_book === bookVal && q.ncert_class === classVal);
-    let subjectsSet = new Set();
-    matchedPool.forEach(q => {
-      let chParts = (q.ncert_chapter || '').split('-');
-      subjectsSet.add(chParts[0] ? chParts[0].trim() : 'General');
-    });
-    let subs = Array.from(subjectsSet);
-    if(subs.length === 0) subs = ['History', 'Geography', 'Civics', 'Economics'];
-    if(subEl) subEl.innerHTML = '<option value="ALL">All Subjects</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
-    cascadeNcertChapters(bookId, classId, subId, chapId);
+  function populateAllSubjectDropdowns() {
+    syncDynamicSubjects();
+    updateTestSubjectOptions();
+    updatePracSubjectOptions();
   }
 
-  function cascadeNcertChapters(bookId, classId, subId, chapId) {
-    const bookVal = document.getElementById(bookId).value;
-    const classVal = document.getElementById(classId).value;
-    const subVal = document.getElementById(subId).value;
-    const chapEl = document.getElementById(chapId);
-    if(!chapEl) return;
-    if(!subVal || subVal === 'ALL') { chapEl.innerHTML = '<option value="ALL">All Chapters</option>'; return; }
-
-    let matchedPool = questions.filter(q => {
-      if(!(q.ncert_tag === "true" || q.ncert_tag === true)) return false;
-      if(q.ncert_book !== bookVal || q.ncert_class !== classVal) return false;
-      let chParts = (q.ncert_chapter || '').split('-');
-      return (chParts[0] ? chParts[0].trim() : '') === subVal;
-    });
-
-    let chaptersSet = new Set();
-    matchedPool.forEach(q => {
-      let chParts = (q.ncert_chapter || '').split('-');
-      chaptersSet.add(chParts[1] ? chParts[1].trim() : (q.ncert_chapter || 'Chapter'));
-    });
-    chapEl.innerHTML = '<option value="ALL">All Chapters</option>' + Array.from(chaptersSet).map(c => `<option value="${c}">${c}</option>`).join('');
-  }
-
-  function startNcertEngine(mode) {
-    const prefix = mode === 'test' ? 'ncertTest' : 'ncertPrac';
-    const bookVal = document.getElementById(`${prefix}Book`).value;
-    const classVal = document.getElementById(`${prefix}Class`).value;
-    const subVal = document.getElementById(`${prefix}Sub`).value;
-    const chapVal = document.getElementById(`${prefix}Chap`).value;
-
-    let pool = questions.filter(q => {
-      if(!(q.ncert_tag === "true" || q.ncert_tag === true)) return false;
-      if(q.ncert_book !== bookVal || q.ncert_class !== classVal) return false;
-      if(subVal && subVal !== 'ALL') {
-        let chParts = (q.ncert_chapter || '').split('-');
-        if((chParts[0] ? chParts[0].trim() : '') !== subVal) return false;
-      }
-      if(chapVal && chapVal !== 'ALL') {
-        let chParts = (q.ncert_chapter || '').split('-');
-        if((chParts[1] ? chParts[1].trim() : (q.ncert_chapter || '')) !== chapVal) return false;
-      }
-      return true;
-    });
-
-    startEngineWithPool(pool, mode, `${bookVal} Test (${classVal})`);
-  }
-
-  function initExamCascades(nameId, yearId, subId, topId, subtopId) {
-    let examsSet = new Set();
-    questions.forEach(q => { if(q.exam && q.exam.trim()) examsSet.add(extractCleanExamName(q.exam)); });
-    let exams = Array.from(examsSet).sort();
-    let nameEl = document.getElementById(nameId);
-    if(nameEl) nameEl.innerHTML = '<option value="ALL">All Exams</option>' + exams.map(e => `<option value="${e}">${e}</option>`).join('');
-    cascadeExamYears(nameId, yearId, subId, topId, subtopId);
-  }
-
-  function cascadeExamYears(nameId, yearId, subId, topId, subtopId) {
-    const examVal = document.getElementById(nameId).value;
-    let yearsSet = new Set();
-    questions.forEach(q => {
-      if(q.exam && q.exam.trim()) {
-        let cleanEx = extractCleanExamName(q.exam);
-        let yr = extractExamYear(q.exam);
-        if(examVal === 'ALL' || cleanEx.toLowerCase().includes(examVal.toLowerCase())) { if(yr) yearsSet.add(yr); }
-      }
-    });
-    let years = Array.from(yearsSet).sort((a,b) => b - a);
-    let yearEl = document.getElementById(yearId);
-    if(yearEl) yearEl.innerHTML = '<option value="ALL">All Years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
-    cascadeExamSubjects(nameId, yearId, subId, topId, subtopId);
-  }
-
-  function cascadeExamSubjects(nameId, yearId, subId, topId, subtopId) {
-    const examVal = document.getElementById(nameId).value;
-    const yearVal = document.getElementById(yearId).value;
-    let subsSet = new Set();
-    questions.forEach(q => {
-      if(!q.exam || !q.exam.trim()) return;
-      let cleanEx = extractCleanExamName(q.exam);
-      let yr = extractExamYear(q.exam);
-      if(examVal !== 'ALL' && !cleanEx.toLowerCase().includes(examVal.toLowerCase())) return;
-      if(yearVal !== 'ALL' && yr !== yearVal && !q.exam.includes(yearVal)) return;
-      if(q.subject) subsSet.add(q.subject);
-    });
-    let subEl = document.getElementById(subId);
-    if(subEl) subEl.innerHTML = '<option value="ALL">All Subjects</option>' + Array.from(subsSet).sort().map(s => `<option value="${s}">${s}</option>`).join('');
-    cascadeExamTopicsForPortal(nameId, yearId, subId, topId, subtopId);
-  }
-
-  function cascadeExamTopicsForPortal(nameId, yearId, subId, topId, subtopId) {
-    const examVal = document.getElementById(nameId).value;
-    const yearVal = document.getElementById(yearId).value;
-    const subVal = document.getElementById(subId).value;
+  function cascadeTopics(subId, topId, subtopId) {
+    const sub = document.getElementById(subId).value;
     const topEl = document.getElementById(topId);
-    if(!topEl) return;
-    if(!subVal || subVal === 'ALL') { topEl.innerHTML = '<option value="ALL">All Topics</option>'; cascadeExamSubtopicsForPortal(nameId, yearId, subId, topId, subtopId); return; }
-
-    let topicsSet = new Set();
-    questions.forEach(q => {
-      if(!q.exam || !q.exam.trim() || q.subject !== subVal) return;
-      let cleanEx = extractCleanExamName(q.exam);
-      let yr = extractExamYear(q.exam);
-      if(examVal !== 'ALL' && !cleanEx.toLowerCase().includes(examVal.toLowerCase())) return;
-      if(yearVal !== 'ALL' && yr !== yearVal && !q.exam.includes(yearVal)) return;
-      if(q.topic) topicsSet.add(q.topic);
-    });
-    topEl.innerHTML = '<option value="ALL">All Topics</option>' + Array.from(topicsSet).sort().map(t => `<option value="${t}">${t}</option>`).join('');
-    cascadeExamSubtopicsForPortal(nameId, yearId, subId, topId, subtopId);
+    let subPool = questions.filter(q => q.subject === sub);
+    let relatedTopics = [...new Set(subPool.map(q => q.topic).filter(Boolean))].sort();
+    if(topEl) {
+      topEl.innerHTML = `<option value="ALL">All Topics</option>` + relatedTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+      topEl.value = 'ALL';
+      cascadeSubtopics(subId, topId, subtopId);
+    }
   }
 
-  function cascadeExamSubtopicsForPortal(nameId, yearId, subId, topId, subtopId) {
-    const examVal = document.getElementById(nameId).value;
-    const yearVal = document.getElementById(yearId).value;
-    const subVal = document.getElementById(subId).value;
-    const topVal = document.getElementById(topId).value;
+  function cascadeSubtopics(subId, topId, subtopId) {
+    const sub = document.getElementById(subId).value;
+    const top = document.getElementById(topId).value;
     const subtopEl = document.getElementById(subtopId);
-    if(!subtopEl) return;
-    if(!topVal || topVal === 'ALL') { subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>'; return; }
-
-    let subtopicsSet = new Set();
-    questions.forEach(q => {
-      if(!q.exam || !q.exam.trim() || q.subject !== subVal || q.topic !== topVal) return;
-      let cleanEx = extractCleanExamName(q.exam);
-      let yr = extractExamYear(q.exam);
-      if(examVal !== 'ALL' && !cleanEx.toLowerCase().includes(examVal.toLowerCase())) return;
-      if(yearVal !== 'ALL' && yr !== yearVal && !q.exam.includes(yearVal)) return;
-      if(q.subtopic) subtopicsSet.add(q.subtopic);
-    });
-    subtopEl.innerHTML = '<option value="ALL">All Sub-Topics</option>' + Array.from(subtopicsSet).sort().map(st => `<option value="${st}">${st}</option>`).join('');
-  }
-
-  function startExamEngine(mode) {
-    const prefix = mode === 'test' ? 'examTest' : 'examPrac';
-    const examVal = document.getElementById(`${prefix}Name`).value;
-    const yearVal = document.getElementById(`${prefix}Year`).value;
-    const subVal = document.getElementById(`${prefix}Sub`).value;
-    const topVal = document.getElementById(`${prefix}Top`).value;
-    const subtopVal = document.getElementById(`${prefix}Subtop`).value;
-
-    let pool = questions.filter(q => {
-      if(!q.exam || !q.exam.trim()) return false;
-      let cleanEx = extractCleanExamName(q.exam);
-      let yr = extractExamYear(q.exam);
-      if(examVal !== 'ALL' && !cleanEx.toLowerCase().includes(examVal.toLowerCase())) return false;
-      if(yearVal !== 'ALL' && yr !== yearVal && !q.exam.includes(yearVal)) return false;
-      if(subVal !== 'ALL' && q.subject !== subVal) return false;
-      if(topVal && topVal !== 'ALL' && q.topic !== topVal) return false;
-      if(subtopVal && subtopVal !== 'ALL' && q.subtopic !== subtopVal) return false;
-      return true;
-    });
-
-    startEngineWithPool(pool, mode, examVal !== 'ALL' ? examVal : 'Exam Mock Test');
-  }
-
-  function getUniqueSemanticPool(pool) {
-    let seenSignatures = new Set();
-    let uniqueList = [];
-    let shuffled = [...pool].sort(() => Math.random() - 0.5);
-
-    shuffled.forEach(q => {
-      let qTextClean = (q.text || q.assertion || "").toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 50);
-      let optAClean = (q.options?.A || q.optionA || "").toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 15);
-      let signature = `${q.subject}_${qTextClean}_${optAClean}`;
-
-      if(!seenSignatures.has(signature)) {
-        seenSignatures.add(signature);
-        uniqueList.push(q);
-      }
-    });
-    return uniqueList;
-  }
-
-  function startEngineWithPool(pool, mode, testLabel, sectionNameTag = '') {
-    let cleanPool = getUniqueSemanticPool(pool);
-    if(cleanPool.length === 0) return alert('No questions found matching this selection.');
-
-    if(sectionNameTag) {
-      cleanPool.forEach(q => q.sectionName = sectionNameTag);
-    }
-
-    activeEngineMode = mode === 'test' ? 'test' : 'practice';
-    activeQuestions = cleanPool;
-    userResponses = {};
-    currentQIdx = 0;
-    window.currentCustomTestLabel = testLabel;
-
-    let durationMins = mode === 'test' ? getSelectedTimerMinutes('testDurationTopic', 'customTopicMinutes') : 0;
-    startTestTimer(durationMins);
-
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    if(mode === 'test') {
-      document.getElementById('tab-test').style.display = 'block';
-      document.getElementById('testConfigWrapper').style.display = 'none';
-      document.getElementById('test-player').style.display = 'block';
-      renderTestView();
-    } else {
-      document.getElementById('tab-practice').style.display = 'block';
-      document.getElementById('pracConfigWrapper').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'block';
-      renderPracticeView();
-    }
-  }
-
-  function startEngine(mode) {
-    let sub = document.getElementById(mode === 'test' ? 'testSub' : 'pracSub').value;
-    let top = document.getElementById(mode === 'test' ? 'testTop' : 'pracTop').value;
-    let subtop = document.getElementById(mode === 'test' ? 'testSubtop' : 'pracSubtop').value;
-
     let pool = questions.filter(q => q.subject === sub);
-    let subLower = (sub || "").toLowerCase();
-    if(subLower.includes('history')) {
-      let eraFilter = document.getElementById(mode === 'test' ? 'testEraFilter' : 'pracEraFilter').value;
-      if(eraFilter && eraFilter !== 'ALL') pool = pool.filter(q => q.era && q.era.toLowerCase() === eraFilter.toLowerCase());
+    if(top && top !== 'ALL') pool = pool.filter(q => q.topic === top);
+    let relatedSubtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort();
+    if(subtopEl) {
+      subtopEl.innerHTML = `<option value="ALL">All Sub-Topics</option>` + relatedSubtopics.map(st => `<option value="${st}">${st}</option>`).join('');
+      subtopEl.value = 'ALL';
     }
-    if(top !== 'ALL') pool = pool.filter(q => q.topic === top);
-    if(subtop !== 'ALL') pool = pool.filter(q => q.subtopic === subtop);
-
-    startEngineWithPool(pool, mode === 'test' ? 'test' : 'practice', sub, sub);
   }
 
-  function buildSectionalFltBuilder() {
-    syncDynamicSubjects();
-    const container = document.getElementById('fltSectionalBuilderContainer');
-    if(!container) return;
-
-    container.innerHTML = fltSectionDefinitions.map((sec, secIdx) => {
-      let sectionIdKey = `sec_${secIdx}`;
-      
-      let subjectsHtml = sec.subjects.map(sub => {
-        let subPool = questions.filter(q => q.subject === sub);
-        let topics = [...new Set(subPool.map(q => q.topic).filter(Boolean))].sort();
-        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
-
-        return `
-          <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px;">
-            <div class="flt-sub-row" style="margin-bottom:6px;">
-              <div>
-                <strong style="color:#f3f4f6; font-size:0.92rem;">${sub}</strong>
-                <div style="font-size:0.75rem; color:var(--muted);">Available Qs: ${subPool.length}</div>
-              </div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <label style="margin:0; font-size:0.78rem; color:var(--muted);">Count:</label>
-                <input type="number" class="flt-num-input flt-count-sub-${sectionIdKey}" id="flt-count-${subIdKey}" min="0" max="${subPool.length}" value="0" oninput="updateFltTotalCount()" style="width:70px !important; margin-bottom:0 !important; padding:4px 8px !important;">
-              </div>
-            </div>
-            <div style="max-height:130px; overflow-y:auto; padding-left:10px;">
-              <div style="font-size:0.78rem; color:#38bdf8; margin-bottom:4px; font-weight:600;">Select Topics:</div>
-              <div class="flt-topic-checkbox-grid">
-                ${topics.map(t => `
-                  <label class="flt-topic-lbl">
-                    <input type="checkbox" class="flt-topic-chk-${subIdKey}" value="${t}" checked onchange="updateFltTotalCount()"> ${t}
-                  </label>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      return `
-        <div class="flt-section-card">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
-            <h4 style="color:#60a5fa; margin:0; font-size:1.05rem;">📂 Section ${secIdx + 1}: ${sec.sectionName}</h4>
-          </div>
-          ${subjectsHtml}
-        </div>
-      `;
-    }).join('');
-    updateFltTotalCount();
+  function extractExamYear(examStr) {
+    if(!examStr) return '';
+    const m = examStr.match(/\b(19\d{2}|20\d{2})\b/);
+    return m ? m[0] : '';
   }
 
-  function updateFltTotalCount() {
-    let total = 0;
-    fltSectionDefinitions.forEach((sec) => {
-      sec.subjects.forEach(sub => {
-        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
-        let el = document.getElementById(`flt-count-${subIdKey}`);
-        if(el) total += parseInt(el.value || 0, 10);
-      });
-    });
-    const totalEl = document.getElementById('fltTotalSelectedCount');
-    const badgeEl = document.getElementById('fltTotalHeaderCountBadge');
-    if(totalEl) totalEl.innerText = total;
-    if(badgeEl) badgeEl.innerText = `Total Qs: ${total}`;
-  }
-
-  function resetFltInputs() {
-    fltSectionDefinitions.forEach(sec => {
-      sec.subjects.forEach(sub => {
-        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
-        let el = document.getElementById(`flt-count-${subIdKey}`);
-        if(el) el.value = 0;
-      });
-    });
-    updateFltTotalCount();
-  }
-
-  function applyAutoSmartPaperDesign() {
-    syncDynamicSubjects();
-    let weightageMap = {
-      "Indian History": 12, "Polity": 10, "Economy": 8, "General Science": 8, "Indian Geography": 7, "Environment": 5, "Current Affairs": 5,
-      "CG History": 8, "CG Geography": 7, "CG Tribes": 5, "CG Art & Culture": 5, "CG Language": 5, "CG Administration": 3, "CG Panchayati Raj": 2, "CG Economy": 5, "CG General Knowledge": 5,
-      "General Mental Ability": 10, "Mathematics": 10, "Hindi": 10, "English": 10, "Computer": 5
-    };
-    fltSectionDefinitions.forEach(sec => {
-      sec.subjects.forEach(sub => {
-        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
-        let el = document.getElementById(`flt-count-${subIdKey}`);
-        let avail = questions.filter(q => q.subject === sub).length;
-        if(el) el.value = Math.min(avail, weightageMap[sub] || 5);
-      });
-    });
-    updateFltTotalCount();
-    alert('⚡ Auto Smart Paper applied successfully!');
-  }
-
-  function startSectionalFLT() {
-    let sectionalQuestionsGrouped = [];
-    
-    fltSectionDefinitions.forEach(sec => {
-      let secQuestions = [];
-      sec.subjects.forEach(sub => {
-        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
-        let el = document.getElementById(`flt-count-${subIdKey}`);
-        let count = el ? parseInt(el.value || 0, 10) : 0;
-        if(count > 0) {
-          let chks = document.querySelectorAll(`.flt-topic-chk-${subIdKey}:checked`);
-          let selectedTopics = Array.from(chks).map(c => c.value);
-
-          let subPool = questions.filter(q => q.subject === sub);
-          if(selectedTopics.length > 0) {
-            subPool = subPool.filter(q => selectedTopics.includes(q.topic));
-          }
-          let cleanSubPool = getUniqueSemanticPool(subPool);
-          let sliced = cleanSubPool.slice(0, count);
-          sliced.forEach(q => q.sectionName = sec.sectionName);
-          secQuestions.push(...sliced);
-        }
-      });
-      if(secQuestions.length > 0) {
-        sectionalQuestionsGrouped.push(...getUniqueSemanticPool(secQuestions));
-      }
-    });
-
-    if(sectionalQuestionsGrouped.length === 0) return alert('Please configure at least 1 question.');
-
-    let testName = document.getElementById('customFltNameInput').value.trim() || 'Sectional FLT Test';
-    let durationMins = getSelectedTimerMinutes('testDurationFlt', 'customFltMinutes');
-
-    activeEngineMode = 'flt';
-    activeQuestions = sectionalQuestionsGrouped;
-    userResponses = {};
-    currentQIdx = 0;
-    window.currentCustomTestLabel = testName;
-
-    startTestTimer(durationMins);
-
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    renderTestView();
-  }
-
-  function startFullSectionalMockTest() {
-    if(questions.length === 0) return alert('No questions available in database.');
-    
-    let fullMockPool = [];
-    fltSectionDefinitions.forEach(sec => {
-      let secPool = questions.filter(q => sec.subjects.includes(q.subject));
-      let cleanSec = getUniqueSemanticPool(secPool);
-      let sliceCount = Math.min(15, cleanSec.length);
-      let sliced = cleanSec.slice(0, sliceCount);
-      sliced.forEach(q => q.sectionName = sec.sectionName);
-      fullMockPool.push(...sliced);
-    });
-
-    if(fullMockPool.length === 0) {
-      fullMockPool = getUniqueSemanticPool(questions).slice(0, 100);
-      fullMockPool.forEach(q => q.sectionName = "General Section");
-    }
-
-    activeEngineMode = 'full_mock';
-    activeQuestions = fullMockPool;
-    userResponses = {};
-    currentQIdx = 0;
-    window.currentCustomTestLabel = 'Full Sectional Mock Test (CGVYAPAM / CGPSC)';
-
-    startTestTimer(120);
-
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    renderTestView();
-  }
-
-  function startTestTimer(minutes) {
-    if(testTimerInterval) clearInterval(testTimerInterval);
-    const timerBadge = document.getElementById('testTimerBadge');
-    if(!timerBadge) return;
-    if(minutes <= 0) { timerBadge.style.display = 'none'; return; }
-    timerBadge.style.display = 'inline-block';
-    testTimeRemaining = minutes * 60;
-    testTimerInterval = setInterval(() => {
-      if(testTimeRemaining <= 0) { clearInterval(testTimerInterval); alert('Time is up!'); submitTestEngine(); return; }
-      testTimeRemaining--;
-      let m = Math.floor(testTimeRemaining / 60), s = testTimeRemaining % 60;
-      timerBadge.innerText = `⏱ ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    }, 1000);
-  }
-
-  function renderTestView() {
-    const q = activeQuestions[currentQIdx];
-    document.getElementById('t-counter').innerText = `Question ${currentQIdx + 1} of ${activeQuestions.length}`;
-    document.getElementById('t-exam-badge').innerText = q.exam || 'PYQ';
-    document.getElementById('t-hier-badge').innerText = `${q.subject} > ${q.topic}`;
-    document.getElementById('t-section-badge').innerText = q.sectionName || q.subject || 'Section';
-
-    let bodyHtml = q.text || q.assertion || '';
-    if(q.type === 'match' && q.matchRows) {
-      let rows = typeof q.matchRows === 'string' ? JSON.parse(q.matchRows) : q.matchRows;
-      bodyHtml = `<div><strong>${q.text || 'Match the following:'}</strong></div><div class="match-table-wrapper"><table class="match-table"><thead><tr><th>#</th><th>${q.matchHead1 || 'List I'}</th><th>Seq</th><th>${q.matchHead2 || 'List II'}</th></tr></thead><tbody>${rows.map(r => `<tr><td><strong>${r.c1}</strong></td><td>${r.c2}</td><td><strong>(${r.c3})</strong></td><td>${r.c4}</td></tr>`).join('')}</tbody></table></div>`;
-    } else if(q.type === 'ar') {
-      bodyHtml = `<div>${q.arText || ''}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">Assertion:</span> <span class="ar-text">${q.assertion}</span></div><div class="ar-item"><span class="ar-label">Reason:</span> <span class="ar-text">${q.reason}</span></div></div>`;
-    } else if(q.type === 'statement') {
-      bodyHtml = `<div>${q.stIntro || ''}</div>` + (q.statements || []).map((st, i) => `<div class="statement-preview-item"><span class="st-num">(${i+1})</span><span class="st-text">${st}</span></div>`).join('');
-    }
-
-    let bodyContainer = document.getElementById('t-body');
-    if(q.type === 'statement' || q.type === 'ar' || q.type === 'match') bodyContainer.innerHTML = bodyHtml;
-    else bodyContainer.innerText = bodyHtml;
-
-    let opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD });
-    const optContainer = document.getElementById('t-opts');
-    optContainer.innerHTML = '';
-    
-    ['A', 'B', 'C', 'D'].forEach(k => {
-      const isChecked = userResponses[currentQIdx] === k ? 'checked' : '';
-      optContainer.innerHTML += `
-        <label class="test-opt" onclick="handleOptionClick(event, '${k}')">
-          <input type="radio" name="testOpt" value="${k}" ${isChecked} autocomplete="off" style="pointer-events: none;">
-          <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k] || ''}</span></div>
-        </label>
-      `;
-    });
-    renderExamPalette();
-  }
-
-  function handleOptionClick(event, k) {
-    event.preventDefault();
-    const radioInput = event.currentTarget.querySelector('input[type="radio"]');
-    if(!radioInput) return;
-
-    if(userResponses[currentQIdx] === k) {
-      delete userResponses[currentQIdx];
-      radioInput.checked = false;
-    } else {
-      userResponses[currentQIdx] = k;
-      radioInput.checked = true;
-    }
-    renderExamPalette();
-  }
-
-  function renderExamPalette() {
-    const grid = document.getElementById('modalExamPaletteGrid');
-    if(!grid) return;
-    grid.innerHTML = activeQuestions.map((_, i) => {
-      let cls = 'palette-box';
-      if(i === currentQIdx) cls += ' current';
-      if(userResponses[i]) cls += ' answered';
-      return `<div class="${cls}" onclick="jumpToQuestion(${i})">${i + 1}</div>`;
-    }).join('');
-  }
-
-  function openPaletteModal() { renderExamPalette(); document.getElementById('palettePopupModal').style.display = 'block'; }
-  function closePaletteModal() { document.getElementById('palettePopupModal').style.display = 'none'; }
-  function jumpToQuestion(idx) { currentQIdx = idx; renderTestView(); closePaletteModal(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  function moveTestQ(step, event) { if(event) event.preventDefault(); if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) { currentQIdx += step; renderTestView(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-  function exitTestModeConfirm() { if(confirm('Submit test?')) submitTestEngine(); }
-  function exitPracMode() { document.getElementById('prac-player').style.display = 'none'; document.getElementById('prac-result-card').style.display = 'none'; document.getElementById('pracConfigWrapper').style.display = 'block'; }
-
-  function renderPracticeView() {
-    const q = activeQuestions[currentQIdx];
-    document.getElementById('p-counter').innerText = `Practice Q ${currentQIdx + 1} / ${activeQuestions.length}`;
-    document.getElementById('p-exam-badge').innerText = q.exam || 'PYQ';
-    document.getElementById('p-hier-badge').innerText = `${q.subject} > ${q.topic}`;
-
-    let bodyHtml = q.text || q.assertion || '';
-    let bodyContainer = document.getElementById('p-body');
-    bodyContainer.innerText = bodyHtml;
-
-    let opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD });
-    const optContainer = document.getElementById('p-opts');
-    const explBox = document.getElementById('p-expl');
-    optContainer.innerHTML = '';
-    explBox.style.display = 'none';
-
-    const chosen = userResponses[currentQIdx];
-    ['A', 'B', 'C', 'D'].forEach(k => {
-      let extraClass = chosen ? (k === q.ans ? 'opt-correct' : (k === chosen ? 'opt-wrong' : '')) : '';
-      optContainer.innerHTML += `
-        <div class="test-opt ${extraClass}" onclick="handlePracticeClick('${k}')">
-          <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k] || ''}</span></div>
-        </div>
-      `;
-    });
-    if(chosen) { explBox.style.display = 'block'; explBox.innerHTML = `<strong>Explanation:</strong>\n${q.expl || ''}`; }
-  }
-
-  function handlePracticeClick(k) {
-    if(userResponses[currentQIdx]) return;
-    userResponses[currentQIdx] = k;
-    renderPracticeView();
-  }
-
-  function movePracQ(step, event) { if(event) event.preventDefault(); if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) { currentQIdx += step; renderPracticeView(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
-
-  function submitTestEngine() {
-    if(testTimerInterval) clearInterval(testTimerInterval);
-    let correct = 0, wrong = 0, unattempted = 0;
-    let wrongQs = [], correctQs = [], unattemptedQs = [], testSubMap = {};
-
-    activeQuestions.forEach((q, i) => {
-      const resp = userResponses[i];
-      let sName = q.subject || 'General';
-      if(!testSubMap[sName]) testSubMap[sName] = { correct: 0 };
-      if(!resp) { unattempted++; unattemptedQs.push({q, userAns: resp}); }
-      else if(resp === q.ans) { correct++; correctQs.push({q, userAns: resp}); testSubMap[sName].correct++; }
-      else { wrong++; wrongQs.push({q, userAns: resp}); }
-    });
-
-    let finalMarks = Math.max(0, correct - (wrong * 0.25));
-    lastAttemptSummary = { marks: finalMarks.toFixed(2), totalMarks: activeQuestions.length, correct, wrong, unattempted, accuracy: ((correct/(correct+wrong || 1))*100).toFixed(1)+'%', wrongQs, correctQs, unattemptedQs, subject: window.currentCustomTestLabel || 'Mock Test' };
-
-    if(!currentUser.history) currentUser.history = [];
-    currentUser.history.unshift({ subject: lastAttemptSummary.subject, marks: parseFloat(finalMarks.toFixed(2)), totalMarks: activeQuestions.length, correct, wrong, date: new Date().toLocaleDateString() });
-    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-    updateUserProgressToCloud(correct, testSubMap, currentUser.revision_store);
-
-    document.getElementById('test-player').style.display = 'none';
-    navigate('tab-results');
-    displayScorecard();
-  }
-
-  async function fetchQuestionsFromCloud(isSilent = false) {
-    try {
-      const snap = await db.collection("questions").get();
-      if(!snap.empty) {
-        let uniqueMap = new Map();
-        snap.forEach(doc => {
-          let q = { id: doc.id, ...doc.data() };
-          uniqueMap.set(q.id.toString(), q);
-        });
-        questions = Array.from(uniqueMap.values());
-        localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
-      }
-    } catch(err) { console.error(err); }
-  }
-
-  async function fetchUsersFromCloud(isSilent = false) {
-    try {
-      const snap = await db.collection("users").get();
-      if(!snap.empty) {
-        let list = [];
-        snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-        members = list;
-        if(currentUser) {
-          let me = members.find(m => m.username.toLowerCase() === currentUser.username.toLowerCase());
-          if(me) currentUser = { ...currentUser, ...me };
-        }
-      }
-    } catch(err) { console.error(err); }
-  }
-
-  async function updateUserProgressToCloud(newCorrectCount, testSubMap, revisionObj) {
-    if(!currentUser) return;
-    try {
-      if(!currentUser.subject_progress) currentUser.subject_progress = {};
-      for(let sub in testSubMap) {
-        if(!currentUser.subject_progress[sub]) currentUser.subject_progress[sub] = { correct: 0, revisions: 0 };
-        currentUser.subject_progress[sub].correct += testSubMap[sub].correct;
-        let totalSubQ = questions.filter(q => q.subject === sub).length || 10;
-        if(currentUser.subject_progress[sub].correct >= totalSubQ) {
-          currentUser.subject_progress[sub].revisions = (currentUser.subject_progress[sub].revisions || 0) + 1;
-          currentUser.subject_progress[sub].correct = 0;
-        }
-      }
-
-      let totalCorrect = 0, totalRev = 0;
-      for(let s in currentUser.subject_progress) {
-        totalCorrect += currentUser.subject_progress[s].correct;
-        totalRev += currentUser.subject_progress[s].revisions;
-      }
-      currentUser.revision_count = totalRev;
-      currentUser.current_percentage = questions.length > 0 ? Math.min(100, Math.round((totalCorrect / questions.length) * 100)) : 0;
-      currentUser.combined_score = totalCorrect + (totalRev * 100);
-
-      await db.collection("users").doc(currentUser.username.toLowerCase()).set(currentUser, { merge: true });
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      syncOnlineLeaderboard();
-    } catch(err) { console.error(err); }
-  }
-
-  function displayScorecard() {
-    if(!lastAttemptSummary) return;
-    document.getElementById('latest-scorecard').style.display = 'block';
-    document.getElementById('no-recent-scorecard').style.display = 'none';
-    document.getElementById('resMarks').innerText = lastAttemptSummary.marks;
-    document.getElementById('resTotalMarksSub').innerText = `/ ${lastAttemptSummary.totalMarks}`;
-    document.getElementById('resCorrect').innerText = lastAttemptSummary.correct;
-    document.getElementById('resWrong').innerText = lastAttemptSummary.wrong;
-    document.getElementById('resLeft').innerText = lastAttemptSummary.unattempted;
-    document.getElementById('resAcc').innerText = lastAttemptSummary.accuracy;
-    switchReviewFilter('wrong');
-  }
-
-  function switchReviewFilter(type) {
-    document.querySelectorAll('.review-tab-btn').forEach(b => b.classList.remove('active'));
-    if(type === 'wrong') document.getElementById('btnTabWrong').classList.add('active');
-    else if(type === 'correct') document.getElementById('btnTabCorrect').classList.add('active');
-    else if(type === 'unattempted') document.getElementById('btnTabLeft').classList.add('active');
-
-    let list = type === 'wrong' ? lastAttemptSummary.wrongQs : (type === 'correct' ? lastAttemptSummary.correctQs : lastAttemptSummary.unattemptedQs);
-    document.getElementById('review-questions-list').innerHTML = list.map((item, idx) => `
-      <div style="background:var(--card-inner); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px;">
-        <strong style="color:#60a5fa;">#${idx+1} ${item.q.subject}</strong><br>
-        <div>${item.q.text || ''}</div>
-      </div>
-    `).join('') || '<p>No questions found.</p>';
-  }
-
-  function renderPastTestHistoryTable() {
-    const tbody = document.getElementById('pastTestHistoryBody');
-    if(!tbody) return;
-    let h = currentUser?.history || [];
-    tbody.innerHTML = h.length === 0 ? `<tr><td colspan="5" style="text-align:center;">No attempts found.</td></tr>` : h.map(x => `<tr><td>${x.date}</td><td>${x.subject}</td><td style="text-align:center;">${x.marks}</td><td style="text-align:center; color:var(--success);">${x.correct}</td><td style="text-align:center; color:var(--danger);">${x.wrong}</td></tr>`).join('');
-  }
-
-  function renderRadarAnalytics() {
-    const radarBox = document.getElementById('subject-radar-container');
-    if(!radarBox) return;
-    radarBox.innerHTML = subjects.map(sub => `<div>${sub}</div>`).join('');
-  }
-
-  async function syncOnlineLeaderboard() {
-    const tbody = document.getElementById('topTenLeaderboardBody');
-    if (!tbody) return;
-    try {
-      const snap = await db.collection("users").get();
-      let usersData = [];
-      snap.forEach(doc => usersData.push(doc.data()));
-      usersData.sort((a, b) => (b.combined_score || 0) - (a.combined_score || 0));
-      
-      let me = currentUser ? usersData.find(u => u.username.toLowerCase() === currentUser.username.toLowerCase()) : null;
-      if(me) {
-        document.getElementById('currentPercentageVal').innerText = `${me.current_percentage || 0}%`;
-        document.getElementById('revisionCountVal').innerText = me.revision_count || 0;
-        document.getElementById('dynamicProgressBar').style.width = `${me.current_percentage || 0}%`;
-        document.getElementById('progressEmojiThumb').style.left = `${me.current_percentage || 0}%`;
-      }
-
-      tbody.innerHTML = usersData.slice(0, 10).map((u, i) => `<tr><td>#${i+1}</td><td>${u.name}</td><td style="text-align:center;">${u.current_percentage || 0}%</td><td style="text-align:center;">${u.revision_count || 0}</td></tr>`).join('') || '<tr><td colspan="4">No users.</td></tr>';
-    } catch(e) { console.error(e); }
-  }
-
-  async function memberRegister() {
-    const name = document.getElementById('memRegName').value.trim();
-    const user = document.getElementById('memRegUser').value.trim().toLowerCase();
-    const dob = document.getElementById('memRegDob').value;
-    const pass = document.getElementById('memRegPass').value.trim();
-
-    if(!name || !user || !dob || !pass) return alert('Please fill all fields!');
-    if(members.find(m => m.username && m.username.toLowerCase() === user)) return alert('Username already taken!');
-
-    let newUserDoc = {
-      username: user, name: name, dob: dob, pass: pass,
-      subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] },
-      history: [], combined_score: 0, revision_count: 0, current_percentage: 0,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-
-    try {
-      await db.collection("users").doc(user).set(newUserDoc);
-      members.push(newUserDoc);
-      currentUser = { name, username: user, role: 'member', subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] }, history: [] };
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      showPortal();
-    } catch(err) { alert("Registration error."); }
-  }
-
-  function memberLogin() {
-    const user = document.getElementById('memLogUser').value.trim().toLowerCase();
-    const pass = document.getElementById('memLogPass').value.trim();
-    const found = members.find(m => m.username && m.username.toLowerCase() === user && m.pass === pass);
-
-    if(found) {
-      currentUser = { ...found };
-      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-      showPortal();
-    } else { alert('Invalid username or password!'); }
-  }
-
-  function logout() {
-    currentUser = null;
-    localStorage.removeItem('cg_auth_user');
-    localStorage.removeItem('cg_active_tab');
-    init();
-  }
-
-  function navigate(tabId) {
-    if(document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') {
-      if(!confirm('A test is currently in progress! Do you want to leave?')) return;
-      if(testTimerInterval) clearInterval(testTimerInterval);
-      document.getElementById('test-player').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'none';
-    }
-
-    localStorage.setItem('cg_active_tab', tabId);
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.f-nav-item').forEach(b => b.classList.remove('active'));
-    
-    const targetView = document.getElementById(tabId);
-    if(targetView) targetView.style.display = 'block';
-
-    if(tabId === 'tab-home') document.getElementById('fNavHome')?.classList.add('active');
-    if(tabId === 'tab-test') document.getElementById('fNavTest')?.classList.add('active');
-    if(tabId === 'tab-practice') { document.getElementById('fNavPrac')?.classList.add('active'); document.getElementById('pracConfigWrapper').style.display = 'block'; }
-    if(tabId === 'tab-revision') document.getElementById('fNavRev')?.classList.add('active');
-    if(tabId === 'tab-results') document.getElementById('fNavRes')?.classList.add('active');
-
-    if(tabId === 'tab-test') {
-      document.getElementById('testConfigWrapper').style.display = 'block';
-      document.getElementById('test-player').style.display = 'none';
-    }
-    if(tabId === 'tab-flt') buildSectionalFltBuilder();
-    if(tabId === 'tab-revision') {
-      document.getElementById('revision-quiz-player').style.display = 'none';
-      switchRevisionSubTab('wrong');
-      renderRevisionNeededSection();
-    }
-    if(tabId === 'tab-results') {
-      switchResultsSubTab('prev');
-      renderRadarAnalytics();
-      renderPastTestHistoryTable();
-      syncOnlineLeaderboard();
-      if(lastAttemptSummary) {
-        document.getElementById('latest-scorecard').style.display = 'block';
-        document.getElementById('no-recent-scorecard').style.display = 'none';
-      } else {
-        document.getElementById('latest-scorecard').style.display = 'none';
-        document.getElementById('no-recent-scorecard').style.display = 'block';
-      }
-    }
+  function extractCleanExamName(examStr) {
+    if(!examStr) return '';
+    return examStr.replace(/\b(19\d{2}|20\d{2})\b/g, '').replace(/\s+/g, ' ').trim();
   }
 
   init();

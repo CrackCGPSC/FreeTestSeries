@@ -122,9 +122,8 @@
       .brand-subtitle { font-size: 0.72rem; }
     }
 
-    .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; position: relative; z-index: 102; }
     
-    /* Compact Professional Google Translate Widget Styling */
     #google_translate_element { transform: scale(0.85); transform-origin: right center; display: inline-block; background: rgba(30, 41, 59, 0.8); border: 1px solid var(--border); border-radius: 8px; padding: 2px 6px; backdrop-filter: blur(10px); }
     .goog-te-combo { background: transparent !important; color: #38bdf8 !important; border: none !important; padding: 2px 4px !important; border-radius: 4px !important; font-size: 0.78rem !important; outline: none !important; cursor: pointer; font-family: 'Poppins', sans-serif !important; }
     .goog-logo-link, .gsk-translate-gadget { display: none !important; }
@@ -220,7 +219,8 @@
     .palette-box.answered { background: rgba(16, 185, 129, 0.25); border-color: var(--success); color: var(--success); }
     .palette-box.current { border-color: var(--primary); box-shadow: 0 0 10px var(--primary); color: #fff; }
 
-    .test-opt { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: rgba(13, 20, 36, 0.7); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; width: 100%; transition: 0.2s; backdrop-filter: blur(10px); }
+    /* Prevent mobile touch scrolling interference with inputs/radio buttons */
+    .test-opt { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; background: rgba(13, 20, 36, 0.7); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; cursor: pointer; text-align: left; width: 100%; transition: 0.2s; backdrop-filter: blur(10px); touch-action: manipulation; }
     .test-opt input[type="radio"] { width: 16px !important; height: 16px !important; min-width: 16px; margin-top: 3px !important; cursor: pointer; accent-color: var(--primary); pointer-events: none; }
     .test-opt-label { font-size: 0.95rem; color: var(--text); line-height: 1.55; flex: 1; text-align: left; display: flex; gap: 6px; }
     .test-opt-label .opt-letter { font-weight: 700; color: #60a5fa; min-width: 24px; flex-shrink: 0; }
@@ -1249,24 +1249,28 @@
   let revQuizResponses = {};
   let revQuizIdx = 0;
 
+  // PROFESSIONAL CACHE-FIRST INITIALIZATION TO PREVENT READ SPIKES & ENSURE ZERO FREEZE
   async function init() {
     setProgress(20);
+    
+    // Load immediately from local storage cache if available for instant display
+    if(questions.length > 0) {
+      syncDynamicSubjects();
+      populateAllSubjectDropdowns();
+      buildSectionalFltBuilder();
+    }
+
     if (currentUser) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('portal-screen').style.display = 'block';
-      
-      if(questions.length > 0) {
-        syncDynamicSubjects();
-        populateAllSubjectDropdowns();
-        buildSectionalFltBuilder();
-        syncOnlineLeaderboard();
-      }
+      syncOnlineLeaderboard();
     }
     
     setProgress(50);
     
-    await fetchQuestionsFromCloud(true);
-    await fetchUsersFromCloud(true);
+    // Non-blocking background sync with smart caching
+    fetchQuestionsFromCloud(true);
+    fetchUsersFromCloud(true);
     
     syncDynamicSubjects();
     setProgress(80);
@@ -1290,9 +1294,9 @@
   document.addEventListener("visibilitychange", async function() {
     if (document.visibilityState === "visible") {
       if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
-      await fetchQuestionsFromCloud(true);
+      fetchQuestionsFromCloud(true);
       if (currentUser) {
-        await fetchUsersFromCloud(true);
+        fetchUsersFromCloud(true);
         syncOnlineLeaderboard();
         if(document.getElementById('tab-results').style.display === 'block') {
           renderRadarAnalytics();
@@ -1303,9 +1307,9 @@
 
   window.addEventListener("focus", async function() {
     if (window.isDropdownInteracting || document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') return;
-    await fetchQuestionsFromCloud(true);
+    fetchQuestionsFromCloud(true);
     if (currentUser) {
-      await fetchUsersFromCloud(true);
+      fetchUsersFromCloud(true);
       syncOnlineLeaderboard();
       if(document.getElementById('tab-results').style.display === 'block') {
         renderRadarAnalytics();
@@ -1979,6 +1983,8 @@
     document.getElementById('t-counter').innerText = `Question ${currentQIdx + 1} of ${activeQuestions.length}`;
     document.getElementById('t-exam-badge').innerText = q.exam || 'PYQ';
     document.getElementById('t-hier-badge').innerText = `${q.subject} > ${q.topic} > ${q.subtopic}`;
+    const secBadge = document.getElementById('t-section-badge');
+    if(secBadge) secBadge.innerText = q.sectionName || q.subject || 'Section';
 
     const starBtn = document.getElementById('t-star-btn');
     if(!currentUser) currentUser = { revision_store: { wrong: [], unatt: [], saved: [] } };

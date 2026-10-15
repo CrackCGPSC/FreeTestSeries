@@ -890,6 +890,411 @@
     return examStr.replace(/\b(19\d{2}|20\d{2})\b/g, '').replace(/\s+/g, ' ').trim();
   }
 
+  // --- SECTIONAL FLT & TEST ENGINE MODULE ---
+  function startSectionalFLT() {
+    let sectionalQuestionsGrouped = [];
+    fltSectionDefinitions.forEach(sec => {
+      let secQuestions = [];
+      sec.subjects.forEach(sub => {
+        let subIdKey = sub.replace(/[^a-zA-Z0-9]/g, '_');
+        let el = document.getElementById(`flt-count-${subIdKey}`);
+        let count = el ? parseInt(el.value || 0, 10) : 0;
+        if(count > 0) {
+          let chks = document.querySelectorAll(`.flt-topic-chk-${subIdKey}:checked`);
+          let selectedTopics = Array.from(chks).map(c => c.value);
+          let subPool = questions.filter(q => q.subject === sub);
+          if(selectedTopics.length > 0) {
+            subPool = subPool.filter(q => selectedTopics.includes(q.topic));
+          }
+          let cleanSubPool = getUniqueSemanticPool(subPool);
+          let sliced = cleanSubPool.slice(0, count);
+          sliced.forEach(q => q.sectionName = sec.sectionName);
+          secQuestions.push(...sliced);
+        }
+      });
+      if(secQuestions.length > 0) {
+        sectionalQuestionsGrouped.push(...getUniqueSemanticPool(secQuestions));
+      }
+    });
+
+    if(sectionalQuestionsGrouped.length === 0) return alert('Please configure at least 1 question.');
+
+    let testName = document.getElementById('customFltNameInput').value.trim() || 'Sectional FLT Test';
+    let durationMins = getSelectedTimerMinutes('testDurationFlt', 'customFltMinutes');
+
+    activeEngineMode = 'flt';
+    activeQuestions = sectionalQuestionsGrouped;
+    userResponses = {};
+    currentQIdx = 0;
+    window.currentCustomTestLabel = testName;
+
+    startTestTimer(durationMins);
+    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-test').style.display = 'block';
+    document.getElementById('testConfigWrapper').style.display = 'none';
+    document.getElementById('test-player').style.display = 'block';
+    renderTestView();
+  }
+
+  function startFullSectionalMockTest() {
+    if(questions.length === 0) return alert('No questions available in database.');
+    let fullMockPool = [];
+    fltSectionDefinitions.forEach(sec => {
+      let secPool = questions.filter(q => sec.subjects.includes(q.subject));
+      let cleanSec = getUniqueSemanticPool(secPool);
+      let sliceCount = Math.min(15, cleanSec.length);
+      let sliced = cleanSec.slice(0, sliceCount);
+      sliced.forEach(q => q.sectionName = sec.sectionName);
+      fullMockPool.push(...sliced);
+    });
+
+    if(fullMockPool.length === 0) {
+      fullMockPool = getUniqueSemanticPool(questions).slice(0, 100);
+      fullMockPool.forEach(q => q.sectionName = "General Section");
+    }
+
+    activeEngineMode = 'full_mock';
+    activeQuestions = fullMockPool;
+    userResponses = {};
+    currentQIdx = 0;
+    window.currentCustomTestLabel = 'Full Sectional Mock Test (CGVYAPAM / CGPSC)';
+
+    startTestTimer(120);
+    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-test').style.display = 'block';
+    document.getElementById('testConfigWrapper').style.display = 'none';
+    document.getElementById('test-player').style.display = 'block';
+    renderTestView();
+  }
+
+  function getUniqueSemanticPool(pool) {
+    let seenSignatures = new Set();
+    let uniqueList = [];
+    let shuffled = [...pool].sort(() => Math.random() - 0.5);
+    shuffled.forEach(q => {
+      let qTextClean = (q.text || q.assertion || "").toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 50);
+      let optAClean = (q.options?.A || q.optionA || "").toLowerCase().replace(/[^a-z0-9]/g, "").substring(0, 15);
+      let signature = `${q.subject}_${qTextClean}_${optAClean}`;
+      if(!seenSignatures.has(signature)) {
+        seenSignatures.add(signature);
+        uniqueList.push(q);
+      }
+    });
+    return uniqueList;
+  }
+
+  function startTestTimer(minutes) {
+    if(testTimerInterval) clearInterval(testTimerInterval);
+    const timerBadge = document.getElementById('testTimerBadge');
+    if(!timerBadge) return;
+    if(minutes <= 0) { timerBadge.style.display = 'none'; return; }
+    timerBadge.style.display = 'inline-block';
+    testTimeRemaining = minutes * 60;
+    testTimerInterval = setInterval(() => {
+      if(testTimeRemaining <= 0) { clearInterval(testTimerInterval); alert('Time is up!'); submitTestEngine(); return; }
+      testTimeRemaining--;
+      let m = Math.floor(testTimeRemaining / 60), s = testTimeRemaining % 60;
+      timerBadge.innerText = `⏱ ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+
+  function renderTestView() {
+    const q = activeQuestions[currentQIdx];
+    document.getElementById('t-counter').innerText = `Question ${currentQIdx + 1} of ${activeQuestions.length}`;
+    document.getElementById('t-exam-badge').innerText = q.exam || 'PYQ';
+    document.getElementById('t-hier-badge').innerText = `${q.subject} > ${q.topic}`;
+    document.getElementById('t-section-badge').innerText = q.sectionName || q.subject || 'Section';
+
+    let bodyHtml = q.text || q.assertion || '';
+    let bodyContainer = document.getElementById('t-body');
+    bodyContainer.innerText = bodyHtml;
+
+    let opts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD });
+    const optContainer = document.getElementById('t-opts');
+    optContainer.innerHTML = '';
+    
+    ['A', 'B', 'C', 'D'].forEach(k => {
+      const isChecked = userResponses[currentQIdx] === k ? 'checked' : '';
+      optContainer.innerHTML += `
+        <label class="test-opt" onclick="handleOptionClick(event, '${k}')">
+          <input type="radio" name="testOpt" value="${k}" ${isChecked} autocomplete="off" style="pointer-events: none;">
+          <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k] || ''}</span></div>
+        </label>
+      `;
+    });
+    renderExamPalette();
+  }
+
+  function handleOptionClick(event, k) {
+    event.preventDefault();
+    const radioInput = event.currentTarget.querySelector('input[type="radio"]');
+    if(!radioInput) return;
+    if(userResponses[currentQIdx] === k) {
+      delete userResponses[currentQIdx];
+      radioInput.checked = false;
+    } else {
+      userResponses[currentQIdx] = k;
+      radioInput.checked = true;
+    }
+    renderExamPalette();
+  }
+
+  function renderExamPalette() {
+    const grid = document.getElementById('modalExamPaletteGrid');
+    if(!grid) return;
+    grid.innerHTML = activeQuestions.map((_, i) => {
+      let cls = 'palette-box';
+      if(i === currentQIdx) cls += ' current';
+      if(userResponses[i]) cls += ' answered';
+      return `<div class="${cls}" onclick="jumpToQuestion(${i})">${i + 1}</div>`;
+    }).join('');
+  }
+
+  function openPaletteModal() { renderExamPalette(); document.getElementById('palettePopupModal').style.display = 'block'; }
+  function closePaletteModal() { document.getElementById('palettePopupModal').style.display = 'none'; }
+  function jumpToQuestion(idx) { currentQIdx = idx; renderTestView(); closePaletteModal(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function moveTestQ(step, event) { if(event) event.preventDefault(); if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) { currentQIdx += step; renderTestView(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+  function exitTestModeConfirm() { if(confirm('Submit test?')) submitTestEngine(); }
+
+  function submitTestEngine() {
+    if(testTimerInterval) clearInterval(testTimerInterval);
+    let correct = 0, wrong = 0, unattempted = 0;
+    let wrongQs = [], correctQs = [], unattemptedQs = [], testSubMap = {};
+
+    activeQuestions.forEach((q, i) => {
+      const resp = userResponses[i];
+      let sName = q.subject || 'General';
+      if(!testSubMap[sName]) testSubMap[sName] = { correct: 0 };
+      if(!resp) { unattempted++; unattemptedQs.push({q, userAns: resp}); }
+      else if(resp === q.ans) { correct++; correctQs.push({q, userAns: resp}); testSubMap[sName].correct++; }
+      else { wrong++; wrongQs.push({q, userAns: resp}); }
+    });
+
+    let finalMarks = Math.max(0, correct - (wrong * 0.25));
+    lastAttemptSummary = { marks: finalMarks.toFixed(2), totalMarks: activeQuestions.length, correct, wrong, unattempted, accuracy: ((correct/(correct+wrong || 1))*100).toFixed(1)+'%', wrongQs, correctQs, unattemptedQs, subject: window.currentCustomTestLabel || 'Mock Test' };
+
+    if(!currentUser.history) currentUser.history = [];
+    currentUser.history.unshift({ subject: lastAttemptSummary.subject, marks: parseFloat(finalMarks.toFixed(2)), totalMarks: activeQuestions.length, correct, wrong, date: new Date().toLocaleDateString() });
+    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+    updateUserProgressToCloud(correct, testSubMap, currentUser.revision_store);
+
+    document.getElementById('test-player').style.display = 'none';
+    navigate('tab-results');
+    displayScorecard();
+  }
+
+  async function fetchQuestionsFromCloud(isSilent = false) {
+    try {
+      const snap = await db.collection("questions").get();
+      if(!snap.empty) {
+        let uniqueMap = new Map();
+        snap.forEach(doc => {
+          let q = { id: doc.id, ...doc.data() };
+          uniqueMap.set(q.id.toString(), q);
+        });
+        questions = Array.from(uniqueMap.values());
+        localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
+      }
+    } catch(err) { console.error(err); }
+  }
+
+  async function fetchUsersFromCloud(isSilent = false) {
+    try {
+      const snap = await db.collection("users").get();
+      if(!snap.empty) {
+        let list = [];
+        snap.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+        members = list;
+        if(currentUser) {
+          let me = members.find(m => m.username.toLowerCase() === currentUser.username.toLowerCase());
+          if(me) currentUser = { ...currentUser, ...me };
+        }
+      }
+    } catch(err) { console.error(err); }
+  }
+
+  async function updateUserProgressToCloud(newCorrectCount, testSubMap, revisionObj) {
+    if(!currentUser) return;
+    try {
+      if(!currentUser.subject_progress) currentUser.subject_progress = {};
+      for(let sub in testSubMap) {
+        if(!currentUser.subject_progress[sub]) currentUser.subject_progress[sub] = { correct: 0, revisions: 0 };
+        currentUser.subject_progress[sub].correct += testSubMap[sub].correct;
+        let totalSubQ = questions.filter(q => q.subject === sub).length || 10;
+        if(currentUser.subject_progress[sub].correct >= totalSubQ) {
+          currentUser.subject_progress[sub].revisions = (currentUser.subject_progress[sub].revisions || 0) + 1;
+          currentUser.subject_progress[sub].correct = 0;
+        }
+      }
+
+      let totalCorrect = 0, totalRev = 0;
+      for(let s in currentUser.subject_progress) {
+        totalCorrect += currentUser.subject_progress[s].correct;
+        totalRev += currentUser.subject_progress[s].revisions;
+      }
+      currentUser.revision_count = totalRev;
+      currentUser.current_percentage = questions.length > 0 ? Math.min(100, Math.round((totalCorrect / questions.length) * 100)) : 0;
+      currentUser.combined_score = totalCorrect + (totalRev * 100);
+
+      await db.collection("users").doc(currentUser.username.toLowerCase()).set(currentUser, { merge: true });
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      syncOnlineLeaderboard();
+    } catch(err) { console.error(err); }
+  }
+
+  function displayScorecard() {
+    if(!lastAttemptSummary) return;
+    document.getElementById('latest-scorecard').style.display = 'block';
+    document.getElementById('no-recent-scorecard').style.display = 'none';
+    document.getElementById('resMarks').innerText = lastAttemptSummary.marks;
+    document.getElementById('resTotalMarksSub').innerText = `/ ${lastAttemptSummary.totalMarks}`;
+    document.getElementById('resCorrect').innerText = lastAttemptSummary.correct;
+    document.getElementById('resWrong').innerText = lastAttemptSummary.wrong;
+    document.getElementById('resLeft').innerText = lastAttemptSummary.unattempted;
+    document.getElementById('resAcc').innerText = lastAttemptSummary.accuracy;
+    switchReviewFilter('wrong');
+  }
+
+  function switchReviewFilter(type) {
+    document.querySelectorAll('.review-tab-btn').forEach(b => b.classList.remove('active'));
+    if(type === 'wrong') document.getElementById('btnTabWrong').classList.add('active');
+    else if(type === 'correct') document.getElementById('btnTabCorrect').classList.add('active');
+    else if(type === 'unattempted') document.getElementById('btnTabLeft').classList.add('active');
+
+    let list = type === 'wrong' ? lastAttemptSummary.wrongQs : (type === 'correct' ? lastAttemptSummary.correctQs : lastAttemptSummary.unattemptedQs);
+    document.getElementById('review-questions-list').innerHTML = list.map((item, idx) => `
+      <div style="background:var(--card-inner); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px;">
+        <strong style="color:#60a5fa;">#${idx+1} ${item.q.subject}</strong><br>
+        <div>${item.q.text || ''}</div>
+      </div>
+    `).join('') || '<p>No questions found.</p>';
+  }
+
+  function renderPastTestHistoryTable() {
+    const tbody = document.getElementById('pastTestHistoryBody');
+    if(!tbody) return;
+    let h = currentUser?.history || [];
+    tbody.innerHTML = h.length === 0 ? `<tr><td colspan="5" style="text-align:center;">No attempts found.</td></tr>` : h.map(x => `<tr><td>${x.date}</td><td>${x.subject}</td><td style="text-align:center;">${x.marks}</td><td style="text-align:center; color:var(--success);">${x.correct}</td><td style="text-align:center; color:var(--danger);">${x.wrong}</td></tr>`).join('');
+  }
+
+  function renderRadarAnalytics() {
+    const radarBox = document.getElementById('subject-radar-container');
+    if(!radarBox) return;
+    radarBox.innerHTML = subjects.map(sub => `<div>${sub}</div>`).join('');
+  }
+
+  async function syncOnlineLeaderboard() {
+    const tbody = document.getElementById('topTenLeaderboardBody');
+    if (!tbody) return;
+    try {
+      const snap = await db.collection("users").get();
+      let usersData = [];
+      snap.forEach(doc => usersData.push(doc.data()));
+      usersData.sort((a, b) => (b.combined_score || 0) - (a.combined_score || 0));
+      
+      let me = currentUser ? usersData.find(u => u.username.toLowerCase() === currentUser.username.toLowerCase()) : null;
+      if(me) {
+        document.getElementById('currentPercentageVal').innerText = `${me.current_percentage || 0}%`;
+        document.getElementById('revisionCountVal').innerText = me.revision_count || 0;
+        document.getElementById('dynamicProgressBar').style.width = `${me.current_percentage || 0}%`;
+        document.getElementById('progressEmojiThumb').style.left = `${me.current_percentage || 0}%`;
+      }
+
+      tbody.innerHTML = usersData.slice(0, 10).map((u, i) => `<tr><td>#${i+1}</td><td>${u.name}</td><td style="text-align:center;">${u.current_percentage || 0}%</td><td style="text-align:center;">${u.revision_count || 0}</td></tr>`).join('') || '<tr><td colspan="4">No users.</td></tr>';
+    } catch(e) { console.error(e); }
+  }
+
+  async function memberRegister() {
+    const name = document.getElementById('memRegName').value.trim();
+    const user = document.getElementById('memRegUser').value.trim().toLowerCase();
+    const dob = document.getElementById('memRegDob').value;
+    const pass = document.getElementById('memRegPass').value.trim();
+
+    if(!name || !user || !dob || !pass) return alert('Please fill all fields!');
+    if(members.find(m => m.username && m.username.toLowerCase() === user)) return alert('Username already taken!');
+
+    let newUserDoc = {
+      username: user, name: name, dob: dob, pass: pass,
+      subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] },
+      history: [], combined_score: 0, revision_count: 0, current_percentage: 0,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+      await db.collection("users").doc(user).set(newUserDoc);
+      members.push(newUserDoc);
+      currentUser = { name, username: user, role: 'member', subject_progress: {}, revision_store: { wrong: [], unatt: [], saved: [] }, history: [] };
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      showPortal();
+    } catch(err) { alert("Registration error."); }
+  }
+
+  function memberLogin() {
+    const user = document.getElementById('memLogUser').value.trim().toLowerCase();
+    const pass = document.getElementById('memLogPass').value.trim();
+    const found = members.find(m => m.username && m.username.toLowerCase() === user && m.pass === pass);
+
+    if(found) {
+      currentUser = { ...found };
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      showPortal();
+    } else { alert('Invalid username or password!'); }
+  }
+
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem('cg_auth_user');
+    localStorage.removeItem('cg_active_tab');
+    init();
+  }
+
+  function navigate(tabId) {
+    if(document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') {
+      if(!confirm('A test is currently in progress! Do you want to leave?')) return;
+      if(testTimerInterval) clearInterval(testTimerInterval);
+      document.getElementById('test-player').style.display = 'none';
+      document.getElementById('prac-player').style.display = 'none';
+    }
+
+    localStorage.setItem('cg_active_tab', tabId);
+    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.f-nav-item').forEach(b => b.classList.remove('active'));
+    
+    const targetView = document.getElementById(tabId);
+    if(targetView) targetView.style.display = 'block';
+
+    if(tabId === 'tab-home') document.getElementById('fNavHome')?.classList.add('active');
+    if(tabId === 'tab-test') document.getElementById('fNavTest')?.classList.add('active');
+    if(tabId === 'tab-practice') { document.getElementById('fNavPrac')?.classList.add('active'); document.getElementById('pracConfigWrapper').style.display = 'block'; }
+    if(tabId === 'tab-revision') document.getElementById('fNavRev')?.classList.add('active');
+    if(tabId === 'tab-results') document.getElementById('fNavRes')?.classList.add('active');
+
+    if(tabId === 'tab-test') {
+      document.getElementById('testConfigWrapper').style.display = 'block';
+      document.getElementById('test-player').style.display = 'none';
+    }
+    if(tabId === 'tab-flt') buildSectionalFltBuilder();
+    if(tabId === 'tab-revision') {
+      document.getElementById('revision-quiz-player').style.display = 'none';
+      switchRevisionSubTab('wrong');
+      renderRevisionNeededSection();
+    }
+    if(tabId === 'tab-results') {
+      switchResultsSubTab('prev');
+      renderRadarAnalytics();
+      renderPastTestHistoryTable();
+      syncOnlineLeaderboard();
+      if(lastAttemptSummary) {
+        document.getElementById('latest-scorecard').style.display = 'block';
+        document.getElementById('no-recent-scorecard').style.display = 'none';
+      } else {
+        document.getElementById('latest-scorecard').style.display = 'none';
+        document.getElementById('no-recent-scorecard').style.display = 'block';
+      }
+    }
+  }
+
   init();
 </script>
 </body>

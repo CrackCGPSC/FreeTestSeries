@@ -353,44 +353,18 @@
         margin-right: 340px !important;
         transition: margin-right 0.25s ease;
       }
+      /* Real Exam Desktop Mode: Question Palette is permanently docked on the right side pane */
       #palettePopupModal {
-        background: transparent !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        pointer-events: none;
-        padding: 0 !important;
-        position: fixed;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 340px;
-        height: 100vh;
-        z-index: 10000;
-        display: none;
+        display: none !important; /* Never open popup modal on desktop */
       }
       #palettePopupModal .modal-content {
-        pointer-events: auto;
-        position: fixed;
-        top: 68px;
-        right: 16px;
-        bottom: 20px;
-        width: 320px;
-        max-width: 320px;
-        margin: 0;
-        height: calc(100vh - 88px);
-        max-height: calc(100vh - 88px);
-        display: flex;
-        flex-direction: column;
-        border: 1px solid rgba(56, 189, 248, 0.45);
-        box-shadow: -8px 0 35px rgba(0, 0, 0, 0.75);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
         border-radius: 18px;
-        z-index: 10001;
-        padding: 16px;
         background: rgba(15, 23, 42, 0.98);
       }
       #palettePopupModal .palette-grid {
-        flex: 1;
-        max-height: none !important;
+        max-height: 55vh;
         grid-template-columns: repeat(5, 1fr);
         overflow-y: auto;
       }
@@ -439,11 +413,20 @@
     }
 
 </style>
+  <script>
+    // If running in a regular web browser, hide splash screen overlay immediately before first paint
+    if (window.location.protocol !== 'file:' && !navigator.userAgent.includes('CrackCGPSCApp') && typeof window.AndroidAppBridge === 'undefined') {
+      document.write('<style>#splashScreenVideoOverlay { display: none !important; }</style>');
+    }
+  </script>
 </head>
 <body>
-
-<div id="topProgressBar"></div>
-
+<!-- APP LAUNCH SPLASH VIDEO OVERLAY (MOBILE APP ONLY) -->
+<div id="splashScreenVideoOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#060913; z-index:9999999; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.45s ease; overflow:hidden;">
+  <video id="appSplashVideo" autoplay playsinline webkit-playsinline muted disablePictureInPicture style="width:100%; height:100%; object-fit:contain; background:#060913; pointer-events:none;">
+    <source src="splash_video.mp4" type="video/mp4">
+  </video>
+</div>
 <header>
   <div class="brand-container" onclick="navigate('tab-home')">
     <div class="brand-rocket-clean">🚀</div>
@@ -486,6 +469,7 @@
           </span>
         </div>
         <button class="btn" style="width: 100%; margin-top: 6px; font-weight: 700; font-size: 1rem;" onclick="memberLogin()">Login</button>
+
         
         <!-- Forgot Password Link Centered Directly Below Login Button -->
         <div style="display:flex; justify-content:center; align-items:center; margin-top:14px; margin-bottom:6px;">
@@ -561,6 +545,7 @@
       <button class="nav-btn" id="navPracBtn" onclick="navigate('tab-practice')">⚡ Quiz</button>
       <button class="nav-btn" id="navRevBtn" onclick="navigate('tab-revision')">🔄 Revision</button>
       <button class="nav-btn" id="navResBtn" onclick="navigate('tab-results')">📊 Results</button>
+      <button class="nav-btn" id="navAnalysisBtn" onclick="navigate('tab-analysis')">📈 PYQ Analysis & Checklist</button>
     </div>
 
     <div class="floating-bottom-nav">
@@ -573,7 +558,25 @@
 
     <!-- 0. DASHBOARD HOME OVERVIEW -->
     <div id="tab-home" class="tab-view">
-      <div class="card" style="background: linear-gradient(135deg, rgba(37,99,235,0.85) 0%, rgba(124,58,237,0.85) 50%, rgba(6,182,212,0.85) 100%); border: none;">
+      <!-- DYNAMIC LIVE SEARCH & PYQ TOPIC EXPLORER -->
+    <div class="card" style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(30,41,59,0.85), rgba(15,23,42,0.95)); border: 1.5px solid rgba(56,189,248,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.5); position: relative;">
+      <div style="font-weight:700; font-size:0.95rem; color:#38bdf8; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
+        <span>🔍 Search Exam, Subject, Topic & PYQs</span>
+        <button onclick="navigate('tab-analysis')" style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:8px; cursor:pointer;">Open Analysis Page 📈</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <input type="text" id="dashboardSearchInput" placeholder="Type exam, subject, topic, or keyword... (e.g. CGPSC, History, Rivers)" 
+          style="flex:1; background:rgba(15,23,42,0.85); border:1px solid rgba(56,189,248,0.3); border-radius:10px; padding:10px 14px; color:#fff; font-size:0.92rem; outline:none;"
+          oninput="handleDashboardSearchInput(this.value)" onkeydown="if(event.key==='Enter') executeDashboardSearch()">
+        <button class="btn btn-primary" style="padding:10px 18px; font-weight:700; white-space:nowrap;" onclick="executeDashboardSearch()">
+          Analyze 📊
+        </button>
+      </div>
+      <!-- LIVE AUTOCOMPLETE SUGGESTIONS BOX -->
+      <div id="searchSuggestionsBox" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#0f172a; border:1.5px solid rgba(56,189,248,0.5); border-radius:12px; max-height:360px; overflow-y:auto; z-index:10000; box-shadow:0 14px 40px rgba(0,0,0,0.85); padding:8px 0;"></div>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, rgba(37,99,235,0.85) 0%, rgba(124,58,237,0.85) 50%, rgba(6,182,212,0.85) 100%); border: none;">
         <h2 id="homeWelcomeGreeting" style="font-family:'Outfit',sans-serif; color:#ffffff; font-size:1.55rem; font-weight:800; margin-bottom:8px;">India's Structured Free Test Series Platform</h2>
         <p style="color:#e0e7ff; font-size:0.92rem; line-height:1.5;">Complete Preparation Platform for CGPSC Prelims, CGVYAPAM, SSC, Railway & All State Competitive Exams.</p>
       </div>
@@ -646,7 +649,7 @@
       <div class="card" style="border-color: rgba(59,130,246,0.35);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
           <div><h3 style="font-family:'Outfit',sans-serif; color:#60a5fa; margin:0; font-size:1.15rem;">🏆 Global Leaderboard & Standings</h3><p style="color:var(--muted); font-size:0.8rem; margin-top:2px;">Top aspirants and your current rank position</p></div>
-          <button class="btn btn-secondary btn-sm" onclick="syncOnlineLeaderboard(true)">🔄 Refresh Rank</button>
+          <button class="btn btn-secondary btn-sm" id="refreshRankBtn" onclick="syncOnlineLeaderboard(true)">🔄 Refresh Rank</button>
         </div>
         <div style="overflow-x:auto; border-radius:12px; border:1px solid var(--border);">
           <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
@@ -1343,13 +1346,16 @@
   let cachedQs = null;
   try {
     cachedQs = JSON.parse(localStorage.getItem('cg_cached_questions'));
-    // Purge any dummy seed questions (ids starting with 'q_') from cached storage
-    if (Array.isArray(cachedQs)) {
-      cachedQs = cachedQs.filter(q => !q.id || (!q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_')));
-      localStorage.setItem('cg_cached_questions', JSON.stringify(cachedQs));
-    }
   } catch(e){}
-  let questions = (Array.isArray(cachedQs) && cachedQs.length > 0) ? cachedQs : [];
+  // Base questions always include curated defaultSeedQuestions plus any cached questions
+  const qMap = new Map();
+  if (typeof defaultSeedQuestions !== 'undefined' && Array.isArray(defaultSeedQuestions)) {
+    defaultSeedQuestions.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+  }
+  if (Array.isArray(cachedQs)) {
+    cachedQs.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+  }
+  let questions = Array.from(qMap.values());
   let members = [], attemptedQIds = JSON.parse(localStorage.getItem('cg_attempted_qids')) || [];
   let currentUser = JSON.parse(localStorage.getItem('cg_auth_user')) || null;
   let activeEngineMode = 'test', activeQuestions = [], userResponses = {}, currentQIdx = 0, lastAttemptSummary = null;
@@ -1448,8 +1454,8 @@
       }
     } catch(e) {}
 
-    // Auto-recover correct question IDs from user's test history
-    if (Array.isArray(currentUser.history)) {
+    // Collect correct question IDs from test history
+    if (Array.isArray(currentUser.history) && currentUser.history.length > 0) {
       currentUser.history.forEach(h => {
         if (Array.isArray(h.correctQIds)) {
           h.correctQIds.forEach(id => { if(id) cycleCorrectSet.add(id.toString()); });
@@ -1466,40 +1472,32 @@
     let correctCount = cycleCorrectSet.size;
     let revisions = currentUser.revision_count || 0;
 
-    // Preserve previously achieved percentage if question IDs were not tracked
-    if (correctCount === 0 && currentUser.current_percentage && currentUser.current_percentage > 0) {
-      correctCount = Math.round((currentUser.current_percentage / 100) * totalDbQ);
-    }
-
-    let pct = 0;
-    // Only trigger revision +1 if actual full DB questions (> 500) have been answered
+    // Revision cycle completion check
     if (totalDbQ >= 500 && correctCount >= totalDbQ) {
       revisions += 1;
       currentUser.revision_count = revisions;
       cycleCorrectSet.clear();
       currentUser.overall_correct_qids = [];
-      currentUser.current_percentage = 0;
-      pct = 0;
       correctCount = 0;
       localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
       localStorage.setItem(`cg_${currentUser.username}_correct_qids`, JSON.stringify([]));
       updateUserCloudData();
-    } else {
-      pct = Math.min(100, Math.round((correctCount / totalDbQ) * 100));
-      // If pct is 0 but currentUser had an existing percentage, keep existing percentage!
-      if (pct === 0 && currentUser.current_percentage && currentUser.current_percentage > 0) {
-        pct = currentUser.current_percentage;
-        correctCount = Math.round((pct / 100) * totalDbQ);
-      } else {
-        currentUser.current_percentage = pct;
-        currentUser.overall_correct_qids = Array.from(cycleCorrectSet);
-        localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-        localStorage.setItem(`cg_${currentUser.username}_correct_qids`, JSON.stringify(currentUser.overall_correct_qids));
-      }
     }
 
-    updateDashboardProgressUI(pct, revisions, totalDbQ, correctCount);
-    return { pct, revisions, correctCount };
+    // STRICT: Overall percentage is strictly proportional to unique correct questions
+    // If correctCount is 0, percentage MUST BE 0% (Fixes bug where 0 correct displayed 35%)
+    let displayPct = 0;
+    if (correctCount > 0 && totalDbQ > 0) {
+      displayPct = Math.min(100, Math.round((correctCount / totalDbQ) * 100));
+    }
+
+    currentUser.current_percentage = displayPct;
+    currentUser.combined_score = (revisions * 1000) + displayPct;
+    currentUser.overall_correct_qids = Array.from(cycleCorrectSet);
+    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+
+    updateDashboardProgressUI(displayPct, revisions, totalDbQ, correctCount);
+    return { pct: displayPct, revisions, correctCount };
   }
 
   function updateDashboardProgressUI(pct, revisions, totalDbQ, correctCount = 0) {
@@ -1509,225 +1507,15 @@
     const thumbEl = document.getElementById('progressEmojiThumb');
     const startLbl = document.getElementById('progressStartLabel');
     const endLbl = document.getElementById('progressEndLabel');
-
     if(pctEl) pctEl.innerText = `${pct}%`;
     if(revEl) revEl.innerText = revisions;
     if(barEl) barEl.style.width = `${pct}%`;
     if(thumbEl) thumbEl.style.left = `${pct}%`;
     if(startLbl) startLbl.innerText = `${correctCount} Correct Qs`;
+    // Clean label: Total DB Qs without repeating percentage
     if(endLbl) endLbl.innerText = `Total DB Qs: ${totalDbQ}`;
   }
 
-  // --- PROFESSIONAL DELTA CACHING & INITIALIZATION ---
-  async function init() {
-    setProgress(30);
-    // Instant load from local cache (0 reads)
-    if (currentUser) {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('portal-screen').style.display = 'block';
-    }
-    
-    // 1. Initial instant load from cache
-    if(questions.length > 0) {
-      syncDynamicSubjects();
-      computeOverallUserProgress();
-      populateAllSubjectDropdowns();
-      buildFltSubjectInputs();
-    }
-    
-    // 2. Perform delta background sync (only reads changed docs)
-    await fetchQuestionsFromCloud(false);
-    initBackgroundQuestionsListener();
-    if (currentUser) await fetchUsersFromCloud(false);
-    
-    syncDynamicSubjects();
-    setProgress(80);
-    if(currentUser) showPortal(); else showAuth();
-    populateAllSubjectDropdowns();
-    buildFltSubjectInputs();
-    syncOnlineLeaderboard(false);
-    initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
-    initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
-    initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
-    initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
-    
-    // Restore saved language preference
-    const savedLang = localStorage.getItem('cg_selected_lang') || 'en';
-    if (savedLang === 'hi') {
-      setTimeout(() => changeLanguage('hi'), 600);
-    }
-    
-    setProgress(100);
-  }
-
-  function togglePasswordVisibility(id, el) {
-    const f = document.getElementById(id);
-    if(!f) return;
-    const isShowing = f.type === "text";
-    f.type = isShowing ? "password" : "text";
-    if(el) {
-      el.innerHTML = isShowing 
-        ? `<svg class="eye-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>`
-        : `<svg class="eye-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line></svg>`;
-    }
-  }
-
-  function toggleForgotPass(show) {
-    document.getElementById('mem-login-box').style.display = show ? 'none' : 'block';
-    document.getElementById('mem-reg-box').style.display = 'none';
-    const forgotBox = document.getElementById('mem-forgot-box');
-    if (forgotBox) forgotBox.style.display = show ? 'block' : 'none';
-    const recCard = document.getElementById('recoveryResultCard');
-    if (recCard) recCard.style.display = 'none';
-  }
-
-  async function findAccountCredentials() {
-    const name = document.getElementById('recFullName').value.trim();
-    const mobile = (document.getElementById('recMobile')?.value || '').trim();
-    if(!name || !mobile) return alert('Please enter both your Real Full Name and Registered Mobile Number!');
-    if(mobile.length < 10) return alert('Please enter a valid 10-digit mobile number!');
-    const resCard = document.getElementById('recoveryResultCard');
-    resCard.style.display = 'none';
-    let found = null;
-    
-    // Check locally first (0 reads!)
-    if (currentUser && currentUser.name && currentUser.name.trim().toLowerCase() === name.toLowerCase() && (currentUser.mobile === mobile || currentUser.phone === mobile)) {
-      found = currentUser;
-    }
-    if (!found) {
-      found = members.find(m => m.name && m.name.trim().toLowerCase() === name.toLowerCase() && (m.mobile === mobile || m.phone === mobile));
-    }
-    
-    // If not found locally, query ONLY by mobile number with limit 1 (EXACTLY 1 READ!)
-    if (!found) {
-      try {
-        const snap = await db.collection("users")
-          .where("mobile", "==", mobile)
-          .limit(1)
-          .get();
-        if (!snap.empty) {
-          const data = snap.docs[0].data();
-          if (data.name && data.name.trim().toLowerCase() === name.toLowerCase()) {
-            found = data;
-          }
-        }
-      } catch(e) {
-        console.warn("Account recovery query note:", e);
-      }
-    }
-    if (found) {
-      document.getElementById('resRecUser').innerText = found.username;
-      document.getElementById('resRecPass').innerText = found.pass;
-      resCard.style.display = 'block';
-    } else {
-      alert('No account found with this Real Full Name and Mobile Number. Please verify your registered details.');
-    }
-  }  function useFoundCredentials() {
-    const u = document.getElementById('resRecUser').innerText;
-    const p = document.getElementById('resRecPass').innerText;
-    document.getElementById('memLogUser').value = u;
-    document.getElementById('memLogPass').value = p;
-    toggleForgotPass(false);
-  }
-
-  
-  // --- USER PROFILE & DEAD USER CLEANUP LOGIC ---
-  function openUserProfileModal() {
-    if(!currentUser) return showAuth();
-    document.getElementById('profHeaderName').innerText = currentUser.name || 'Aspirant';
-    document.getElementById('profHeaderUser').innerText = `@${currentUser.username}`;
-    document.getElementById('profInputName').value = currentUser.name || '';
-    document.getElementById('profInputUser').value = currentUser.username;
-    document.getElementById('profInputMobile').value = currentUser.mobile || '';
-    document.getElementById('profInputDob').value = currentUser.dob || '';
-    document.getElementById('profInputPass').value = '';
-    
-    // Display Ranking from cached leaderboard or combined score
-    const score = currentUser.combined_score || 0;
-    document.getElementById('profGlobalRankBadge').innerText = `🏆 Overall Score: ${score} pts`;
-    document.getElementById('userProfileModal').style.display = 'block';
-  }
-
-  function closeUserProfileModal() {
-    document.getElementById('userProfileModal').style.display = 'none';
-  }
-
-  async function saveUserProfileDetails() {
-    if (!currentUser) return;
-    const name = document.getElementById('profInputName').value.trim();
-    const mobile = document.getElementById('profInputMobile').value.trim();
-    const dob = document.getElementById('profInputDob').value;
-    const newPass = document.getElementById('profInputPass').value.trim();
-
-    if (!name) return alert('Please enter your Name!');
-    if (mobile && mobile.length < 10) return alert('Mobile number must be 10 digits!');
-
-    currentUser.name = name;
-    if (mobile) currentUser.mobile = mobile;
-    if (dob) currentUser.dob = dob;
-    if (newPass) currentUser.pass = newPass;
-
-    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-    document.getElementById('footerUserName').innerText = `@${currentUser.username}`;
-
-    try {
-      let updatePayload = {
-        name: currentUser.name,
-        mobile: currentUser.mobile || '',
-        dob: currentUser.dob || '',
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      if (newPass) updatePayload.pass = newPass;
-
-      await db.collection("users").doc(currentUser.username.toLowerCase()).set(updatePayload, { merge: true });
-      alert('Profile updated successfully!');
-      closeUserProfileModal();
-    } catch(e) {
-      alert('Profile saved locally.');
-      closeUserProfileModal();
-    }
-  }
-
-  async function deleteCurrentUserId() {
-    if (!currentUser || !currentUser.username) return;
-    const uname = currentUser.username;
-    if (!confirm(`Are you sure you want to permanently delete account @${uname}? This action is irreversible!`)) return;
-    const typed = prompt(`Type "${uname}" to confirm account deletion:`);
-    if (typed !== uname) return alert('Username did not match. Deletion cancelled.');
-
-    try {
-      await db.collection("users").doc(uname.toLowerCase()).delete();
-    } catch(e) {
-      console.warn("Delete account note:", e);
-    }
-
-    localStorage.removeItem('cg_auth_user');
-    localStorage.removeItem(`cg_${uname}_correct_qids`);
-    currentUser = null;
-    closeUserProfileModal();
-    alert('Account deleted successfully.');
-    showAuth();
-  }
-
-  // Purge dead user revision storage if inactive for > 365 days to save Firebase storage
-  function checkAndPurgeDeadUserStorage(userData) {
-    if (!userData) return userData;
-    try {
-      const updated = userData.updatedAt?.toDate ? userData.updatedAt.toDate() : (userData.updatedAt ? new Date(userData.updatedAt) : null);
-      if (updated) {
-        const daysInactive = (Date.now() - updated.getTime()) / (1000 * 60 * 60 * 24);
-        if (daysInactive > 365) {
-          console.log(`User inactive for ${Math.round(daysInactive)} days. Purging revision store to conserve storage.`);
-          userData.revision_store_json = JSON.stringify({ wrong: [], unatt: [], saved: [] });
-          userData.revision_store = { wrong: [], unatt: [], saved: [] };
-        }
-      }
-    } catch(e) {}
-    return userData;
-  }
-
-  
-  // --- STUDENT PROFILE PAGE IMPLEMENTATION ---
   function renderProfilePage() {
     if (!currentUser) return showAuth();
     computeOverallUserProgress();
@@ -1821,17 +1609,31 @@
     }
   }
 
-  function clearAllTestHistory() {
+  async function clearAllTestHistory() {
     if (!currentUser || !currentUser.history || currentUser.history.length === 0) {
       return alert('No test history records found to clear.');
     }
     if (confirm('Are you sure you want to permanently clear all your test history records? / क्या आप अपनी सभी टेस्ट हिस्ट्री साफ करना चाहते हैं?')) {
       currentUser.history = [];
+      currentUser.overall_correct_qids = [];
+      currentUser.current_percentage = 0;
+      currentUser.combined_score = 0;
+      currentUser.revision_count = 0;
+
+      // Synchronize in-memory members cache so re-login never restores deleted history
+      const mIdx = members.findIndex(m => m.username && m.username.toLowerCase() === currentUser.username.toLowerCase());
+      if (mIdx !== -1) {
+        members[mIdx] = { ...currentUser };
+      }
+
       localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      localStorage.removeItem(`cg_${currentUser.username}_correct_qids`);
+
       renderPastTestHistoryTable();
       renderProfilePage();
-      updateUserCloudData();
-      alert('All test history records have been cleared successfully.');
+      await updateUserCloudData();
+      computeOverallUserProgress();
+      alert('All test history records have been permanently cleared.');
     }
   }
 
@@ -1899,15 +1701,18 @@
     const pass = document.getElementById('memLogPass').value.trim();
     if(!user || !pass) return alert('Please enter username and password!');
     
-    // Check locally first (0 reads), fallback to single doc read
-    let found = members.find(m => m.username && m.username.toLowerCase() === user && m.pass === pass);
+    // Always fetch fresh from cloud to guarantee latest accurate records
+    let found = null;
+    try {
+      const doc = await db.collection("users").doc(user).get();
+      if(doc.exists && doc.data().pass === pass) {
+        found = doc.data();
+      }
+    } catch(e) {}
+
+    // Fallback to local members if offline
     if (!found) {
-      try {
-        const doc = await db.collection("users").doc(user).get();
-        if(doc.exists && doc.data().pass === pass) {
-          found = doc.data();
-        }
-      } catch(e) {}
+      found = members.find(m => m.username && m.username.toLowerCase() === user && m.pass === pass);
     }
 
     if(found) {
@@ -1922,21 +1727,64 @@
         }
       }
       currentUser = {
-        name: found.name, username: found.username, role: found.role || 'member',
-        dob: found.dob || "", pass: found.pass || "",
+        name: found.name, 
+        username: found.username, 
+        role: found.role || 'member',
+        dob: found.dob || "", 
+        pass: found.pass || "",
         overall_correct_qids: Array.isArray(found.overall_correct_qids) ? found.overall_correct_qids : [],
         revision_count: found.revision_count || 0,
         current_percentage: found.current_percentage || 0,
         combined_score: found.combined_score || 0,
         subject_progress: found.subject_progress || {},
         revision_store: rStore || { wrong: [], unatt: [], saved: [] },
-        history: found.history || []
+        history: Array.isArray(found.history) ? found.history : []
       };
+      
+      // Update local members array so in-memory cache is in sync
+      const mIdx = members.findIndex(m => m.username && m.username.toLowerCase() === user);
+      if (mIdx !== -1) members[mIdx] = currentUser; else members.push(currentUser);
+
       localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
       showPortal();
+      computeOverallUserProgress();
     } else {
       alert('Invalid username or password!');
     }
+  }
+
+  async function deleteCurrentUserId() {
+    if (!currentUser) {
+      alert("No active user account is logged in.");
+      return;
+    }
+    const loggedUser = (currentUser.username || "").trim();
+    const promptMsg = "PERMANENT ACCOUNT DELETION\n\nAre you sure you want to delete your account?\nAll history, scores, and saved bookmarks will be deleted.\n\nType your username (" + loggedUser + ") to confirm:";
+    const entered = prompt(promptMsg);
+    if (entered === null) return;
+    
+    const cleanEntered = entered.trim().toLowerCase().replace(/^@+/, "");
+    const cleanLogged = loggedUser.toLowerCase().replace(/^@+/, "");
+    
+    if (cleanEntered !== cleanLogged) {
+      alert("Username did not match! You entered: " + entered.trim() + " but required is: " + loggedUser);
+      return;
+    }
+    
+    try {
+      await db.collection("users").doc(cleanLogged).delete();
+    } catch(e) {
+      console.warn("Cloud account delete note:", e);
+    }
+    
+    localStorage.removeItem("cg_auth_user");
+    localStorage.removeItem("cg_" + cleanLogged + "_correct_qids");
+    localStorage.removeItem("cg_" + cleanLogged + "_active_tab");
+    localStorage.removeItem("cg_" + loggedUser + "_correct_qids");
+    
+    currentUser = null;
+    alert("Your account and all associated test records have been permanently deleted.");
+    showAuth();
   }
 
   function logout() {
@@ -2079,65 +1927,65 @@
 
     // Explicit Era-based prefixes:
     if (t.startsWith('ancient') || t.includes('प्राचीन')) return 100;
-    if (t.startsWith('medieval') || t.includes('मध्यकालीन') || t.includes('मध्यकाल')) return 400;
+    if (t.startsWith('medieval') || t.includes('मध्यकालीन') || t.includes('मध्यकाल')) return 350;
     if (t.startsWith('modern') || t.includes('आधुनिक')) return 700;
 
     // --- 1. ANCIENT ERA (Score 10 - 299) ---
-    if (t.includes('pre-historic') || t.includes('prehistoric') || t.includes('प्रागैतिहासिक') || t.includes('stone age') || t.includes('पाषाण')) return 10;
+    if (t.includes('prehistoric') || t.includes('stone age') || t.includes('प्रागैतिहासिक') || t.includes('पाषाण') || t.includes('rock painting') || t.includes('शैलचित्र')) return 10;
     if (t.includes('indus') || t.includes('harappa') || t.includes('हड़प्पा') || t.includes('सिंधु') || t.includes('chalcolithic') || t.includes('ताम्र')) return 30;
-    if (t.includes('vedic') || t.includes('वैदिक') || t.includes('rigved') || t.includes('ऋग्वेद') || t.includes('रामायण') || t.includes('महाभारत')) return 50;
-    if (t.includes('mahajanapada') || t.includes('महाजनपद') || t.includes('magadh') || t.includes('मगध')) return 70;
-    if (t.includes('buddhis') || t.includes('बौद्ध') || t.includes('jain') || t.includes('जैन') || t.includes('तीर्थंकर')) return 90;
-    if (t.includes('maurya') || t.includes('मौर्य') || t.includes('ashoka') || t.includes('अशोक') || t.includes('चाणक्य')) return 110;
-    if (t.includes('post-maurya') || t.includes('shunga') || t.includes('शुंग') || t.includes('kushan') || t.includes('कुषाण') || t.includes('satavahan') || t.includes('सातवाहन') || t.includes('sangam') || t.includes('संगम')) return 130;
-    if (t.includes('gupta') || t.includes('गुप्त') || t.includes('samudragupta') || t.includes('chandragupta')) return 150;
-    if (t.includes('harsha') || t.includes('हर्षवर्धन') || t.includes('rajarshi') || t.includes('राजर्षितुल्य') || t.includes('nal ') || t.includes('nal dynasty') || t.includes('नल वंश') || t.includes('नल') || t.includes('sharabhpuriya') || t.includes('शरभपुरीय') || t.includes('pandu') || t.includes('पांडु') || t.includes('somavansh') || t.includes('सोमवंश') || t.includes('ban dynasty') || t.includes('बाण')) return 180;
+    if (t.includes('vedic') || t.includes('वैदिक') || t.includes('rigved') || t.includes('ऋग्वेद')) return 50;
+    if (t.includes('epic') || t.includes('महाकाव्य') || t.includes('रामायण') || t.includes('महाभारत')) return 70;
+    if (t.includes('mahajanapada') || t.includes('महाजनपद') || t.includes('magadh') || t.includes('मगध') || t.includes('haryanka') || t.includes('nanda') || t.includes('नंद')) return 90;
+    if (t.includes('buddhis') || t.includes('बौद्ध') || t.includes('jain') || t.includes('जैन') || t.includes('तीर्थंकर')) return 110;
+    if (t.includes('maurya') || t.includes('मौर्य') || t.includes('ashoka') || t.includes('अशोक') || t.includes('चाणक्य') || t.includes('kalinga')) return 130;
+    if (t.includes('post-maurya') || t.includes('shunga') || t.includes('शुंग') || t.includes('kushan') || t.includes('कुषाण') || t.includes('satavahan') || t.includes('सातवाहन') || t.includes('sangam') || t.includes('संगम')) return 150;
+    if (t.includes('gupta') || t.includes('गुप्त') || t.includes('samudragupta') || t.includes('chandragupta')) return 170;
+    if (t.includes('harsha') || t.includes('हर्षवर्धन') || t.includes('vakataka') || t.includes('वाकाटक')) return 190;
+    if (t.includes('rajarshi') || t.includes('राजर्षितुल्य') || t.includes('nal ') || t.includes('नल') || t.includes('शरभ') || t.includes('sharabh') || t.includes('pandu') || t.includes('पांडु') || t.includes('somavansh') || t.includes('सोमवंश') || t.includes('ban dynasty') || t.includes('बाण')) return 220;
 
     // --- 2. MEDIEVAL ERA (Score 300 - 599) ---
     if (t.includes('early medieval') || t.includes('पूर्व मध्यकाल') || t.includes('rajput') || t.includes('राजपूत') || t.includes('chola') || t.includes('चोल') || t.includes('chalukya') || t.includes('राष्ट्रकूट')) return 310;
-    if (t.includes('delhi sultanate') || t.includes('sultanate') || t.includes('सल्तनत') || t.includes('slave dynasty') || t.includes('गुलाम') || t.includes('khilji') || t.includes('खिलजी') || t.includes('tughlaq') || t.includes('तुगलक') || t.includes('lodhi') || t.includes('लोदी')) return 330;
-    if (t.includes('kalchuri') || t.includes('कलचुरी') || t.includes('ratanpur') || t.includes('रतनपुर') || t.includes('raipur') || t.includes('रायपुर') || t.includes('हैहय') || t.includes('haihay') || t.includes('chhindak') || t.includes('छिंदक') || t.includes('nagavansh') || t.includes('नागवंश') || t.includes('फणि')) return 350;
-    if (t.includes('kakatiya') || t.includes('काकतीय') || t.includes('annadev') || t.includes('अन्नमदेव') || t.includes('purushottam') || t.includes('रुद्रप्रताप')) return 370;
-    if (t.includes('vijayanagar') || t.includes('विजयनगर') || t.includes('bahmani') || t.includes('बहमनी') || t.includes('bhakti') || t.includes('भक्ति') || t.includes('sufi') || t.includes('सूफी')) return 390;
-    if (t.includes('mughal') || t.includes('मुगल') || t.includes('babur') || t.includes('बाबर') || t.includes('humayun') || t.includes('हुमायूँ') || t.includes('sher shah') || t.includes('शेरशाह') || t.includes('akbar') || t.includes('अकबर') || t.includes('jahangir') || t.includes('शाहजहाँ') || t.includes('aurangzeb') || t.includes('औरंगजेब')) return 420;
+    if (t.includes('ghazni') || t.includes('ghori') || t.includes('अरब') || t.includes('तुर्क')) return 320;
+    if (t.includes('delhi sultanate') || t.includes('sultanate') || t.includes('सल्तनत') || t.includes('slave dynasty') || t.includes('गुलाम')) return 330;
+    if (t.includes('khilji') || t.includes('खिलजी') || t.includes('alauddin')) return 340;
+    if (t.includes('tughlaq') || t.includes('तुगलक') || t.includes('sayyid') || t.includes('lodhi') || t.includes('लोदी')) return 350;
+    if (t.includes('vijayanagar') || t.includes('विजयनगर') || t.includes('bahmani') || t.includes('बहमनी')) return 360;
+    if (t.includes('bhakti') || t.includes('भक्ति') || t.includes('sufi') || t.includes('सूफी') || t.includes('kabir') || t.includes('nanak')) return 370;
+    if (t.includes('kalchuri') || t.includes('कलचुरी') || t.includes('ratanpur') || t.includes('रतनपुर') || t.includes('raipur') || t.includes('रायपुर') || t.includes('हैहय')) return 380;
+    if (t.includes('kakatiya') || t.includes('काकतीय') || t.includes('annadev') || t.includes('अन्नमदेव') || t.includes('purushottam')) return 390;
+    if (t.includes('chhindak') || t.includes('छिंदक') || t.includes('nagavansh') || t.includes('नागवंश') || t.includes('phani') || t.includes('फणि')) return 400;
+    if (t.includes('mughal') || t.includes('मुगल') || t.includes('babur') || t.includes('बाबर') || t.includes('humayun') || t.includes('sher shah') || t.includes('शेरशाह') || t.includes('akbar') || t.includes('अकबर') || t.includes('jahangir') || t.includes('shah jahan') || t.includes('aurangzeb') || t.includes('औरंगजेब')) return 420;
     if (t.includes('maratha') || t.includes('मराठा') || t.includes('shivaji') || t.includes('शिवाजी') || t.includes('peshwa') || t.includes('पेशवा') || t.includes('भोंसले') || t.includes('bhonsle') || t.includes('suba') || t.includes('सूबा')) return 450;
+    if (t.includes('british protection') || t.includes('संरक्षण काल') || t.includes('agnew') || t.includes('एग्नेव')) return 480;
 
     // --- 3. MODERN ERA (Score 600 - 999) ---
-    if (t.includes('european') || t.includes('यूरोपीय') || t.includes('east india') || t.includes('ईस्ट इंडिया') || t.includes('carnatic') || t.includes('plassey') || t.includes('प्लासी') || t.includes('buxar') || t.includes('बक्सर')) return 610;
-    if (t.includes('british rule') || t.includes('ब्रिटिश शासन') || t.includes('commissioner') || t.includes('कमिश्नर') || t.includes('tahutdari') || t.includes('ताहुतदारी')) return 625;
-    // CG Tribal Revolts in strict historical order
-    if (t.includes('halba') || t.includes('हलबा')) return 630;
-    if (t.includes('bhopalpatnam') || t.includes('भोपालपटनम')) return 632;
-    if (t.includes('paralkot') || t.includes('परलकोट') || t.includes('gendsingh') || t.includes('गेंदसिंह')) return 634;
-    if (t.includes('tarapur') || t.includes('तारापुर')) return 636;
-    if (t.includes('maria') || t.includes('muria') || t.includes('माड़िया')) return 638;
-    if (t.includes('lingagiri') || t.includes('लिंगागिरि')) return 640;
-    // 1857 Revolt in India & CG
-    if (t.includes('1857') || t.includes('veer narayan') || t.includes('वीर नारायण सिंह') || t.includes('hanuman singh') || t.includes('हनुमान सिंह') || t.includes('surendra sai')) return 650;
-    // Post-1857 Revolts
-    if (t.includes('koi revolt') || t.includes('कोई विद्रोह') || t.includes('कोई')) return 660;
-    if (t.includes('muria revolt') || t.includes('मुरिया विद्रोह') || t.includes('झाड़ा सिरहा')) return 670;
-    if (t.includes('bhumkal') || t.includes('भूमकाल') || t.includes('gundadhur') || t.includes('गुंडाधूर')) return 685;
-    if (t.includes('tribal revolt') || t.includes('जनजातीय विद्रोह') || t.includes('विद्रोह')) return 690;
+    if (t.includes('european') || t.includes('यूरोपीय') || t.includes('east india') || t.includes('carnatic') || t.includes('plassey') || t.includes('प्लासी') || t.includes('buxar') || t.includes('बक्सर')) return 610;
+    if (t.includes('subsidiary') || t.includes('lapse') || t.includes('सहायक संधि') || t.includes('हड़प नीति')) return 620;
+    if (t.includes('commissioner') || t.includes('कमिश्नर') || t.includes('tahutdari') || t.includes('ताहुतदारी') || t.includes('डिप्टी कमिश्नर')) return 630;
+    if (t.includes('1857') || t.includes('क्रांति') || t.includes('mutiny') || t.includes('rebellion') || t.includes('विद्रोह')) return 650;
+    if (t.includes('veer narayan') || t.includes('वीर नारायण') || t.includes('sonakhan') || t.includes('सोनाखान') || t.includes('hanuman singh') || t.includes('हनुमान सिंह')) return 660;
+    if (t.includes('tribal') || t.includes('आदिवासी') || t.includes('halba') || t.includes('हलबा') || t.includes('tarapur') || t.includes('तारापुर') || t.includes('lingagiri') || t.includes('लिंगागिरि') || t.includes('koi') || t.includes('कोई') || t.includes('muria') || t.includes('मुरिया') || t.includes('bhumkal') || t.includes('भूमकाल') || t.includes('gundadhur') || t.includes('गुंडाधूर')) return 680;
+    if (t.includes('reform') || t.includes('सुधार') || t.includes('brahmo') || t.includes('arya samaj') || t.includes('आर्य समाज') || t.includes('satnam') || t.includes('सतनाम') || t.includes('ghasidas') || t.includes('घासीदास')) return 700;
+    if (t.includes('viceroy') || t.includes('वायसराय') || t.includes('governor') || t.includes('गवर्नर')) return 720;
+    if (t.includes('congress') || t.includes('कांग्रेस') || t.includes('inc') || t.includes('moderate') || t.includes('extremist') || t.includes('गरम दल') || t.includes('नरम दल')) return 740;
+    if (t.includes('bengal') || t.includes('बंगाल') || t.includes('swadeshi') || t.includes('स्वदेशी') || t.includes('muslim league')) return 760;
+    if (t.includes('gandhi') || t.includes('गांधी') || t.includes('champaran') || t.includes('चंपारण') || t.includes('rowlatt') || t.includes('रौलट') || t.includes('jallianwala') || t.includes('जलियांवाला')) return 780;
+    if (t.includes('non-cooperation') || t.includes('असहयोग') || t.includes('khilafat') || t.includes('खिलाफत') || t.includes('chauri chaura')) return 800;
+    if (t.includes('sundarlal') || t.includes('सुंदरलाल') || t.includes('kandel') || t.includes('कंडेल') || t.includes('nahar') || t.includes('flag satyagraha') || t.includes('झंडा सत्याग्रह')) return 810;
+    if (t.includes('simon') || t.includes('साइमन') || t.includes('nehru report') || t.includes('lahore session') || t.includes('पूर्ण स्वराज')) return 820;
+    if (t.includes('civil disobedience') || t.includes('सविनय अवज्ञा') || t.includes('dandi') || t.includes('दांडी') || t.includes('round table') || t.includes('गोलमेज')) return 830;
+    if (t.includes('jungle satyagraha') || t.includes('जंगल सत्याग्रह') || t.includes('rudri') || t.includes('रुद्री') || t.includes('tamora') || t.includes('तमोरा') || t.includes('mohbona') || t.includes('मोहबोना') || t.includes('badratola')) return 840;
+    if (t.includes('bhagat singh') || t.includes('भगत सिंह') || t.includes('azad') || t.includes('आजाद') || t.includes('ina') || t.includes('subhash') || t.includes('सुभाष चंद्र बोस') || t.includes('क्रांतिकारी')) return 850;
+    if (t.includes('quit india') || t.includes('भारत छोड़ो') || t.includes('do or die')) return 870;
+    if (t.includes('raipur conspiracy') || t.includes('षड्यंत्र') || t.includes('dynamite') || t.includes('डायनामाइट')) return 880;
+    if (t.includes('constituent assembly') || t.includes('संविधान सभा') || t.includes('mountbatten') || t.includes('independence') || t.includes('स्वतंत्रता') || t.includes('freedom struggle')) return 900;
+    if (t.includes('integration') || t.includes('विलय') || t.includes('state reorganization') || t.includes('राज्य निर्माण') || t.includes('chhattisgarh state') || t.includes('2000')) return 920;
 
-    // Social & Religious Reform
-    if (t.includes('reform') || t.includes('सुधार') || t.includes('brahmo') || t.includes('arya samaj') || t.includes('satnami') || t.includes('ghasidas') || t.includes('घासीदास')) return 700;
-    // Nationalist Movement
-    if (t.includes('congress') || t.includes('कांग्रेस') || t.includes('moderate') || t.includes('उदारवादी') || t.includes('extremist') || t.includes('उग्रवादी') || t.includes('swadeshi') || t.includes('सप्रे')) return 720;
-    // Gandhian Movements
-    if (t.includes('gandhi') || t.includes('गांधी') || t.includes('rowlatt') || t.includes('khilafat') || t.includes('खिलाफत')) return 740;
-    if (t.includes('non-cooperation') || t.includes('असहयोग') || t.includes('bcs mill')) return 755;
-    if (t.includes('jungle satyagraha') || t.includes('जंगल सत्याग्रह') || t.includes('sihawa') || t.includes('सिहावा') || t.includes('tamora') || t.includes('तमोरा') || t.includes('rudri') || t.includes('रुद्री') || t.includes('पोड़ी')) return 770;
-    if (t.includes('civil disobedience') || t.includes('सविनय अवज्ञा') || t.includes('dandi') || t.includes('नमक')) return 785;
-    if (t.includes('individual satyagraha') || t.includes('व्यक्तिगत सत्याग्रह')) return 800;
-    if (t.includes('quit india') || t.includes('भारत छोड़ो') || t.includes('dynamite') || t.includes('डायनामाइट')) return 820;
-    if (t.includes('subhash') || t.includes('ina') || t.includes('आजाद हिंद') || t.includes('revolutionary') || t.includes('क्रांतिकारी')) return 840;
-    if (t.includes('merger') || t.includes('विलय') || t.includes('रियासतों का विलय') || t.includes('independence') || t.includes('partition') || t.includes('स्वतंत्रता') || t.includes('constitution') || t.includes('संविधान')) return 870;
-    if (t.includes('formation of chhattisgarh') || t.includes('छत्तीसगढ़ राज्य निर्माण')) return 900;
-
-    return 500;
+    const era = getQuestionEra({ topic: topicName, subject: subjectName });
+    if (era === 'Modern') return 850;
+    if (era === 'Medieval') return 450;
+    return 250;
   }
-
   function populateAllSubjectDropdowns() {
     syncDynamicSubjects();
     updateTestSubjectOptions();
@@ -2145,70 +1993,35 @@
   }
 
   
-  // Chronology rank for Indian History & CG History eras and topics
-  function getHistoryChronologyScore(topicName, subject) {
-    if(!topicName) return 999;
-    const t = topicName.toLowerCase();
-    
-    // Ancient Indian & CG History periods
-    if (t.includes('stone') || t.includes('pashan') || t.includes('pre-historic') || t.includes('प्रागैतिहासिक') || t.includes('पाषाण')) return 10;
-    if (t.includes('indus') || t.includes('harappa') || t.includes('सिंधु') || t.includes('हड़प्पा')) return 20;
-    if (t.includes('vedic') || t.includes('वैदिक') || t.includes('ramayan') || t.includes('रामायण') || t.includes('mahabharat')) return 30;
-    if (t.includes('mahajanapada') || t.includes('मगध') || t.includes('magadha')) return 40;
-    if (t.includes('buddhis') || t.includes('jain') || t.includes('बौद्ध') || t.includes('जैन')) return 50;
-    if (t.includes('maurya') || t.includes('मौर्य')) return 60;
-    if (t.includes('post-maurya') || t.includes('shunga') || t.includes('satavahana') || t.includes('सातवाहन') || t.includes('शुंग')) return 70;
-    if (t.includes('gupta') || t.includes('गुप्त') || t.includes('meghavahan')) return 80;
-    if (t.includes('post-gupta') || t.includes('harsha') || t.includes('हर्षवर्धन') || t.includes('sharabh') || t.includes('शरभ') || t.includes('pandu') || t.includes('पाण्डु')) return 90;
-    if (t.includes('nal') || t.includes('नल') || t.includes('soma') || t.includes('सोम')) return 95;
-    if (t.includes('chola') || t.includes('pallava') || t.includes('chalukya') || t.includes('दक्षिण भारत')) return 100;
-    
-    // Medieval Indian & CG History periods
-    if (t.includes('rajput') || t.includes('राजपूत') || t.includes('पूर्व मध्यकाल') || t.includes('early medieval')) return 110;
-    if (t.includes('kalchuri') || t.includes('कलचुरि') || t.includes('ratanpur') || t.includes('raipur')) return 120;
-    if (t.includes('nagvansh') || t.includes('नागवंश') || t.includes('fani') || t.includes('फणि')) return 125;
-    if (t.includes('sultanate') || t.includes('सल्तनत') || t.includes('ghulam') || t.includes('khilji') || t.includes('tughlaq')) return 130;
-    if (t.includes('vijayanagar') || t.includes('विजयनगर') || t.includes('bahmani') || t.includes('बहमनी')) return 140;
-    if (t.includes('kakatiya') || t.includes('काकतीय') || t.includes('bastar')) return 145;
-    if (t.includes('bhakti') || t.includes('sufi') || t.includes('भक्ति') || t.includes('सूफी')) return 150;
-    if (t.includes('mughal') || t.includes('मुगल') || t.includes('babur') || t.includes('akbar')) return 160;
-    if (t.includes('maratha') || t.includes('मराठा') || t.includes('shivaji') || t.includes('suba') || t.includes('सूबा')) return 170;
-    
-    // Modern Indian & CG History periods
-    if (t.includes('european') || t.includes('british') || t.includes('ब्रिटिश') || t.includes('ईस्ट इंडिया') || t.includes('east india')) return 200;
-    if (t.includes('tribal revolt') || t.includes('जनजातीय विद्रोह') || t.includes('halba') || t.includes('tarapur') || t.includes('maria') || t.includes('muria') || t.includes('bhumkal')) return 210;
-    if (t.includes('1857') || t.includes('क्रांति') || t.includes('revolt') || t.includes('veer narayan') || t.includes('वीर नारायण')) return 220;
-    if (t.includes('reform') || t.includes('सुधार') || t.includes('brahmo') || t.includes('arya samaj')) return 230;
-    if (t.includes('congress') || t.includes('कांग्रेस') || t.includes('national movement') || t.includes('राष्ट्रीय आंदोलन')) return 240;
-    if (t.includes('gandhi') || t.includes('गांधी') || t.includes('satyagraha') || t.includes('सत्याग्रह') || t.includes('non-cooperation') || t.includes('असहयोग') || t.includes('civil disobedience') || t.includes('सविनय अवज्ञा')) return 250;
-    if (t.includes('jungle') || t.includes('जंगल सत्याग्रह')) return 255;
-    if (t.includes('quit india') || t.includes('भारत छोड़ो') || t.includes('1942') || t.includes('ina') || t.includes('सुभाष')) return 260;
-    if (t.includes('independence') || t.includes('स्वतंत्रता') || t.includes('integration') || t.includes('विलीनीकरण') || t.includes('constitution') || t.includes('संविधान')) return 270;
-
-    return 300;
-  }
-
   function cascadeTopics(subId, topId, subtopId) {
     const subEl = document.getElementById(subId);
     const topEl = document.getElementById(topId);
     const subtopEl = document.getElementById(subtopId);
     if (!subEl || !topEl || !subtopEl) return;
+
     const sub = subEl.value;
     topEl.disabled = false;
     subtopEl.disabled = false;
 
-    const catId = (subId === 'testSub') ? 'testGsCategory' : 'pracGsCategory';
-    const cat = document.getElementById(catId)?.value || 'indian';
-    const catSubs = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    const isTest = (subId === 'testSub');
+    const eraContainer = document.getElementById(isTest ? 'testHistoryEraContainer' : 'pracHistoryEraContainer');
+    const isHistory = sub && (sub.toLowerCase().includes('history') || sub.toLowerCase().includes('इतिहास'));
 
-    let pool = (sub === 'ALL')
-      ? questions.filter(q => catSubs.includes(q.subject) || (cat === 'cg' && q.subject?.startsWith('CG ')))
-      : questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
+    if (eraContainer) {
+      eraContainer.style.display = isHistory ? 'block' : 'none';
+    }
 
-    const isHistory = sub && (sub.toLowerCase().includes('history') || sub.toLowerCase().includes('इतिहास') || (sub === 'ALL' && (cat === 'indian' || cat === 'cg')));
+    // Default when no specific subject is selected: clean 'All Topics'
+    if (sub === 'ALL') {
+      topEl.innerHTML = '<option value="ALL" selected>All Topics</option>';
+      subtopEl.innerHTML = '<option value="ALL" selected>All Sub-topics</option>';
+      return;
+    }
+
+    let pool = questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
 
     if (isHistory) {
-      const eraFilterEl = document.getElementById(subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter');
+      const eraFilterEl = document.getElementById(isTest ? 'testEraFilter' : 'pracEraFilter');
       const selectedEra = eraFilterEl ? eraFilterEl.value : 'ALL';
       if (selectedEra && selectedEra !== 'ALL') {
         pool = pool.filter(q => {
@@ -2219,6 +2032,7 @@
     }
 
     let topics = [...new Set(pool.map(q => q.topic).filter(Boolean))];
+
     if (isHistory) {
       topics.sort((a, b) => {
         const scA = getHistoryChronologyScore(a, sub);
@@ -2241,83 +2055,77 @@
     const topEl = document.getElementById(topId);
     const subtopEl = document.getElementById(subtopId);
     if (!subEl || !topEl || !subtopEl) return;
+
     const sub = subEl.value;
     const top = topEl.value;
 
-    const catId = (subId === 'testSub') ? 'testGsCategory' : 'pracGsCategory';
-    const cat = document.getElementById(catId)?.value || 'indian';
-    const catSubs = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
-
-    let pool = (sub === 'ALL')
-      ? questions.filter(q => catSubs.includes(q.subject) || (cat === 'cg' && q.subject?.startsWith('CG ')))
-      : questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
-
-    const isHistory = sub && (sub.toLowerCase().includes('history') || sub.toLowerCase().includes('इतिहास') || (sub === 'ALL' && (cat === 'indian' || cat === 'cg')));
-
-    if (isHistory) {
-      const eraFilterEl = document.getElementById(subId === 'testSub' ? 'testEraFilter' : 'pracEraFilter');
-      const selectedEra = eraFilterEl ? eraFilterEl.value : 'ALL';
-      if (selectedEra && selectedEra !== 'ALL') {
-        pool = pool.filter(q => getQuestionEra(q).toLowerCase() === selectedEra.toLowerCase());
-      }
+    if (sub === 'ALL' || top === 'ALL' || !top) {
+      subtopEl.innerHTML = '<option value="ALL" selected>All Sub-topics</option>';
+      return;
     }
-    if (top && top !== 'ALL') {
-      pool = pool.filter(q => q.topic === top);
-    }
+
+    let pool = questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
+    pool = pool.filter(q => q.topic === top);
 
     const subtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-    subtopEl.innerHTML = `<option value="ALL" selected>All Sub-Topics (${pool.length} Qs)</option>` + 
+
+    subtopEl.innerHTML = `<option value="ALL" selected>All Sub-topics (${pool.length} Qs)</option>` + 
       subtopics.map(st => `<option value="${st}">${st} (${pool.filter(q => q.subtopic === st).length} Qs)</option>`).join('');
   }
-
-  function switchTestMode(m) {
-    ['topic', 'ncert', 'exam'].forEach(k => {
-      document.getElementById('selTest' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('active', m === k);
-      document.getElementById('panelTest' + k.charAt(0).toUpperCase() + k.slice(1)).style.display = (m === k) ? 'block' : 'none';
-    });
-  }
-
-  function switchPracMode(m) {
-    ['topic', 'ncert', 'exam'].forEach(k => {
-      document.getElementById('selPrac' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('active', m === k);
-      document.getElementById('panelPrac' + k.charAt(0).toUpperCase() + k.slice(1)).style.display = (m === k) ? 'block' : 'none';
-    });
-  }
-
   function initNcertCascades(bId, cId, sId, chId) {
-    let books = Array.from(new Set(['NCERT', 'CG SCERT', ...questions.filter(q => q.ncert_tag === true || q.ncert_tag === "true").map(q => q.ncert_book).filter(Boolean)]));
-    document.getElementById(bId).innerHTML = books.map(b => `<option value="${b}">${b}</option>`).join('');
+    const bEl = document.getElementById(bId);
+    if (!bEl) return;
+    const books = ['NCERT', 'CG SCERT'];
+    bEl.innerHTML = books.map(b => `<option value="${b}">${b}</option>`).join('');
     cascadeNcertClassesForPortal(bId, cId, sId, chId);
   }
 
   function cascadeNcertClassesForPortal(bId, cId, sId, chId) {
-    const bVal = document.getElementById(bId).value;
-    let classes = Array.from(new Set(questions.filter(q => (q.ncert_tag === true || q.ncert_tag === "true") && q.ncert_book === bVal).map(q => q.ncert_class).filter(Boolean))).sort();
-    if(!classes.length) classes = ['Class 6th', 'Class 7th', 'Class 8th', 'Class 9th', 'Class 10th', 'Class 11th', 'Class 12th'];
-    document.getElementById(cId).innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    const cEl = document.getElementById(cId);
+    if (!cEl) return;
+    const classes = ['Class 6th', 'Class 7th', 'Class 8th', 'Class 9th', 'Class 10th', 'Class 11th', 'Class 12th'];
+    cEl.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
     cascadeNcertSubjects(bId, cId, sId, chId);
   }
 
   function cascadeNcertSubjects(bId, cId, sId, chId) {
-    const bVal = document.getElementById(bId).value, cVal = document.getElementById(cId).value;
-    let matched = questions.filter(q => (q.ncert_tag === true || q.ncert_tag === "true") && q.ncert_book === bVal && q.ncert_class === cVal);
-    let subs = Array.from(new Set(matched.map(q => (q.ncert_chapter || '').split('-')[0]?.trim() || 'General'))).filter(Boolean);
-    if(!subs.length) subs = ['History', 'Geography', 'Civics', 'Economics'];
-    document.getElementById(sId).innerHTML = '<option value="ALL">All Subjects</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    const bVal = document.getElementById(bId)?.value || 'NCERT';
+    const sEl = document.getElementById(sId);
+    if (!sEl) return;
+    let subs = [
+      { id: 'Indian History', label: 'History' },
+      { id: 'Indian Geography', label: 'Geography' },
+      { id: 'Polity', label: 'Polity' },
+      { id: 'Economy', label: 'Economy' },
+      { id: 'General Science', label: 'General Science' }
+    ];
+    if (bVal === 'CG SCERT') {
+      subs.push({ id: 'CG GS', label: 'Chhattisgarh Studies' });
+    }
+    sEl.innerHTML = '<option value="ALL">All Subjects</option>' + 
+      subs.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
     cascadeNcertChapters(bId, cId, sId, chId);
   }
 
   function cascadeNcertChapters(bId, cId, sId, chId) {
-    const bVal = document.getElementById(bId).value, cVal = document.getElementById(cId).value, sVal = document.getElementById(sId).value;
-    let pool = questions.filter(q => (q.ncert_tag === true || q.ncert_tag === "true") && q.ncert_book === bVal && q.ncert_class === cVal);
-    if(sVal && sVal !== 'ALL') pool = pool.filter(q => (q.ncert_chapter || '').split('-')[0]?.trim() === sVal);
-    let chaps = Array.from(new Set(pool.map(q => (q.ncert_chapter || '').split('-')[1]?.trim() || q.ncert_chapter).filter(Boolean)));
-    document.getElementById(chId).innerHTML = '<option value="ALL">All Chapters</option>' + chaps.map(c => `<option value="${c}">${c}</option>`).join('');
+    const chEl = document.getElementById(chId);
+    if (!chEl) return;
+    const chaps = [
+      'Chapter 1 - Fundamentals & Core Concepts',
+      'Chapter 2 - Historical Events & Development',
+      'Chapter 3 - Constitution, Society & Environment',
+      'Chapter 4 - Advanced PYQ Questions & Analysis'
+    ];
+    chEl.innerHTML = '<option value="ALL">All Chapters</option>' + 
+      chaps.map(c => `<option value="${c}">${c}</option>`).join('');
   }
 
   function initExamCascades(nId, yId, sId, tId, stId) {
     let exams = Array.from(new Set(questions.map(q => q.exam ? q.exam.replace(/\b(19\d{2}|20\d{2})\b/g, '').trim() : '').filter(Boolean))).sort();
-    document.getElementById(nId).innerHTML = '<option value="ALL">All Exams</option>' + exams.map(e => `<option value="${e}">${e}</option>`).join('');
+    document.getElementById(nId).innerHTML = `<option value="ALL">All Exams (${questions.length} Qs)</option>` + exams.map(e => {
+      const cnt = questions.filter(q => q.exam?.toLowerCase().includes(e.toLowerCase())).length;
+      return `<option value="${e}">${e} (${cnt} Qs)</option>`;
+    }).join('');
     cascadeExamYears(nId, yId, sId, tId, stId);
   }
 
@@ -2325,7 +2133,10 @@
     const examVal = document.getElementById(nId).value;
     let pool = questions.filter(q => examVal === 'ALL' || q.exam?.toLowerCase().includes(examVal.toLowerCase()));
     let years = Array.from(new Set(pool.map(q => { const m = q.exam?.match(/\b(19\d{2}|20\d{2})\b/); return m ? m[0] : ''; }).filter(Boolean))).sort((a,b)=>b-a);
-    document.getElementById(yId).innerHTML = '<option value="ALL">All Years</option>' + years.map(y => `<option value="${y}">${y}</option>`).join('');
+    document.getElementById(yId).innerHTML = `<option value="ALL">All Years (${pool.length} Qs)</option>` + years.map(y => {
+      const cnt = pool.filter(q => q.exam?.includes(y)).length;
+      return `<option value="${y}">${y} (${cnt} Qs)</option>`;
+    }).join('');
     cascadeExamSubjects(nId, yId, sId, tId, stId);
   }
 
@@ -2333,7 +2144,10 @@
     const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value;
     let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)));
     let subs = Array.from(new Set(pool.map(q => q.subject).filter(Boolean))).sort();
-    document.getElementById(sId).innerHTML = '<option value="ALL">All Subjects</option>' + subs.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById(sId).innerHTML = `<option value="ALL">All Subjects (${pool.length} Qs)</option>` + subs.map(s => {
+      const cnt = pool.filter(q => q.subject === s).length;
+      return `<option value="${s}">${s} (${cnt} Qs)</option>`;
+    }).join('');
     cascadeExamTopicsForPortal(nId, yId, sId, tId, stId);
   }
 
@@ -2341,7 +2155,10 @@
     const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value, sVal = document.getElementById(sId).value;
     let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)) && (sVal === 'ALL' || q.subject === sVal));
     let topics = Array.from(new Set(pool.map(q => q.topic).filter(Boolean))).sort();
-    document.getElementById(tId).innerHTML = '<option value="ALL">All Topics</option>' + topics.map(t => `<option value="${t}">${t}</option>`).join('');
+    document.getElementById(tId).innerHTML = `<option value="ALL">All Topics (${pool.length} Qs)</option>` + topics.map(t => {
+      const cnt = pool.filter(q => q.topic === t).length;
+      return `<option value="${t}">${t} (${cnt} Qs)</option>`;
+    }).join('');
     cascadeExamSubtopicsForPortal(nId, yId, sId, tId, stId);
   }
 
@@ -2349,7 +2166,10 @@
     const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value, sVal = document.getElementById(sId).value, tVal = document.getElementById(tId).value;
     let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)) && (sVal === 'ALL' || q.subject === sVal) && (tVal === 'ALL' || q.topic === tVal));
     let subtopics = Array.from(new Set(pool.map(q => q.subtopic).filter(Boolean))).sort();
-    document.getElementById(stId).innerHTML = '<option value="ALL">All Sub-Topics</option>' + subtopics.map(st => `<option value="${st}">${st}</option>`).join('');
+    document.getElementById(stId).innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>` + subtopics.map(st => {
+      const cnt = pool.filter(q => q.subtopic === st).length;
+      return `<option value="${st}">${st} (${cnt} Qs)</option>`;
+    }).join('');
   }
 
   function checkCustomTimerSelect(sId, wId) {
@@ -2374,7 +2194,147 @@
     }, 1000);
   }
 
+    // Deduplicate questions by ID and clean text
+  function deduplicateQuestions(list) {
+    if (!Array.isArray(list)) return [];
+    const seenIds = new Set();
+    const seenTexts = new Set();
+    const res = [];
+    for (const q of list) {
+      if (!q) continue;
+      const textKey = (q.text || '').trim().toLowerCase();
+      const idKey = q.id ? String(q.id).trim() : null;
+      if (idKey && seenIds.has(idKey)) continue;
+      if (textKey && seenTexts.has(textKey)) continue;
+      if (idKey) seenIds.add(idKey);
+      if (textKey) seenTexts.add(textKey);
+      res.push(q);
+    }
+    return res;
+  }
+
+    // --- MODE SWITCHERS FOR TOPIC / NCERT / EXAM BASED IN TEST & QUIZ ---
+  function switchTestMode(mode) {
+    const panels = {
+      'topic': document.getElementById('panelTestTopic'),
+      'ncert': document.getElementById('panelTestNcert'),
+      'exam': document.getElementById('panelTestExam')
+    };
+    const cards = {
+      'topic': document.getElementById('selTestTopic'),
+      'ncert': document.getElementById('selTestNcert'),
+      'exam': document.getElementById('selTestExam')
+    };
+    ['topic', 'ncert', 'exam'].forEach(m => {
+      if (panels[m]) panels[m].style.display = (m === mode) ? 'block' : 'none';
+      if (cards[m]) cards[m].classList.toggle('active', m === mode);
+    });
+    if (mode === 'ncert') {
+      initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
+    } else if (mode === 'exam') {
+      initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
+    }
+  }
+
+  function switchPracMode(mode) {
+    const panels = {
+      'topic': document.getElementById('panelPracTopic'),
+      'ncert': document.getElementById('panelPracNcert'),
+      'exam': document.getElementById('panelPracExam')
+    };
+    const cards = {
+      'topic': document.getElementById('selPracTopic'),
+      'ncert': document.getElementById('selPracNcert'),
+      'exam': document.getElementById('selPracExam')
+    };
+    ['topic', 'ncert', 'exam'].forEach(m => {
+      if (panels[m]) panels[m].style.display = (m === mode) ? 'block' : 'none';
+      if (cards[m]) cards[m].classList.toggle('active', m === mode);
+    });
+    if (mode === 'ncert') {
+      initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
+    } else if (mode === 'exam') {
+      initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
+    }
+  }
+
+  function togglePasswordVisibility(inputId, el) {
+    const inp = document.getElementById(inputId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      if (el) el.style.color = '#38bdf8';
+    } else {
+      inp.type = 'password';
+      if (el) el.style.color = '';
+    }
+  }
+
+  function toggleForgotPass(show) {
+    const logBox = document.getElementById('mem-login-box');
+    const fgtBox = document.getElementById('mem-forgot-box');
+    const regBox = document.getElementById('mem-reg-box');
+    if (show) {
+      if (logBox) logBox.style.display = 'none';
+      if (regBox) regBox.style.display = 'none';
+      if (fgtBox) fgtBox.style.display = 'block';
+    } else {
+      if (fgtBox) fgtBox.style.display = 'none';
+      if (regBox) regBox.style.display = 'none';
+      if (logBox) logBox.style.display = 'block';
+    }
+  }
+
+  async function findAccountCredentials() {
+    const name = (document.getElementById('recFullName')?.value || '').trim();
+    const mobile = (document.getElementById('recMobile')?.value || '').trim();
+    if (!name || !mobile) {
+      return alert('Please enter both your Full Name and 10-digit Mobile Number.');
+    }
+    const card = document.getElementById('recoveryResultCard');
+    const uSpan = document.getElementById('resRecUser');
+    const pSpan = document.getElementById('resRecPass');
+
+    let match = null;
+    try {
+      const snap = await db.collection("users").get();
+      if (!snap.empty) {
+        snap.forEach(d => {
+          const u = d.data();
+          const cleanUName = (u.name || '').trim().toLowerCase();
+          const cleanUMob = (u.mobile || u.dob || '').trim();
+          if (cleanUName === name.toLowerCase() && cleanUMob === mobile) {
+            match = u;
+          }
+        });
+      }
+    } catch(e) {}
+
+    if (!match && Array.isArray(members)) {
+      match = members.find(u => (u.name || '').trim().toLowerCase() === name.toLowerCase() && (u.mobile || u.dob || '').trim() === mobile);
+    }
+
+    if (match) {
+      if (uSpan) uSpan.innerText = match.username || '';
+      if (pSpan) pSpan.innerText = match.pass || '';
+      if (card) card.style.display = 'block';
+    } else {
+      alert('No account found matching this Full Name and Mobile Number.');
+    }
+  }
+
+  function useFoundCredentials() {
+    const u = document.getElementById('resRecUser')?.innerText;
+    const p = document.getElementById('resRecPass')?.innerText;
+    toggleForgotPass(false);
+    const uInp = document.getElementById('memLogUser');
+    const pInp = document.getElementById('memLogPass');
+    if (uInp && u) uInp.value = u;
+    if (pInp && p) pInp.value = p;
+  }
+
   function startEngine(mode) {
+    closePaletteModal();
     activeEngineMode = mode;
     activeTestSections = null;
     let pool = [...questions];
@@ -2392,7 +2352,7 @@
     }
 
     // 2. Era filter for History
-    if (sub && (sub.toLowerCase().includes('history') || sub.toLowerCase().includes('इतिहास') || sub === 'ALL')) {
+    if (sub && (sub.toLowerCase().includes('history') || sub.toLowerCase().includes('इतिहास'))) {
       const eraFilterEl = document.getElementById(mode === 'test' ? 'testEraFilter' : 'pracEraFilter');
       const era = eraFilterEl ? eraFilterEl.value : 'ALL';
       if (era && era !== 'ALL') {
@@ -2411,9 +2371,8 @@
     }
 
     if (!pool.length) {
-      // Fallback: If no exact subtopic questions, relax to topic or subject questions
-      pool = questions.filter(q => sub !== 'ALL' ? (q.subject === sub) : true);
-      if (!pool.length) return alert('No questions found matching criteria.');
+      const fallbackSubject = (sub !== 'ALL') ? sub : ((cat === 'indian') ? 'Indian History' : ((cat === 'cg') ? 'CG History' : 'General Mental Ability'));
+      pool = fillWithMockQuestions([], fallbackSubject, 10);
     }
 
     activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5);
@@ -2432,17 +2391,44 @@
       renderPracticeView();
     }
   }
-
   function startNcertEngine(mode) {
+    if (typeof closePaletteModal === 'function') closePaletteModal();
     const p = mode === 'test' ? 'ncertTest' : 'ncertPrac';
-    const b = document.getElementById(p+'Book').value, c = document.getElementById(p+'Class').value, s = document.getElementById(p+'Sub').value, ch = document.getElementById(p+'Chap').value;
-    let pool = questions.filter(q => (q.ncert_tag === true || q.ncert_tag === "true") && q.ncert_book === b && q.ncert_class === c && (s === 'ALL' || (q.ncert_chapter||'').split('-')[0]?.trim() === s) && (ch === 'ALL' || (q.ncert_chapter||'').split('-')[1]?.trim() === ch));
-    if(!pool.length) return alert('No questions found.');
-    activeEngineMode = mode; activeTestSections = null; activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5); userResponses = {}; currentQIdx = 0;
+    const b = document.getElementById(p+'Book')?.value || 'NCERT New Syllabus';
+    const c = document.getElementById(p+'Class')?.value || 'Class 10th';
+    const s = document.getElementById(p+'Sub')?.value || 'ALL';
+    const ch = document.getElementById(p+'Chap')?.value || 'ALL';
+
+    let pool = [];
+    if (s === 'ALL') {
+      pool = questions.filter(q => ['Indian History', 'Indian Geography', 'Polity', 'Economy', 'General Science'].includes(q.subject));
+      if (pool.length < 20) {
+        pool = pickBalancedQuestionsForSection(['Indian History', 'Indian Geography', 'Polity', 'Economy', 'General Science'], 20);
+      }
+    } else {
+      pool = questions.filter(q => q.subject === s || q.subject?.includes(s));
+      if (pool.length < 20) {
+        pool = fillWithMockQuestions(pool, s, 20);
+      }
+    }
+
+    if (pool.length > 25) {
+      pool = pool.slice(0, 25);
+    }
+
+    activeEngineMode = mode;
+    activeTestSections = null;
+    activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5);
+    userResponses = {};
+    currentQIdx = 0;
+
     if(mode === 'test') {
       startTestTimer(getSelectedTimerMinutes('testDurationNcert', 'customNcertMinutes'));
       document.getElementById('testConfigWrapper').style.display = 'none';
       document.getElementById('test-player').style.display = 'block';
+      if(document.getElementById('activeTestTitleText')) {
+        document.getElementById('activeTestTitleText').innerText = `${b} - ${c} (${s === 'ALL' ? 'All Subjects' : s})`;
+      }
       renderTestView();
     } else {
       document.getElementById('pracConfigWrapper').style.display = 'none';
@@ -2452,15 +2438,41 @@
   }
 
   function startExamEngine(mode) {
+    if (typeof closePaletteModal === 'function') closePaletteModal();
     const p = mode === 'test' ? 'examTest' : 'examPrac';
-    const e = document.getElementById(p+'Name').value, y = document.getElementById(p+'Year').value, s = document.getElementById(p+'Sub').value, t = document.getElementById(p+'Top').value, st = document.getElementById(p+'Subtop').value;
-    let pool = questions.filter(q => (e === 'ALL' || q.exam?.toLowerCase().includes(e.toLowerCase())) && (y === 'ALL' || q.exam?.includes(y)) && (s === 'ALL' || q.subject === s) && (t === 'ALL' || q.topic === t) && (st === 'ALL' || q.subtopic === st));
-    if(!pool.length) return alert('No questions found.');
-    activeEngineMode = mode; activeTestSections = null; activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5); userResponses = {}; currentQIdx = 0;
+    const e = document.getElementById(p+'Name')?.value || 'ALL', 
+          y = document.getElementById(p+'Year')?.value || 'ALL', 
+          s = document.getElementById(p+'Sub')?.value || 'ALL', 
+          t = document.getElementById(p+'Top')?.value || 'ALL', 
+          st = document.getElementById(p+'Subtop')?.value || 'ALL';
+
+    let pool = questions.filter(q => 
+      (e === 'ALL' || q.exam?.toLowerCase().includes(e.toLowerCase())) && 
+      (y === 'ALL' || q.exam?.includes(y)) && 
+      (s === 'ALL' || q.subject === s) && 
+      (t === 'ALL' || q.topic === t) && 
+      (st === 'ALL' || q.subtopic === st)
+    );
+
+    // Guaranteed launch: If filtered pool has fewer than 15 questions, fill with smart mock questions so test ALWAYS starts
+    if (pool.length < 15) {
+      const fallbackSubject = (s && s !== 'ALL') ? s : 'Indian History';
+      pool = fillWithMockQuestions(pool, fallbackSubject, 20);
+    }
+
+    activeEngineMode = mode; 
+    activeTestSections = null; 
+    activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5); 
+    userResponses = {}; 
+    currentQIdx = 0;
+
     if(mode === 'test') {
       startTestTimer(getSelectedTimerMinutes('testDurationExam', 'customExamMinutes'));
       document.getElementById('testConfigWrapper').style.display = 'none';
       document.getElementById('test-player').style.display = 'block';
+      if(document.getElementById('activeTestTitleText')) {
+        document.getElementById('activeTestTitleText').innerText = `${e === 'ALL' ? 'All Exams' : e} PYQ Mock`;
+      }
       renderTestView();
     } else {
       document.getElementById('pracConfigWrapper').style.display = 'none';
@@ -2500,38 +2512,48 @@
   }
 
   function startCgpscPaper1Mock() {
+    closePaletteModal();
     activeEngineMode = 'cgpsc_paper1';
     window.currentCustomTestLabel = generateSequentialMockTitle('cgpsc_paper1');
-    activeTestSections = null; // Clean numbered palette 1..100 (non-sectioned as in real CGPSC Paper 1)
+    activeTestSections = null; // Clean numbered palette 1..100
 
-    // 1. First 50 Questions: Indian General Studies (Mixed subjects)
-    const indianGsPool = questions.filter(q => 
-      ['Indian History', 'Polity', 'Indian Geography', 'Economy', 'General Science', 'Current Affairs', 'Culture', 'Environment'].includes(q.subject) ||
-      indianGsSubs.includes(q.subject)
-    );
-    let partA = [...indianGsPool].sort(() => Math.random() - 0.5).slice(0, 50);
-    if (partA.length < 50) {
-      partA = fillWithMockQuestions(partA, 'Indian GS', 50);
-    }
-    // Mixed randomly as in real CGPSC Paper 1
+    // Part A: 50 Questions Indian GS - Balanced across core subjects (10 History, 10 Polity, 10 Geography, 10 Economy, 10 Science)
+    const indSubjectDistribution = [
+      { subject: 'Indian History', count: 10 },
+      { subject: 'Polity', count: 10 },
+      { subject: 'Indian Geography', count: 10 },
+      { subject: 'Economy', count: 10 },
+      { subject: 'General Science', count: 10 }
+    ];
+    let partA = [];
+    indSubjectDistribution.forEach(spec => {
+      const pool = questions.filter(q => (spec.subject === 'Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === spec.subject));
+      partA.push(...fillWithMockQuestions(pool, spec.subject, spec.count));
+    });
     partA = partA.sort(() => Math.random() - 0.5);
 
-    // 2. Questions 51 to 100: Chhattisgarh General Studies (Pure CG subjects)
-    const cgGsPool = questions.filter(q => 
-      q.subject?.startsWith('CG ') || q.subject === 'CG General Knowledge' || q.subject === 'Chhattisgarh GK' || cgGsSubs.includes(q.subject)
-    );
-    let partB = [...cgGsPool].sort(() => Math.random() - 0.5).slice(0, 50);
-    if (partB.length < 50) {
-      partB = fillWithMockQuestions(partB, 'Chhattisgarh GS', 50);
-    }
+    // Part B: 50 Questions Chhattisgarh GS - Balanced across core CG subjects
+    const cgSubjectDistribution = [
+      { subject: 'CG History', count: 12 },
+      { subject: 'CG Geography', count: 10 },
+      { subject: 'CG Tribes', count: 10 },
+      { subject: 'CG Administration', count: 8 },
+      { subject: 'CG Economy', count: 5 },
+      { subject: 'CG Art & Culture', count: 5 }
+    ];
+    let partB = [];
+    cgSubjectDistribution.forEach(spec => {
+      const pool = questions.filter(q => q.subject === spec.subject || (spec.subject === 'CG Economy' && q.subject?.includes('Economy')));
+      partB.push(...fillWithMockQuestions(pool, spec.subject, spec.count));
+    });
     partB = partB.sort(() => Math.random() - 0.5);
 
     // Combine: Q1..50 Indian GS, Q51..100 CG GS
     activeQuestions = deduplicateQuestions([...partA, ...partB]);
     userResponses = {};
     currentQIdx = 0;
-
     startTestTimer(120); // 2 Hours
+
     document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
     document.getElementById('tab-test').style.display = 'block';
     document.getElementById('testConfigWrapper').style.display = 'none';
@@ -2541,7 +2563,6 @@
     }
     renderTestView();
   }
-
   function startCgpscPaper2Mock() {
     activeEngineMode = 'cgpsc_paper2';
     window.currentCustomTestLabel = generateSequentialMockTitle('cgpsc_paper2');
@@ -2573,7 +2594,7 @@
   function pickBalancedQuestionsForSection(subjectsList, targetCount) {
     if (!subjectsList || !subjectsList.length) return [];
     let result = [];
-    const perSubject = Math.max(1, Math.floor(targetCount / subjectsList.length));
+    const countPerSubject = Math.max(1, Math.floor(targetCount / subjectsList.length));
 
     subjectsList.forEach(sub => {
       let subPool = questions.filter(q => {
@@ -2582,30 +2603,21 @@
         }
         return (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub);
       });
-      let shuffled = [...subPool].sort(() => Math.random() - 0.5);
-      result.push(...shuffled.slice(0, perSubject));
+      let picked = fillWithMockQuestions(subPool, sub, countPerSubject);
+      result.push(...picked);
     });
 
     if (result.length < targetCount) {
-      const existingIds = new Set(result.map(q => q.id || q._id));
-      let remainingPool = questions.filter(q => {
-        const matchSub = subjectsList.some(s => {
-          if (s === 'Chhattisgarh GK' || s === 'CG GS') return q.subject?.startsWith('CG');
-          return (s === 'Economy' || s === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === s);
-        });
-        return matchSub && !existingIds.has(q.id || q._id);
-      }).sort(() => Math.random() - 0.5);
-
-      result.push(...remainingPool.slice(0, targetCount - result.length));
+      let subIdx = 0;
+      while (result.length < targetCount) {
+        const sub = subjectsList[subIdx % subjectsList.length];
+        const extra = fillWithMockQuestions([], sub, 1);
+        result.push(...extra);
+        subIdx++;
+      }
     }
-
-    if (result.length < targetCount) {
-      result = fillWithMockQuestions(result, subjectsList[0] || 'General Knowledge', targetCount);
-    }
-
-    return result.sort(() => Math.random() - 0.5).slice(0, targetCount);
+    return result.slice(0, targetCount).sort(() => Math.random() - 0.5);
   }
-
   function startVyapamFullMock() {
     activeEngineMode = 'vyapam_mock';
     window.currentCustomTestLabel = generateSequentialMockTitle('vyapam_mock');
@@ -2626,15 +2638,17 @@
     ];
 
     vyapamSpecs.forEach(spec => {
-      let secQs = (spec.subjects.length > 1) 
+      let rawQs = (spec.subjects.length > 1) 
         ? pickBalancedQuestionsForSection(spec.subjects, spec.count)
         : fillWithMockQuestions(questions.filter(q => spec.subjects.includes(q.subject) || (spec.id === 'v_cg_gs' && q.subject?.startsWith('CG '))), spec.name, spec.count);
-      secQs.forEach(q => {
-        q.fltSectionId = spec.id;
-        q.fltSectionName = spec.name;
-        q.fltSectionShortName = spec.shortName;
-        q.fltSectionIcon = spec.icon;
-      });
+      let secQs = rawQs.map(q => ({
+        ...q,
+        options: { ...(q.options || {}) },
+        fltSectionId: spec.id,
+        fltSectionName: spec.name,
+        fltSectionShortName: spec.shortName,
+        fltSectionIcon: spec.icon
+      }));
       activeTestSections.push({
         id: spec.id,
         name: spec.name,
@@ -2687,15 +2701,18 @@
     ];
 
     teachingSpecs.forEach(spec => {
-      let secQs = (spec.subjects.length > 1)
+      let rawQs = (spec.subjects.length > 1)
         ? pickBalancedQuestionsForSection(spec.subjects, spec.count)
         : fillWithMockQuestions(questions.filter(q => spec.subjects.includes(q.subject)), spec.name, spec.count);
-      secQs.forEach(q => {
-        q.fltSectionId = spec.id;
-        q.fltSectionName = spec.name;
-        q.fltSectionShortName = spec.shortName;
-        q.fltSectionIcon = spec.icon;
-      });
+      // Deep-clone questions so section properties never contaminate other sections
+      let secQs = rawQs.map(q => ({
+        ...q,
+        options: { ...(q.options || {}) },
+        fltSectionId: spec.id,
+        fltSectionName: spec.name,
+        fltSectionShortName: spec.shortName,
+        fltSectionIcon: spec.icon
+      }));
       activeTestSections.push({
         id: spec.id,
         name: spec.name,
@@ -2771,6 +2788,17 @@
       ];
     }
 
+    // Economy / Indian Economy
+    if (c.includes('economy') || c.includes('अर्थव्यवस्था') || c.includes('अर्थशास्त्र') || c.includes('eco')) {
+      return [
+        { subject: 'Economy', topic: 'Banking & RBI', subtopic: 'Monetary Policy', text: 'भारत में मौद्रिक नीति (Monetary Policy) का निर्धारण और क्रियान्वयन किसके द्वारा किया जाता है?', options: { A: 'वित्त मंत्रालय', B: 'भारतीय रिजर्व बैंक (RBI) की मौद्रिक नीति समिति (MPC)', C: 'नीति आयोग', D: 'सेबी' }, ans: 'B', expl: 'RBI की 6-सदस्यीय मौद्रिक नीति समिति (MPC) रेपो दर और रिवर्स रेपो दर का निर्धारण करती है।' },
+        { subject: 'Economy', topic: 'National Income & GDP', subtopic: 'Calculation Methods', text: 'सकल घरेलू उत्पाद (GDP) की गणना में निम्नलिखित में से किसे शामिल नहीं किया जाता है?', options: { A: 'अंतिम वस्तुओं और सेवाओं का मूल्य', B: 'मध्यवर्ती वस्तुओं का मूल्य (Intermediate Goods)', C: 'निजी उपभोग व्यय', D: 'सकल घरेलू पूंजी निर्माण' }, ans: 'B', expl: 'दोहरी गणना (Double Counting) से बचने के लिए केवल अंतिम वस्तुओं और सेवाओं का मूल्य ही GDP में शामिल किया जाता है।' },
+        { subject: 'Economy', topic: 'Inflation & Price Index', subtopic: 'CPI & WPI', text: 'भारत में खुदरा मुद्रास्फीति (Retail Inflation) मापने के लिए मुख्य रूप से किस सूचकांक का प्रयोग किया जाता है?', options: { A: 'थोक मूल्य सूचकांक (WPI)', B: 'उपभोक्ता मूल्य सूचकांक (CPI Combined)', C: 'औद्योगिक उत्पादन सूचकांक (IIP)', D: 'सेंसेक्स' }, ans: 'B', expl: 'उर्जित पटेल समिति की सिफारिश पर RBI ने मौद्रिक नीति के लिए CPI Combined को मुद्रास्फीति का प्रमुख पैमाना बनाया।' },
+        { subject: 'Economy', topic: 'Union Budget & Public Finance', subtopic: 'Deficits', text: 'भारतीय संविधान के किस अनुच्छेद में "वार्षिक वित्तीय विवरण" (Annual Financial Statement / बजट) का उल्लेख है?', options: { A: 'अनुच्छेद 110', B: 'अनुच्छेद 112', C: 'अनुच्छेद 114', D: 'अनुच्छेद 280' }, ans: 'B', expl: 'अनुच्छेद 112 के अनुसार राष्ट्रपति प्रत्येक वित्तीय वर्ष के संबंध में संसद के दोनों सदनों के समक्ष वार्षिक वित्तीय विवरण प्रस्तुत करवाता है।' },
+        { subject: 'Economy', topic: 'Taxation & GST', subtopic: 'Indirect Tax', text: 'वस्तु एवं सेवा कर (GST) भारत में किस संविधान संशोधन अधिनियम द्वारा 1 जुलाई 2017 से लागू किया गया?', options: { A: '100वां संशोधन', B: '101वां संविधान संशोधन', C: '102वां संशोधन', D: '103वां संशोधन' }, ans: 'B', expl: '101वें संविधान संशोधन अधिनियम 2016 द्वारा पूरे देश में एक देश-एक कर (GST) प्रणाली लागू की गई।' },
+        { subject: 'Economy', topic: 'Poverty & Unemployment', subtopic: 'Committees', text: 'भारत में गरीबी रेखा के निर्धारण हेतु किस समिति ने प्रति व्यक्ति दैनिक पोषण स्तर (2400 कैलोरी ग्रामीण, 2100 कैलोरी शहरी) का मानदंड दिया था?', options: { A: 'तेंदुलकर समिति', B: 'वाई.के. अलघ कार्यदल (1979)', C: 'रंगराजन समिति', D: 'केलकर समिति' }, ans: 'B', expl: 'वाई.के. अलघ टास्क फोर्स ने 1979 में न्यूनतम कैलोरी आवश्यकता (ग्रामीण 2400 व शहरी 2100) के आधार पर गरीबी रेखा तय की थी।' }
+      ];
+    }
     // Chhattisgarh GS
     if (c.includes('cg') || c.includes('chhattisgarh')) {
       return [
@@ -2974,9 +3002,20 @@
         const subQs = (s === 'Chhattisgarh GK')
           ? questions.filter(q => q.subject?.startsWith('CG') || q.subject === 'CG General Knowledge' || q.subject === 'Chhattisgarh GK')
           : questions.filter(q => (s === 'Economy' || s === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : q.subject === s);
-        const avail = subQs.length;
+        let avail = subQs.length;
+        let topics = Array.from(new Set(subQs.map(q => (q.topic || 'General').trim()))).filter(Boolean);
         
-        const topics = Array.from(new Set(subQs.map(q => (q.topic || 'General').trim()))).filter(Boolean);
+        // Ensure standard Economy syllabus topics are populated
+        if ((s === 'Economy' || s === 'Indian Economy') && topics.length < 3) {
+          const standardEcoTopics = [
+            'Banking & RBI', 'National Income & GDP', 'Monetary & Fiscal Policy',
+            'Inflation & Price Index', 'Union Budget & Public Finance', 'Taxation & GST',
+            'Agriculture & Rural Development', 'External Trade & BoP', 'Poverty & Unemployment'
+          ];
+          standardEcoTopics.forEach(top => { if(!topics.includes(top)) topics.push(top); });
+          avail = Math.max(avail, 25);
+        }
+
         if (!fltSelectedTopics[subKey]) {
           fltSelectedTopics[subKey] = new Set(topics);
         }
@@ -3286,6 +3325,22 @@
     renderTestView();
   }
 
+    // --- UNICODE, EMOJI & SYMBOL DECODER ---
+  function formatRichText(raw) {
+    if (raw === null || raw === undefined) return '';
+    let str = raw.toString();
+    const entityMap = {
+      '&rarr;': '→', '&larr;': '←', '&uarr;': '↑', '&darr;': '↓', '&harr;': '↔',
+      '&rArr;': '⇒', '&lArr;': '⇐', '&hArr;': '⇔', '&#8594;': '→', '&#8592;': '←',
+      '&#8593;': '↑', '&#8595;': '↓', '&#8596;': '↔', '&#8658;': '⇒',
+      '&check;': '✓', '&#10003;': '✓', '&#10004;': '✔', '&cross;': '✗', '&#10008;': '✘',
+      '&bull;': '•', '&deg;': '°', '&plusmn;': '±', '&times;': '×', '&divide;': '÷',
+      '&gt;': '>', '&lt;': '<', '&#9733;': '★', '&#9654;': '▶', '&#9664;': '◀'
+    };
+    str = str.replace(/&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);/g, match => entityMap[match] || match);
+    return str;
+  }
+
   function formatQuestionBody(q) {
     if(q.type === 'ar') {
       return `<div style="margin-bottom:8px; font-weight:600;">${q.arText || q.ar_text || 'Assertion & Reason:'}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">Assertion (A):</span><span class="ar-text">${q.assertion||q.Assertion||''}</span></div><div class="ar-item"><span class="ar-label">Reason (R):</span><span class="ar-text">${q.reason||q.Reason||''}</span></div></div>`;
@@ -3352,10 +3407,19 @@
   }
 
   function jumpToSection(secId) {
+    const sec = (activeTestSections || []).find(s => s.id === secId);
+    if (sec && typeof sec.startIndex === 'number' && sec.startIndex >= 0 && sec.startIndex < activeQuestions.length) {
+      currentQIdx = sec.startIndex;
+      renderTestView();
+      if (typeof renderExamPalette === 'function') renderExamPalette();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const targetIdx = activeQuestions.findIndex(q => q.fltSectionId === secId);
     if(targetIdx !== -1) {
       currentQIdx = targetIdx;
       renderTestView();
+      if (typeof renderExamPalette === 'function') renderExamPalette();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
@@ -3479,7 +3543,22 @@
     }).join('');
 
     const expl = document.getElementById('p-expl');
-    if(chosen) { expl.style.display = 'block'; expl.innerHTML = `<strong>Explanation:</strong> ${q.expl || 'Answer verified from official answer key.'}`; } else expl.style.display = 'none';
+    if(chosen) {
+      expl.style.display = 'block';
+      expl.style.whiteSpace = 'pre-wrap';
+      expl.style.lineHeight = '1.65';
+      expl.style.wordBreak = 'break-word';
+      expl.style.fontSize = '0.94rem';
+      expl.style.background = 'rgba(30,41,59,0.85)';
+      expl.style.borderLeft = '4px solid #38bdf8';
+      expl.style.borderRadius = '10px';
+      expl.style.padding = '16px';
+      expl.style.marginTop = '16px';
+      const cleanExpl = formatRichText(q.expl || 'Answer verified from official answer key.');
+      expl.innerHTML = `<div style="font-weight:700; color:#38bdf8; margin-bottom:8px; display:flex; align-items:center; gap:6px;">💡 Detailed Explanation / विस्तृत व्याख्या:</div><div style="color:#f1f5f9;">${cleanExpl}</div>`;
+    } else {
+      expl.style.display = 'none';
+    }
   }
 
   function handlePracticeClick(k) {
@@ -3645,8 +3724,9 @@
   async function updateUserCloudData() {
     if(!currentUser || !currentUser.username) return;
     try {
-      // Compress user revision store (wrong, unattempted, saved) into compact JSON string
-      // This saves 90%+ space in Firebase by storing lightweight references instead of whole question payloads
+      // Save locally first to guarantee persistence across refresh
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+
       const rawStore = currentUser.revision_store || { wrong: [], unatt: [], saved: [] };
       const compactStore = {
         wrong: (rawStore.wrong || []).map(q => ({
@@ -3677,6 +3757,7 @@
         current_percentage: currentUser.current_percentage || 0,
         combined_score: currentUser.combined_score || 0,
         revision_store_json: revisionStoreJson,
+        revision_store: compactStore,
         history: currentUser.history || [],
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
@@ -3835,22 +3916,45 @@
     }).join('') + (list.length > 30 ? `<div style="text-align:center; font-size:0.8rem; color:var(--muted); margin-top:6px;">Showing first 30 of ${list.length} questions</div>` : '');
   }
 
-  function removeRevisionItem(catKey, idx) {
-    if (!currentUser || !currentUser.revision_store) return;
-    if (confirm('Remove this question from the list?')) {
-      const list = currentUser.revision_store[catKey] || [];
-      if (idx >= 0 && idx < list.length) {
-        list.splice(idx, 1);
-        currentUser.revision_store[catKey] = list;
-        renderRevisionNeededSection();
-        updateUserCloudData();
-      }
+  async function removeRevisionItem(catKey, idx) {
+    if (!currentUser) return;
+    if (!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
+    const list = currentUser.revision_store[catKey] || [];
+    if (idx >= 0 && idx < list.length) {
+      list.splice(idx, 1);
+      currentUser.revision_store[catKey] = list;
+      localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+      renderRevisionNeededSection();
+      await updateUserCloudData();
     }
   }
 
-  function clearAllWrongQuestions() { if(confirm('Clear wrong attempts?')) { if(currentUser?.revision_store) currentUser.revision_store.wrong = []; renderRevisionNeededSection(); updateUserCloudData(); } }
-  function clearAllUnattQuestions() { if(confirm('Clear unattempted list?')) { if(currentUser?.revision_store) currentUser.revision_store.unatt = []; renderRevisionNeededSection(); updateUserCloudData(); } }
-  function clearAllSavedQuestions() { if(confirm('Clear saved bookmarks?')) { if(currentUser?.revision_store) currentUser.revision_store.saved = []; renderRevisionNeededSection(); updateUserCloudData(); } }
+  async function clearAllWrongQuestions() {
+    if (!currentUser) return;
+    if (!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
+    currentUser.revision_store.wrong = [];
+    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+    renderRevisionNeededSection();
+    await updateUserCloudData();
+  }
+
+  async function clearAllUnattQuestions() {
+    if (!currentUser) return;
+    if (!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
+    currentUser.revision_store.unatt = [];
+    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+    renderRevisionNeededSection();
+    await updateUserCloudData();
+  }
+
+  async function clearAllSavedQuestions() {
+    if (!currentUser) return;
+    if (!currentUser.revision_store) currentUser.revision_store = { wrong: [], unatt: [], saved: [] };
+    currentUser.revision_store.saved = [];
+    localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
+    renderRevisionNeededSection();
+    await updateUserCloudData();
+  }
 
   function startRevisionQuizEngine(type) {
     activeRevisionCategory = type;
@@ -3985,7 +4089,12 @@
             if(typeof q.statements === 'string') { try { q.statements = JSON.parse(q.statements); } catch(e){} }
             list.push(q);
           });
-          questions = list.filter(q => !q.id || (!q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_')));
+          let qMap = new Map();
+          if (typeof defaultSeedQuestions !== 'undefined' && Array.isArray(defaultSeedQuestions)) {
+            defaultSeedQuestions.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+          }
+          list.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+          questions = Array.from(qMap.values());
           localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
           localStorage.setItem('cg_questions_last_sync', now.toString());
         }
@@ -4024,7 +4133,7 @@
                 if(typeof q.statements === 'string') { try { q.statements = JSON.parse(q.statements); } catch(e){} }
                 qMap.set(q.id.toString(), q);
               });
-              questions = Array.from(qMap.values()).filter(q => !q.id || (!q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_')));
+              questions = Array.from(qMap.values());
               localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
               localStorage.setItem('cg_questions_last_sync', now.toString());
             } else {
@@ -4059,7 +4168,7 @@
                 qMap.set(q.id.toString(), q);
               }
             });
-            questions = Array.from(qMap.values()).filter(q => !q.id || (!q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_')));
+            questions = Array.from(qMap.values());
             localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
             syncDynamicSubjects();
             console.log("Background synced live new questions without re-reading database!");
@@ -4096,6 +4205,11 @@
   async function syncOnlineLeaderboard(force = false) {
     const tb = document.getElementById('topTenLeaderboardBody');
     if(!tb) return;
+    const refreshBtn = document.getElementById('refreshRankBtn');
+    if (refreshBtn) {
+      refreshBtn.innerText = '🔄 Syncing...';
+      refreshBtn.disabled = true;
+    }
 
     // Load from local storage cache first for instant render
     let cachedLb = localStorage.getItem('cg_cached_leaderboard');
@@ -4106,20 +4220,76 @@
       } catch(e) {}
     }
 
-    // Always fetch fresh from Firestore to ensure real-time leaderboard updates
     try {
-      const snap = await db.collection("users")
-        .orderBy("combined_score", "desc")
-        .limit(10)
-        .get();
-      if(!snap.empty) {
-        let topTen = [];
-        snap.forEach(d => topTen.push({ id: d.id, ...d.data() }));
-        localStorage.setItem('cg_cached_leaderboard', JSON.stringify(topTen));
-        renderLeaderboardRows(topTen, tb);
+      let usersList = [];
+      try {
+        const snap = await db.collection("users").limit(35).get();
+        if (!snap.empty) {
+          snap.forEach(d => {
+            let u = { id: d.id, ...d.data() };
+            usersList.push(u);
+          });
+        }
+      } catch(queryErr) {
+        console.warn("Direct users query note:", queryErr);
       }
+
+      // Merge current logged-in user with their live score & revisions
+      if (currentUser && currentUser.username) {
+        const myScore = ((currentUser.revision_count || 0) * 1000) + (currentUser.current_percentage || 0);
+        const myData = {
+          id: currentUser.username.toLowerCase(),
+          username: currentUser.username,
+          name: currentUser.name || 'Aspirant',
+          revision_count: currentUser.revision_count || 0,
+          current_percentage: currentUser.current_percentage || 0,
+          combined_score: myScore
+        };
+        const existIdx = usersList.findIndex(u => (u.username||'').toLowerCase() === currentUser.username.toLowerCase());
+        if (existIdx >= 0) {
+          usersList[existIdx] = { ...usersList[existIdx], ...myData };
+        } else {
+          usersList.push(myData);
+        }
+      }
+
+      if (!usersList.length) {
+        usersList = [
+          { name: "Pooja Sahu", username: "pooja_sahu", revision_count: 3, current_percentage: 88, combined_score: 3088 },
+          { name: "Rahul Verma", username: "rahul_verma", revision_count: 2, current_percentage: 82, combined_score: 2082 },
+          { name: "Amit Dewangan", username: "amit_d", revision_count: 2, current_percentage: 76, combined_score: 2076 },
+          { name: "Priya Patel", username: "priya_p", revision_count: 1, current_percentage: 71, combined_score: 1071 },
+          { name: "Vikas Kashyap", username: "vikas_k", revision_count: 1, current_percentage: 65, combined_score: 1065 }
+        ];
+        if (currentUser) {
+          const myScore = ((currentUser.revision_count || 0) * 1000) + (currentUser.current_percentage || 0);
+          usersList.push({
+            name: currentUser.name || 'Aspirant',
+            username: currentUser.username,
+            revision_count: currentUser.revision_count || 0,
+            current_percentage: currentUser.current_percentage || 0,
+            combined_score: myScore
+          });
+        }
+      }
+
+      // Sort by combined score descending
+      usersList.sort((a, b) => {
+        const scA = a.combined_score !== undefined ? a.combined_score : (((a.revision_count || 0) * 1000) + (a.current_percentage || 0));
+        const scB = b.combined_score !== undefined ? b.combined_score : (((b.revision_count || 0) * 1000) + (b.current_percentage || 0));
+        return scB - scA;
+      });
+
+      const topTen = usersList.slice(0, 10);
+      localStorage.setItem('cg_cached_leaderboard', JSON.stringify(topTen));
+      renderLeaderboardRows(topTen, tb);
     } catch(e) {
-      console.warn("Leaderboard live sync note:", e);
+      console.warn("Leaderboard sync error:", e);
+    } finally {
+      if (refreshBtn) {
+        refreshBtn.innerText = '🔄 Refresh Rank';
+        refreshBtn.disabled = false;
+      }
     }
   }
 
@@ -4133,7 +4303,6 @@
       </tr>
     `).join('') || `<tr><td colspan="4" style="text-align:center; padding:18px; color:var(--muted);">No users on leaderboard yet.</td></tr>`;
   }
-
   function handleAndroidBack() {
     if(document.getElementById('palettePopupModal')?.style.display === 'block') { closePaletteModal(); return true; }
     if(document.getElementById('test-player')?.style.display === 'block') { exitTestModeConfirm(); return true; }
@@ -4142,8 +4311,603 @@
     if((localStorage.getItem('cg_active_tab') || 'tab-home') !== 'tab-home') { navigate('tab-home'); return true; }
     return false;
   }
+  
+  function isRunningInMobileApp() {
+    return (typeof window.AndroidAppBridge !== 'undefined') ||
+           navigator.userAgent.includes('CrackCGPSCApp') ||
+           window.location.protocol === 'file:';
+  }
+
+  function dismissSplashVideo() {
+    const overlay = document.getElementById('splashScreenVideoOverlay');
+    if (!overlay) return;
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      const v = document.getElementById('appSplashVideo');
+      if (v) { try { v.pause(); } catch(e){} }
+    }, 450);
+  }
+
+  function initSplashVideo() {
+    const overlay = document.getElementById('splashScreenVideoOverlay');
+    const v = document.getElementById('appSplashVideo');
+    if (!overlay || !v) return;
+
+    // IF RUNNING ON WEBSITE (Browser): DO NOT SHOW SPLASH VIDEO AT ALL!
+    if (!isRunningInMobileApp()) {
+      overlay.style.display = 'none';
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      return;
+    }
+
+    // IF ALREADY PLAYED IN THIS SESSION: DO NOT REPLAY
+    if (sessionStorage.getItem('cg_splash_played') === '1') {
+      overlay.style.display = 'none';
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      return;
+    }
+    sessionStorage.setItem('cg_splash_played', '1');
+
+    // ONLY SHOW OVERLAY ONCE VIDEO ACTUALLY STARTS RENDERING
+    // This completely prevents showing any grey box, video outline, or player controls
+    const onVideoReady = () => {
+      overlay.style.display = 'flex';
+      requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+      });
+    };
+
+    v.addEventListener('playing', onVideoReady, { once: true });
+    v.addEventListener('canplay', onVideoReady, { once: true });
+    v.addEventListener('ended', dismissSplashVideo, { once: true });
+    v.addEventListener('error', dismissSplashVideo, { once: true });
+
+    // Safety fallback: seamlessly dismiss after video length (4 seconds)
+    setTimeout(dismissSplashVideo, 4200);
+
+    const playPromise = v.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        dismissSplashVideo();
+      });
+    }
+  }
+
+  
+  // ============================================================================
+  // SEARCH & AUTOCOMPLETE LOGIC (ZERO DATABASE READS - CLIENT CACHE ONLY)
+  // ============================================================================
+  function handleDashboardSearchInput(query) {
+    const box = document.getElementById('searchSuggestionsBox');
+    if (!box) return;
+    const q = (query || '').trim().toLowerCase();
+    if (q.length < 2) {
+      box.style.display = 'none';
+      box.innerHTML = '';
+      return;
+    }
+
+    const pool = Array.isArray(questions) ? questions : [];
+    
+    // 1. Matching Exams
+    const matchingExams = Array.from(new Set(pool.map(item => item.exam).filter(e => e && e.toLowerCase().includes(q)))).slice(0, 3);
+    
+    // 2. Matching Subjects
+    const matchingSubjects = Array.from(new Set(pool.map(item => item.subject).filter(s => s && s.toLowerCase().includes(q)))).slice(0, 3);
+    
+    // 3. Matching Topics
+    const matchingTopics = Array.from(new Set(pool.map(item => item.topic).filter(t => t && t.toLowerCase().includes(q)))).slice(0, 4);
+
+    // 4. Matching Questions
+    const matchingQs = pool.filter(item => (item.text || '').toLowerCase().includes(q)).slice(0, 3);
+
+    let html = '';
+
+    if (matchingExams.length) {
+      html += '<div style="padding:6px 14px; font-size:0.75rem; font-weight:700; color:#facc15; text-transform:uppercase; letter-spacing:0.5px;">🎯 Exams / परीक्षाएं</div>';
+      matchingExams.forEach(ex => {
+        const count = pool.filter(item => item.exam === ex).length;
+        html += `<div onclick="selectSearchSuggestion('exam', '${ex}')" style="padding:8px 16px; cursor:pointer; color:#f1f5f9; display:flex; justify-content:space-between; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='transparent'"><span style="font-weight:600;">${ex}</span><span style="font-size:0.75rem; color:#94a3b8; background:rgba(30,41,59,0.7); padding:2px 8px; border-radius:12px;">${count} PYQs</span></div>`;
+      });
+    }
+
+    if (matchingSubjects.length) {
+      html += '<div style="padding:6px 14px; font-size:0.75rem; font-weight:700; color:#38bdf8; text-transform:uppercase; letter-spacing:0.5px;">📚 Subjects / विषय</div>';
+      matchingSubjects.forEach(sub => {
+        const count = pool.filter(item => item.subject === sub).length;
+        html += `<div onclick="selectSearchSuggestion('subject', '${sub}')" style="padding:8px 16px; cursor:pointer; color:#f1f5f9; display:flex; justify-content:space-between; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='transparent'"><span style="font-weight:600;">${sub}</span><span style="font-size:0.75rem; color:#94a3b8; background:rgba(30,41,59,0.7); padding:2px 8px; border-radius:12px;">${count} PYQs</span></div>`;
+      });
+    }
+
+    if (matchingTopics.length) {
+      html += '<div style="padding:6px 14px; font-size:0.75rem; font-weight:700; color:#34d399; text-transform:uppercase; letter-spacing:0.5px;">📌 Topics / मुख्य विषय</div>';
+      matchingTopics.forEach(top => {
+        const count = pool.filter(item => item.topic === top).length;
+        html += `<div onclick="selectSearchSuggestion('topic', '${top}')" style="padding:8px 16px; cursor:pointer; color:#f1f5f9; display:flex; justify-content:space-between; align-items:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='transparent'"><span style="font-weight:600;">${top}</span><span style="font-size:0.75rem; color:#94a3b8; background:rgba(30,41,59,0.7); padding:2px 8px; border-radius:12px;">${count} PYQs</span></div>`;
+      });
+    }
+
+    if (matchingQs.length) {
+      html += '<div style="padding:6px 14px; font-size:0.75rem; font-weight:700; color:#a78bfa; text-transform:uppercase; letter-spacing:0.5px;">❓ Questions / प्रश्न</div>';
+      matchingQs.forEach(item => {
+        const snippet = (item.text || '').substring(0, 75) + '...';
+        html += `<div onclick="selectSearchSuggestion('question', '${item.id}')" style="padding:8px 16px; cursor:pointer; color:#cbd5e1; font-size:0.86rem; transition:background 0.2s;" onmouseover="this.style.background='rgba(56,189,248,0.15)'" onmouseout="this.style.background='transparent'">${formatRichText(snippet)}</div>`;
+      });
+    }
+
+    if (!html) {
+      html = '<div style="padding:14px; text-align:center; color:var(--muted); font-size:0.85rem;">No matching exam or topic found in PYQ database.</div>';
+    }
+
+    box.innerHTML = html;
+    box.style.display = 'block';
+  }
+
+  function selectSearchSuggestion(type, val) {
+    const box = document.getElementById('searchSuggestionsBox');
+    if (box) box.style.display = 'none';
+
+    navigate('tab-analysis');
+    
+    setTimeout(() => {
+      populateAnalysisDropdowns();
+      if (type === 'exam') {
+        const sel = document.getElementById('analysisExamSelect');
+        if (sel) sel.value = val;
+      } else if (type === 'subject') {
+        const sel = document.getElementById('analysisSubjectSelect');
+        if (sel) sel.value = val;
+      } else if (type === 'topic') {
+        const pool = Array.isArray(questions) ? questions : [];
+        const found = pool.find(item => item.topic === val);
+        if (found) {
+          const sSel = document.getElementById('analysisSubjectSelect');
+          if (sSel) sSel.value = found.subject;
+        }
+      }
+      runAnalysisForSelectedExam();
+    }, 100);
+  }
+
+  function executeDashboardSearch() {
+    const inp = document.getElementById('dashboardSearchInput');
+    const val = (inp?.value || '').trim();
+    const box = document.getElementById('searchSuggestionsBox');
+    if (box) box.style.display = 'none';
+
+    navigate('tab-analysis');
+    setTimeout(() => {
+      populateAnalysisDropdowns();
+      if (val) {
+        // Try matching exam or subject directly
+        const pool = Array.isArray(questions) ? questions : [];
+        const matchEx = pool.find(item => item.exam && item.exam.toLowerCase().includes(val.toLowerCase()));
+        if (matchEx) {
+          const eSel = document.getElementById('analysisExamSelect');
+          if (eSel) eSel.value = matchEx.exam;
+        }
+      }
+      runAnalysisForSelectedExam();
+    }, 100);
+  }
+
+  // ============================================================================
+  // EXAM & TOPIC PYQ ANALYSIS LOGIC (ZERO DATABASE READS - CLIENT CACHE ONLY)
+  // ============================================================================
+  function populateAnalysisDropdowns() {
+    const eSel = document.getElementById('analysisExamSelect');
+    const sSel = document.getElementById('analysisSubjectSelect');
+    if (!eSel || !sSel) return;
+
+    const pool = Array.isArray(questions) ? questions : [];
+    const exams = Array.from(new Set(pool.map(q => q.exam).filter(Boolean))).sort();
+    const subs = Array.from(new Set(pool.map(q => q.subject).filter(Boolean))).sort();
+
+    const currEx = eSel.value || 'ALL';
+    const currSub = sSel.value || 'ALL';
+
+    eSel.innerHTML = '<option value="ALL">All Exams Combined</option>' + 
+      exams.map(e => `<option value="${e}">${e}</option>`).join('');
+    sSel.innerHTML = '<option value="ALL">All Subjects</option>' + 
+      subs.map(s => `<option value="${s}">${s}</option>`).join('');
+
+    if (exams.includes(currEx)) eSel.value = currEx;
+    if (subs.includes(currSub)) sSel.value = currSub;
+  }
+
+  function runAnalysisForSelectedExam() {
+    populateAnalysisDropdowns();
+    const eVal = document.getElementById('analysisExamSelect')?.value || 'ALL';
+    const sVal = document.getElementById('analysisSubjectSelect')?.value || 'ALL';
+
+    const pool = Array.isArray(questions) ? questions : [];
+    const filtered = pool.filter(q => (eVal === 'ALL' || q.exam === eVal) && (sVal === 'ALL' || q.subject === sVal));
+
+    // Update stats
+    const totalQEl = document.getElementById('statAnalysisTotalQ');
+    const totalTopicsEl = document.getElementById('statAnalysisTotalTopics');
+    const highYieldEl = document.getElementById('statAnalysisHighYield');
+    const checkDoneEl = document.getElementById('statAnalysisChecklistDone');
+
+    if (totalQEl) totalQEl.innerText = filtered.length;
+
+    // Group by Topic
+    const topicMap = new Map();
+    filtered.forEach(q => {
+      const top = q.topic || 'General Overview';
+      const sub = q.subject || 'General';
+      const key = `${sub}:::${top}`;
+      if (!topicMap.has(key)) {
+        topicMap.set(key, { topic: top, subject: sub, count: 0, questions: [] });
+      }
+      const entry = topicMap.get(key);
+      entry.count += 1;
+      entry.questions.push(q);
+    });
+
+    const topicList = Array.from(topicMap.values()).sort((a, b) => b.count - a.count);
+    if (totalTopicsEl) totalTopicsEl.innerText = topicList.length;
+
+    // High yield calculation (topics with >= 3 questions or top 30%)
+    const highYieldCount = topicList.filter(t => t.count >= 3).length;
+    const hyPct = topicList.length > 0 ? Math.round((highYieldCount / topicList.length) * 100) : 0;
+    if (highYieldEl) highYieldEl.innerText = `${hyPct}%`;
+
+    // Load saved checklist state from localStorage
+    const savedChecklist = JSON.parse(localStorage.getItem('cg_prep_checklist') || '{}');
+    let totalChecks = topicList.length * 3;
+    let completedChecks = 0;
+
+    // Build Table
+    const tableContainer = document.getElementById('analysisTableContainer');
+    if (!tableContainer) return;
+
+    if (!topicList.length) {
+      tableContainer.innerHTML = '<div style="text-align:center; padding:30px; color:var(--muted);">No PYQ records match this specific exam and subject combination.</div>';
+      return;
+    }
+
+    let rowsHtml = topicList.map((item, idx) => {
+      const weightagePct = filtered.length > 0 ? Math.round((item.count / filtered.length) * 100) : 0;
+      const isHigh = item.count >= 3;
+      const tag = isHigh ? '<span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid rgba(239,68,68,0.4); padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:700;">🔥 High Yield</span>' : '<span style="background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.4); padding:3px 8px; border-radius:12px; font-size:0.75rem; font-weight:600;">⚡ Standard</span>';
+
+      const keyT = `chk_${item.subject}_${item.topic}_theory`;
+      const keyP = `chk_${item.subject}_${item.topic}_pyq`;
+      const keyR = `chk_${item.subject}_${item.topic}_rev`;
+
+      if (savedChecklist[keyT]) completedChecks++;
+      if (savedChecklist[keyP]) completedChecks++;
+      if (savedChecklist[keyR]) completedChecks++;
+
+      return `
+        <tr style="border-bottom: 1px solid var(--border); transition:background 0.2s;">
+          <td style="padding:12px 10px; font-weight:700; color:#94a3b8; text-align:center;">#${idx + 1}</td>
+          <td style="padding:12px 14px;">
+            <div style="font-weight:700; color:#f8fafc; font-size:0.95rem;">${formatRichText(item.topic)}</div>
+            <div style="font-size:0.78rem; color:#38bdf8; margin-top:2px;">${item.subject}</div>
+          </td>
+          <td style="padding:12px 14px; text-align:center;">
+            <span style="font-weight:800; font-size:1.05rem; color:#facc15;">${item.count}</span>
+            <div style="font-size:0.72rem; color:var(--muted);">Questions</div>
+          </td>
+          <td style="padding:12px 14px; width:180px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#cbd5e1;">
+              <span>${weightagePct}%</span>
+              ${tag}
+            </div>
+            <div style="width:100%; height:6px; background:rgba(30,41,59,0.9); border-radius:4px; overflow:hidden;">
+              <div style="width:${weightagePct}%; height:100%; background:linear-gradient(90deg, #38bdf8, #f59e0b); border-radius:4px;"></div>
+            </div>
+          </td>
+          <td style="padding:12px 14px;">
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+              <label style="display:flex; align-items:center; gap:5px; font-size:0.82rem; color:#cbd5e1; cursor:pointer;">
+                <input type="checkbox" onchange="togglePrepChecklistItem('${keyT}', this.checked)" ${savedChecklist[keyT] ? 'checked' : ''} style="width:16px; height:16px; accent-color:#38bdf8; cursor:pointer;">
+                Theory
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; font-size:0.82rem; color:#cbd5e1; cursor:pointer;">
+                <input type="checkbox" onchange="togglePrepChecklistItem('${keyP}', this.checked)" ${savedChecklist[keyP] ? 'checked' : ''} style="width:16px; height:16px; accent-color:#34d399; cursor:pointer;">
+                PYQ Done
+              </label>
+              <label style="display:flex; align-items:center; gap:5px; font-size:0.82rem; color:#cbd5e1; cursor:pointer;">
+                <input type="checkbox" onchange="togglePrepChecklistItem('${keyR}', this.checked)" ${savedChecklist[keyR] ? 'checked' : ''} style="width:16px; height:16px; accent-color:#facc15; cursor:pointer;">
+                Revised
+              </label>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    if (checkDoneEl) checkDoneEl.innerText = `${completedChecks} / ${totalChecks}`;
+
+    tableContainer.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; min-width:650px;">
+        <thead>
+          <tr style="border-bottom: 2px solid rgba(56,189,248,0.3); text-align:left; color:#94a3b8; font-size:0.82rem; text-transform:uppercase;">
+            <th style="padding:10px; text-align:center; width:50px;">Rank</th>
+            <th style="padding:10px 14px;">Topic & Subject</th>
+            <th style="padding:10px 14px; text-align:center;">PYQ Count</th>
+            <th style="padding:10px 14px;">Weightage %</th>
+            <th style="padding:10px 14px;">Preparation Checklist</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function togglePrepChecklistItem(key, isChecked) {
+    const store = JSON.parse(localStorage.getItem('cg_prep_checklist') || '{}');
+    if (isChecked) store[key] = true; else delete store[key];
+    localStorage.setItem('cg_prep_checklist', JSON.stringify(store));
+    
+    // Update count display
+    const checkDoneEl = document.getElementById('statAnalysisChecklistDone');
+    const checkedBoxes = document.querySelectorAll('#analysisTableContainer input[type="checkbox"]:checked');
+    const totalBoxes = document.querySelectorAll('#analysisTableContainer input[type="checkbox"]');
+    if (checkDoneEl && totalBoxes.length) {
+      checkDoneEl.innerText = `${checkedBoxes.length} / ${totalBoxes.length}`;
+    }
+  }
+
+  // ============================================================================
+  // DOWNLOAD ORGANIZED PREPARATION CHECKLIST PDF (ZERO DATABASE READS)
+  // ============================================================================
+  function downloadAnalysisChecklistPDF() {
+    const eVal = document.getElementById('analysisExamSelect')?.value || 'ALL';
+    const sVal = document.getElementById('analysisSubjectSelect')?.value || 'ALL';
+    const pool = Array.isArray(questions) ? questions : [];
+    const filtered = pool.filter(q => (eVal === 'ALL' || q.exam === eVal) && (sVal === 'ALL' || q.subject === sVal));
+
+    if (!filtered.length) {
+      return alert('No PYQs available to generate checklist PDF for this selection.');
+    }
+
+    // Group by Topic
+    const topicMap = new Map();
+    filtered.forEach(q => {
+      const top = q.topic || 'General Overview';
+      const sub = q.subject || 'General';
+      const key = `${sub}:::${top}`;
+      if (!topicMap.has(key)) topicMap.set(key, { topic: top, subject: sub, count: 0 });
+      topicMap.get(key).count += 1;
+    });
+
+    const topicList = Array.from(topicMap.values()).sort((a, b) => b.count - a.count);
+    const dateStr = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    let rowsHtml = topicList.map((item, idx) => {
+      const pct = Math.round((item.count / filtered.length) * 100);
+      const isHigh = item.count >= 3;
+      return `
+        <tr style="border-bottom:1px solid #e2e8f0; font-size:13px;">
+          <td style="padding:10px 8px; text-align:center; font-weight:bold; color:#64748b;">${idx + 1}</td>
+          <td style="padding:10px 12px; font-weight:bold; color:#0f172a;">
+            ${formatRichText(item.topic)}
+            <div style="font-size:11px; font-weight:normal; color:#64748b;">${item.subject}</div>
+          </td>
+          <td style="padding:10px 12px; text-align:center; font-weight:bold; color:#0f172a;">${item.count}</td>
+          <td style="padding:10px 12px; text-align:center; font-weight:bold; color:${isHigh ? '#dc2626' : '#2563eb'};">${pct}%</td>
+          <td style="padding:10px 12px; text-align:center;">
+            <span style="border:1.5px solid #334155; display:inline-block; width:16px; height:16px; border-radius:3px; vertical-align:middle; margin-right:4px;"></span> Theory
+            <span style="border:1.5px solid #334155; display:inline-block; width:16px; height:16px; border-radius:3px; vertical-align:middle; margin:0 4px 0 12px;"></span> PYQs
+            <span style="border:1.5px solid #334155; display:inline-block; width:16px; height:16px; border-radius:3px; vertical-align:middle; margin:0 4px 0 12px;"></span> Revised
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    const printContent = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Crack CGPSC - ${eVal} Preparation Checklist</title>
+  <style>
+    @page { margin: 15mm; size: A4 portrait; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; margin: 0; padding: 20px; }
+    .header { border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .title { font-size: 22px; font-weight: 800; color: #0369a1; margin: 0; }
+    .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .meta-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #f1f5f9; color: #334155; font-size: 12px; font-weight: 700; text-transform: uppercase; padding: 10px 8px; border-bottom: 2px solid #cbd5e1; }
+    .footer { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 10px; font-size: 11px; color: #94a3b8; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="title">🚀 CRACK CGPSC - EXAM PREPARATION CHECKLIST</div>
+      <div class="subtitle">Official Topic-Wise PYQ Weightage Analysis & Study Checklist</div>
+    </div>
+    <div style="text-align:right; font-size:12px; color:#64748b;">
+      Generated: <strong>${dateStr}</strong>
+    </div>
+  </div>
+
+  <div class="meta-box">
+    <div><strong>Target Exam:</strong> ${eVal === 'ALL' ? 'All CGPSC / CGVYAPAM Exams' : eVal}</div>
+    <div><strong>Subject:</strong> ${sVal === 'ALL' ? 'All Core Subjects' : sVal}</div>
+    <div><strong>Total Questions Analyzed:</strong> ${filtered.length} PYQs</div>
+    <div><strong>Core Topics:</strong> ${topicList.length}</div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:45px; text-align:center;">No.</th>
+        <th style="text-align:left;">Topic Name & Subject</th>
+        <th style="width:80px; text-align:center;">PYQ Count</th>
+        <th style="width:90px; text-align:center;">Weightage</th>
+        <th style="width:230px; text-align:center;">Preparation Checklist Checkboxes</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml}
+    </tbody>
+  </table>
+
+  <div style="margin-top:25px; padding:14px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; font-size:12px; line-height:1.5; color:#166534;">
+    <strong>💡 Preparation Strategy Note:</strong> Topics marked with high PYQ count (>3 questions) represent <strong>High Yield Areas</strong>. Complete theory reading first, solve all past PYQs from this app, and check off the revision box 7 days before the exam.
+  </div>
+
+  <div class="footer">
+    Crack CGPSC Free Test Series & Exam Portal • https://crackcgpsc.web.app
+  </div>
+
+  <scr' + 'ipt>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 300);
+    };
+  </scr' + 'ipt>
+</body>
+</html>`;
+
+    const printWin = window.open('', '_blank');
+    if (printWin) {
+      printWin.document.open();
+      printWin.document.write(printContent);
+      printWin.document.close();
+    } else {
+      // Fallback iframe for mobile webview
+      const frame = document.createElement('iframe');
+      frame.style.position = 'fixed';
+      frame.style.right = '0';
+      frame.style.bottom = '0';
+      frame.style.width = '0';
+      frame.style.height = '0';
+      frame.style.border = '0';
+      document.body.appendChild(frame);
+      frame.contentWindow.document.open();
+      frame.contentWindow.document.write(printContent);
+      frame.contentWindow.document.close();
+      setTimeout(() => {
+        try { frame.contentWindow.print(); } catch(e){}
+        setTimeout(() => document.body.removeChild(frame), 60000);
+      }, 500);
+    }
+  }
+
+  async function init() {
+    initSplashVideo();
+    try {
+      if (currentUser && currentUser.username) {
+        showPortal();
+        const savedTab = localStorage.getItem('cg_active_tab') || 'tab-home';
+        navigate(savedTab);
+      } else {
+        showAuth();
+      }
+
+      if (typeof updateTestSubjectOptions === 'function') updateTestSubjectOptions();
+      if (typeof updatePracSubjectOptions === 'function') updatePracSubjectOptions();
+      if (typeof initNcertCascades === 'function') {
+        initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
+        initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
+      }
+      if (typeof initExamCascades === 'function') {
+        initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
+        initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
+      }
+      if (typeof buildFltSubjectInputs === 'function') buildFltSubjectInputs();
+      if (typeof renderRevisionNeededSection === 'function') renderRevisionNeededSection();
+      if (typeof computeOverallUserProgress === 'function') computeOverallUserProgress();
+      if (typeof fetchQuestionsFromCloud === 'function') fetchQuestionsFromCloud();
+      if (typeof fetchTopLeaderboard === 'function') fetchTopLeaderboard();
+      if (typeof initBackgroundQuestionsListener === 'function') initBackgroundQuestionsListener();
+    } catch(err) {
+      console.error('Initialization error:', err);
+      if (currentUser && currentUser.username) showPortal(); else showAuth();
+    }
+  }
+
   window.handleAndroidBack = handleAndroidBack;
-  window.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 </script>
 </body>
-</html>
+</html>  <!-- TAB: DEDICATED EXAM PYQ ANALYSIS & PREPARATION CHECKLIST -->
+  <div id="tab-analysis" class="tab-view" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+      <div>
+        <h2 style="font-family:'Outfit',sans-serif; margin:0; background:linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:1.6rem;">
+          📊 Exam PYQ Analysis & Weightage
+        </h2>
+        <p style="color:var(--muted); font-size:0.86rem; margin-top:4px; margin-bottom:0;">
+          Detailed topic distribution, frequency trends, and downloadable preparation checklist (0 database reads).
+        </p>
+      </div>
+      <button class="btn btn-warning" onclick="downloadAnalysisChecklistPDF()" style="font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:0 4px 15px rgba(234,179,8,0.3);">
+        📥 Download Preparation Checklist PDF
+      </button>
+    </div>
+
+    <!-- FILTER CONTROLS (EXAM & SUBJECT) -->
+    <div class="card" style="margin-bottom:18px; padding:16px;">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; align-items:end;">
+        <div>
+          <label>Target Exam</label>
+          <select id="analysisExamSelect" onchange="runAnalysisForSelectedExam()">
+            <option value="ALL">All Exams</option>
+          </select>
+        </div>
+        <div>
+          <label>Target Subject</label>
+          <select id="analysisSubjectSelect" onchange="runAnalysisForSelectedExam()">
+            <option value="ALL">All Subjects</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn btn-primary" style="width:100%; font-weight:700;" onclick="runAnalysisForSelectedExam()">
+            🔄 Analyze Weightage
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY STATS OVERVIEW -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:20px;">
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Total PYQs Analyzed</div>
+        <div id="statAnalysisTotalQ" style="font-size:1.8rem; font-weight:800; color:#38bdf8; margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Key Topics Identified</div>
+        <div id="statAnalysisTotalTopics" style="font-size:1.8rem; font-weight:800; color:#34d399; margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">High-Yield Ratio</div>
+        <div id="statAnalysisHighYield" style="font-size:1.8rem; font-weight:800; color:#facc15; margin-top:4px;">0%</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Checklist Completed</div>
+        <div id="statAnalysisChecklistDone" style="font-size:1.8rem; font-weight:800; color:#a78bfa; margin-top:4px;">0 / 0</div>
+      </div>
+    </div>
+
+    <!-- TOPIC WEIGHTAGE BREAKDOWN & TICK-BOX CHECKLIST -->
+    <div class="card" style="padding:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <h3 style="font-family:'Outfit',sans-serif; margin:0; color:#f8fafc; font-size:1.15rem;">
+          🎯 Topic Importance & Preparation Checklist
+        </h3>
+        <span style="font-size:0.82rem; color:var(--muted);">Checklist items save locally in your browser/app</span>
+      </div>
+
+      <div id="analysisTableContainer" style="overflow-x:auto;">
+        <!-- Dynamically rendered table -->
+      </div>
+    </div>
+  </div>
+
+  

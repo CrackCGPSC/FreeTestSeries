@@ -54,15 +54,18 @@
                   radial-gradient(circle at 88% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 48%),
                   #060913;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 8px 12px;
+      padding: 6px 10px;
       display: flex;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 100;
-      gap: 8px;
-      flex-wrap: nowrap;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .brand-container {
       display: flex;
@@ -74,13 +77,44 @@
       min-width: 0;
     }
     .brand-rocket-clean {
-      font-size: 1.65rem;
+      position: relative !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      font-size: 1.55rem !important;
+      line-height: 1 !important;
+      flex-shrink: 0 !important;
+      padding: 0 2px !important;
+      cursor: pointer !important;
+      transition: transform 0.2s ease !important;
+    }
+    .brand-rocket-clean:hover {
+      transform: scale(1.08) !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .brand-rocket-clean::before {
+      content: '';
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(139, 92, 246, 0.2) 50%, transparent 80%);
+      border-radius: 50%;
+      filter: blur(5px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .brand-rocket-clean span {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+      display: inline-block;
       line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
-      flex-shrink: 0;
+      transform: translateY(-1px);
     }
     .brand-title-wrap {
       display: flex;
@@ -116,67 +150,137 @@
       header { padding: 6px 8px; gap: 4px; }
     }
     
-    /* Official Google Translate Widget exactly as in screenshot */
+    /* Compact Google Translate Widget & Header Controls */
     .header-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-shrink: 0;
-      max-width: 135px;
-      min-width: 0;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      flex-wrap: nowrap !important;
+      flex-shrink: 0 !important;
+      gap: 8px !important;
+      min-width: 0 !important;
+      margin-left: auto !important;
     }
     #google_translate_element {
-      display: inline-flex;
-      align-items: center;
-      max-width: 130px;
-      flex-shrink: 0;
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-shrink: 0 !important;
+      min-width: 0 !important;
     }
     .goog-te-gadget {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       font-size: 0 !important;
       color: transparent !important;
+      line-height: normal !important;
+      white-space: nowrap !important;
     }
     .goog-te-gadget-simple {
       background-color: #ffffff !important;
-      border: 1px solid #d1d5db !important;
+      border: 1px solid #cbd5e1 !important;
       padding: 3px 6px !important;
-      border-radius: 4px !important;
-      font-size: 0.78rem !important;
+      border-radius: 6px !important;
+      font-size: 0.72rem !important;
       line-height: normal !important;
       display: inline-flex !important;
       align-items: center !important;
       cursor: pointer !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18) !important;
       vertical-align: middle !important;
       white-space: nowrap !important;
+      height: 26px !important;
+      box-sizing: border-box !important;
     }
     .goog-te-gadget-simple * {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
-    }
-    .goog-te-gadget-simple .goog-te-menu-value {
-      color: #111827 !important;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      color: #1e293b !important;
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
       text-decoration: none !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 2px !important;
-      font-size: 0.78rem !important;
-      font-weight: 500 !important;
-      white-space: nowrap !important;
-    }
-    .goog-te-gadget-simple .goog-te-menu-value span {
-      color: #111827 !important;
-      font-size: 0.78rem !important;
-    }
-    .goog-te-gadget-simple .goog-te-menu-value span:last-child {
-      color: #6b7280 !important;
-      font-size: 0.68rem !important;
-      margin-left: 1px !important;
     }
     .goog-te-gadget-icon {
       margin-right: 4px !important;
-      width: 16px !important;
-      height: 16px !important;
+      width: 14px !important;
+      height: 14px !important;
       vertical-align: middle !important;
+    }
+    .goog-te-gadget-simple .goog-te-menu-value {
+      color: #1e293b !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 3px !important;
+    }
+    .goog-te-gadget-simple .goog-te-menu-value span {
+      color: #1e293b !important;
+    }
+    .goog-te-gadget-simple .goog-te-menu-value span:last-child {
+      color: #64748b !important;
+      font-size: 0.60rem !important;
+      margin-left: 1px !important;
+    }
+    .header-user-btn {
+      display: none;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      padding: 0 2px !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      outline: none !important;
+      flex-shrink: 0 !important;
+      user-select: none !important;
+      transition: transform 0.2s ease !important;
+      position: relative !important;
+      z-index: 10 !important;
+    }
+    .header-user-btn:hover, .header-user-btn:active {
+      transform: scale(1.08) !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .header-user-badge {
+      position: relative !important;
+      width: 28px !important;
+      height: 28px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    .header-user-badge::before {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, rgba(226, 232, 240, 0.25) 45%, rgba(148, 163, 184, 0.1) 70%, transparent 85%);
+      border-radius: 50%;
+      filter: blur(5px);
+      z-index: 0;
+      pointer-events: none;
+    }
+    .header-user-badge svg {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.9)) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+    }
+    .header-user-name {
+      font-size: 0.64rem !important;
+      font-weight: 700 !important;
+      color: #ffffff !important;
+      max-width: 48px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      text-align: center !important;
+      margin-top: 1px !important;
+      line-height: 1.1 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.4) !important;
     }
     /* Google Translate Popup Menu: ensure it opens and is fully visible */
     iframe.goog-te-menu-frame {
@@ -429,7 +533,7 @@
 </div>
 <header>
   <div class="brand-container" onclick="navigate('tab-home')">
-    <div class="brand-rocket-clean">🚀</div>
+    <div class="brand-rocket-clean"><span>🚀</span></div>
     <div class="brand-title-wrap">
       <div class="brand">Crack CGPSC</div>
       <div class="brand-subtitle">Govt Exam Free Test Series</div>
@@ -437,8 +541,19 @@
   </div>
   
   <div class="header-right">
-    <!-- Official Google Translate Widget -->
+    <!-- Compact Google Translate Widget -->
     <div id="google_translate_element"></div>
+
+    <!-- Header User Icon with First Name Underneath (Pure White Radiant Glow & Crisp White Icon) -->
+    <div id="headerUserBtn" class="header-user-btn" onclick="navigate('tab-profile')" title="Student Profile & Settings / विद्यार्थी प्रोफ़ाइल">
+      <div class="header-user-badge">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <span id="headerUserFirstName" class="header-user-name">Aspirant</span>
+    </div>
   </div>
 </header>
 
@@ -473,7 +588,7 @@
         
         <!-- Forgot Password Link Centered Directly Below Login Button -->
         <div style="display:flex; justify-content:center; align-items:center; margin-top:14px; margin-bottom:6px;">
-          <a href="javascript:void(0)" onclick="toggleForgotPass(true)" style="color:#38bdf8; font-size:0.88rem; font-weight:600; text-decoration:none; padding:4px 10px; border-radius:8px; background:rgba(56,189,248,0.08);">Forgot Password? / पासवर्ड भूल गए? 🔑</a>
+          <a href="javascript:void(0)" onclick="toggleForgotPass(true)" style="color:#38bdf8; font-size:0.88rem; font-weight:600; text-decoration:none; background:transparent; padding:0; border:none; box-shadow:none;">Forgot Password? 🔑</a>
         </div>
 
         <div style="text-align: center; margin-top: 14px; font-size: 0.88rem; color: var(--muted);">
@@ -519,6 +634,8 @@
         <div id="usernameAvailabilityMsg" style="font-size:0.75rem; margin-top:-8px; margin-bottom:10px;"></div>
         <label>Registered Mobile Number (For Recovery)</label>
         <input type="tel" id="memRegMobile" placeholder="e.g. 9876543210 (10 Digits)" maxlength="10">
+        <label>Date of Birth / जन्म तिथि</label>
+        <input type="date" id="memRegDob" style="background:var(--card-in); border:1px solid var(--border); border-radius:10px; padding:10px 14px; color:#fff; width:100%; margin-bottom:12px; font-family:inherit;">
         <label>Create Password</label>
         <div class="password-wrapper">
           <input type="password" id="memRegPass" placeholder="••••••••">
@@ -559,7 +676,7 @@
     <!-- 0. DASHBOARD HOME OVERVIEW -->
     <div id="tab-home" class="tab-view">
       <!-- DYNAMIC LIVE SEARCH & PYQ TOPIC EXPLORER -->
-    <div class="card" style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(30,41,59,0.85), rgba(15,23,42,0.95)); border: 1.5px solid rgba(56,189,248,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.5); position: relative;">
+    <div class="card" style="margin-bottom: 20px; padding: 16px 20px; background: linear-gradient(135deg, rgba(30,41,59,0.85), rgba(15,23,42,0.95)); border: 1.5px solid rgba(56,189,248,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.5); position: relative; z-index: 1000;">
       <div style="font-weight:700; font-size:0.95rem; color:#38bdf8; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between;">
         <span>🔍 Search Exam, Subject, Topic & PYQs</span>
         <button onclick="navigate('tab-analysis')" style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:8px; cursor:pointer;">Open Analysis Page 📈</button>
@@ -573,10 +690,10 @@
         </button>
       </div>
       <!-- LIVE AUTOCOMPLETE SUGGESTIONS BOX -->
-      <div id="searchSuggestionsBox" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#0f172a; border:1.5px solid rgba(56,189,248,0.5); border-radius:12px; max-height:360px; overflow-y:auto; z-index:10000; box-shadow:0 14px 40px rgba(0,0,0,0.85); padding:8px 0;"></div>
+      <div id="searchSuggestionsBox" style="display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:#0f172a; border:1.5px solid rgba(56,189,248,0.6); border-radius:12px; max-height:360px; overflow-y:auto; z-index:10001; box-shadow:0 18px 45px rgba(0,0,0,0.95); padding:8px 0;"></div>
     </div>
 
-    <div class="card" style="background: linear-gradient(135deg, rgba(37,99,235,0.85) 0%, rgba(124,58,237,0.85) 50%, rgba(6,182,212,0.85) 100%); border: none;">
+    <div class="card" style="background: linear-gradient(135deg, rgba(37,99,235,0.85) 0%, rgba(124,58,237,0.85) 50%, rgba(6,182,212,0.85) 100%); border: none; position: relative; z-index: 1;">
         <h2 id="homeWelcomeGreeting" style="font-family:'Outfit',sans-serif; color:#ffffff; font-size:1.55rem; font-weight:800; margin-bottom:8px;">India's Structured Free Test Series Platform</h2>
         <p style="color:#e0e7ff; font-size:0.92rem; line-height:1.5;">Complete Preparation Platform for CGPSC Prelims, CGVYAPAM, SSC, Railway & All State Competitive Exams.</p>
       </div>
@@ -1167,7 +1284,7 @@
             </div>
             <div style="background:rgba(15,23,42,0.6); padding:12px 14px; border-radius:12px; border:1px solid var(--border); text-align:center;">
               <span style="font-size:0.75rem; color:var(--muted); text-transform:uppercase; font-weight:700; display:block;">Database Solved Qs</span>
-              <span id="profPageCorrectQs" style="font-family:'Outfit',sans-serif; font-size:1.75rem; font-weight:800; color:#38bdf8;">0 / 619</span>
+              <span id="profPageCorrectQs" style="font-family:'Outfit',sans-serif; font-size:1.75rem; font-weight:800; color:#38bdf8;">0 / 0</span>
               <span style="font-size:0.72rem; color:#93c5fd; display:block;">Unique Solved Qs</span>
             </div>
             <div style="background:rgba(15,23,42,0.6); padding:12px 14px; border-radius:12px; border:1px solid var(--border); text-align:center;">
@@ -1294,14 +1411,96 @@
           </div>
         </div>
       </div>
+
+      <!-- Dedicated Logout Option at Very End of Profile & Settings Page -->
+      <div class="card" style="margin-top:22px; text-align:center; border:1.5px solid rgba(239,68,68,0.35); background:linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(30,41,59,0.7) 100%); padding:20px; border-radius:18px; box-shadow:0 8px 24px rgba(239,68,68,0.12);">
+        <h4 style="font-family:'Outfit',sans-serif; color:#f87171; margin:0 0 6px 0; font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <span>🚪</span> Account Sign Out / लॉगआउट
+        </h4>
+        <p style="color:var(--muted); font-size:0.84rem; margin:0 0 14px 0;">Sign out of your account session on this device safely.</p>
+        <button class="btn btn-danger" style="padding:10px 32px; font-weight:700; font-size:0.95rem; border-radius:10px; box-shadow:0 4px 14px rgba(239,68,68,0.35);" onclick="logout()">
+          🚪 Sign Out
+        </button>
+      </div>
     </div>
 
+<!-- TAB: DEDICATED EXAM PYQ ANALYSIS & PREPARATION CHECKLIST -->
+  <div id="tab-analysis" class="tab-view" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+      <div>
+        <h2 style="font-family:'Outfit',sans-serif; margin:0; background:linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:1.6rem;">
+          📊 Exam PYQ Analysis & Weightage
+        </h2>
+        <p style="color:var(--muted); font-size:0.86rem; margin-top:4px; margin-bottom:0;">
+          Detailed topic distribution, frequency trends, and downloadable preparation checklist (0 database reads).
+        </p>
+      </div>
+      <button class="btn btn-warning" onclick="downloadAnalysisChecklistPDF()" style="font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:0 4px 15px rgba(234,179,8,0.3);">
+        📥 Download Preparation Checklist PDF
+      </button>
+    </div>
+
+    <!-- FILTER CONTROLS (EXAM & SUBJECT) -->
+    <div class="card" style="margin-bottom:18px; padding:16px;">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; align-items:end;">
+        <div>
+          <label>Target Exam</label>
+          <select id="analysisExamSelect" onchange="runAnalysisForSelectedExam()">
+            <option value="ALL">All Exams</option>
+          </select>
+        </div>
+        <div>
+          <label>Target Subject</label>
+          <select id="analysisSubjectSelect" onchange="runAnalysisForSelectedExam()">
+            <option value="ALL">All Subjects</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn btn-primary" style="width:100%; font-weight:700;" onclick="runAnalysisForSelectedExam()">
+            🔄 Analyze Weightage
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY STATS OVERVIEW -->
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:20px;">
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Total PYQs Analyzed</div>
+        <div id="statAnalysisTotalQ" style="font-size:1.8rem; font-weight:800; color:#38bdf8; margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Key Topics Identified</div>
+        <div id="statAnalysisTotalTopics" style="font-size:1.8rem; font-weight:800; color:#34d399; margin-top:4px;">0</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">High-Yield Ratio</div>
+        <div id="statAnalysisHighYield" style="font-size:1.8rem; font-weight:800; color:#facc15; margin-top:4px;">0%</div>
+      </div>
+      <div class="card" style="text-align:center; padding:16px;">
+        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Checklist Completed</div>
+        <div id="statAnalysisChecklistDone" style="font-size:1.8rem; font-weight:800; color:#a78bfa; margin-top:4px;">0 / 0</div>
+      </div>
+    </div>
+
+    <!-- TOPIC WEIGHTAGE BREAKDOWN & TICK-BOX CHECKLIST -->
+    <div class="card" style="padding:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <h3 style="font-family:'Outfit',sans-serif; margin:0; color:#f8fafc; font-size:1.15rem;">
+          🎯 Topic Importance & Preparation Checklist
+        </h3>
+        <span style="font-size:0.82rem; color:var(--muted);">Checklist items save locally in your browser/app</span>
+      </div>
+
+      <div id="analysisTableContainer" style="overflow-x:auto;">
+        <!-- Dynamically rendered table -->
+      </div>
+    </div>
   </div>
 
-  <div class="static-bottom-box" id="footerUserBox" style="display:none;">
-    <span class="static-user-info" id="footerUserBadge" onclick="navigate('tab-profile')" style="cursor:pointer;" title="Click to open Student Profile & Settings"><span>👤</span> <strong id="footerUserName">Aspirant</strong></span>
-    <button class="btn btn-danger btn-sm" onclick="logout()">Sign Out</button>
   </div>
+
+  <!-- Main page bottom user bar removed; user profile & settings now accessible via top-right user icon -->
 </div>
 
 
@@ -1342,18 +1541,24 @@
   let cgGsSubs = ["CG History", "CG Geography", "CG Tribes", "CG Art & Culture", "CG Language", "CG Administration", "CG Panchayati Raj", "CG Economy", "CG General Knowledge"];
   let otherSubs = ["CDP", "General Mental Ability", "Maths", "Current Affairs"];
   let subjects = JSON.parse(localStorage.getItem('cg_subs')) || [...indianGsSubs, ...cgGsSubs, ...otherSubs];
-  let defaultSeedQuestions = [{"id": "q_ih_1", "subject": "Indian History", "topic": "Ancient History", "subtopic": "Indus Valley", "exam": "CGPSC Pre", "text": "हड़प्पा सभ्यता का प्रमुख बंदरगाह नगर (Port Town) निम्नलिखित में से कौन सा था?", "options": {"A": "कालीबंगा", "B": "लोथल (Lothal)", "C": "रोपड़", "D": "मोहनजोदड़ो"}, "ans": "B", "expl": "लोथल गुजरात के भाल क्षेत्र में भोगवा नदी के तट पर स्थित हड़प्पा सभ्यता का एक प्रमुख बंदरगाह व गोदीवाड़ा (Dockyard) था।"}, {"id": "q_ih_2", "subject": "Indian History", "topic": "Ancient History", "subtopic": "Buddhism", "exam": "CGPSC Pre", "text": "महात्मा बुद्ध ने अपना प्रथम धर्मोपदेश (धर्मचक्रप्रवर्तन) कहाँ दिया था?", "options": {"A": "बोधगया", "B": "सारनाथ (ऋषिपत्तन)", "C": "कुशीनगर", "D": "श्रावस्ती"}, "ans": "B", "expl": "ज्ञान प्राप्ति के पश्चात तथागत बुद्ध ने सारनाथ के मृगदाव (ऋषिपत्तन) में अपने 5 संन्यासियों को प्रथम उपदेश दिया था।"}, {"id": "q_ih_3", "subject": "Indian History", "topic": "Modern History", "subtopic": "National Movement", "exam": "CGPSC Pre", "text": "भारतीय राष्ट्रीय कांग्रेस के 1929 के ऐतिहासिक लाहौर अधिवेशन की अध्यक्षता किसने की थी जिसमें 'पूर्ण स्वराज' का प्रस्ताव पारित किया गया?", "options": {"A": "महात्मा गांधी", "B": "पंडित जवाहरलाल नेहरू", "C": "सुभाष चंद्र बोस", "D": "सरदार वल्लभभाई पटेल"}, "ans": "B", "expl": "31 दिसंबर 1929 को रावी नदी के तट पर जवाहरलाल नेहरू की अध्यक्षता में पूर्ण स्वराज का तिरंगा फहराया गया था।"}, {"id": "q_ih_4", "subject": "Indian History", "topic": "Modern History", "subtopic": "Revolt of 1857", "exam": "CGVYAPAM", "text": "1857 के प्रथम स्वतंत्रता संग्राम के समय भारत का मुगल सम्राट कौन था?", "options": {"A": "बहादुर शाह जफर (द्वितीय)", "B": "शाह आलम द्वितीय", "C": "अकबर द्वितीय", "D": "आलमगीर द्वितीय"}, "ans": "A", "expl": "क्रांतिकारियों ने बहादुर शाह जफर को भारत का शहंशाह घोषित किया था। विद्रोह दमन के बाद उन्हें रंगून निर्वासित कर दिया गया।"}, {"id": "q_ih_5", "subject": "Indian History", "topic": "Medieval History", "subtopic": "Delhi Sultanate", "exam": "CGPSC Pre", "text": "दिल्ली सल्तनत में बाजार नियंत्रण प्रणाली (Market Control Policy) लागू करने वाला सुल्तान कौन था?", "options": {"A": "बलबन", "B": "अलाउद्दीन खिलजी", "C": "मुहम्मद बिन तुगलक", "D": "फिरोज शाह तुगलक"}, "ans": "B", "expl": "अलाउद्दीन खिलजी ने विशाल सेना के भरण-पोषण हेतु खाद्यान्न व वस्त्रों की कीमतों को सख्ती से नियंत्रित किया था।"}, {"id": "q_pol_1", "subject": "Polity", "topic": "Fundamental Rights", "subtopic": "Constitutional Remedies", "exam": "CGPSC Pre", "text": "डॉ. बी.आर. अम्बेडकर ने भारतीय संविधान के किस अनुच्छेद को 'संविधान का हृदय एवं आत्मा' कहा था?", "options": {"A": "अनुच्छेद 14", "B": "अनुच्छेद 19", "C": "अनुच्छेद 21", "D": "अनुच्छेद 32"}, "ans": "D", "expl": "अनुच्छेद 32 नागरिकों के मौलिक अधिकारों के हनन पर सर्वोच्च न्यायालय द्वारा 5 प्रकार की रिटें जारी करने का अधिकार देता है।"}, {"id": "q_pol_2", "subject": "Polity", "topic": "Preamble", "subtopic": "42nd Amendment", "exam": "CGPSC Pre", "text": "42वें संविधान संशोधन अधिनियम (1976) द्वारा संविधान की प्रस्तावना में कौन से तीन नए शब्द जोड़े गए थे?", "options": {"A": "समाजवादी, पंथनिरपेक्ष और अखंडता", "B": "लोकतांत्रिक, गणराज्य और न्याय", "C": "स्वतंत्रता, समता और बंधुत्व", "D": "संप्रभुता, एकता और अखंडता"}, "ans": "A", "expl": "42वें संशोधन द्वारा प्रस्तावना में 'समाजवादी', 'पंथनिरपेक्ष' और 'अखंडता' (Socialist, Secular and Integrity) शब्द जोड़े गए।"}, {"id": "q_pol_3", "subject": "Polity", "topic": "Parliament", "subtopic": "Rajya Sabha", "exam": "CGPSC Pre", "text": "राज्यसभा के पदेन सभापति (Ex-officio Chairman) कौन होते हैं?", "options": {"A": "राष्ट्रपति", "B": "भारत के उपराष्ट्रपति", "C": "प्रधानमंत्री", "D": "लोकसभा अध्यक्ष"}, "ans": "B", "expl": "संविधान के अनुच्छेद 64 और अनुच्छेद 89(1) के अनुसार भारत के उपराष्ट्रपति राज्यसभा के पदेन सभापति होते हैं।"}, {"id": "q_pol_4", "subject": "Polity", "topic": "Panchayati Raj", "subtopic": "73rd Amendment", "exam": "CGVYAPAM", "text": "73वें संविधान संशोधन द्वारा संविधान में कौन सी अनुसूची जोड़ी गई जिसमें पंचायतों के 29 कार्यकारी विषय हैं?", "options": {"A": "9वीं अनुसूची", "B": "10वीं अनुसूची", "C": "11वीं अनुसूची", "D": "12वीं अनुसूची"}, "ans": "C", "expl": "73वें संशोधन (1992) द्वारा संविधान में भाग IX और 11वीं अनुसूची जोड़ी गई जिसमें 29 विषय शामिल हैं।"}, {"id": "q_geo_1", "subject": "Indian Geography", "topic": "Physiography", "subtopic": "Himalayas", "exam": "CGPSC Pre", "text": "विश्व की सर्वोच्च पर्वत चोटी 'माउंट एवरेस्ट' किस हिमालयी श्रेणी में स्थित है?", "options": {"A": "शिवालिक हिमालय", "B": "लघु हिमालय (हिमाचल)", "C": "महान या वृहत हिमालय (हिमाद्रि)", "D": "ट्रांस हिमालय"}, "ans": "C", "expl": "माउंट एवरेस्ट (8848.86 मी.) नेपाल-तिब्बत सीमा पर वृहत हिमालय (Great Himalayas) में स्थित है।"}, {"id": "q_geo_2", "subject": "Indian Geography", "topic": "Rivers", "subtopic": "Peninsular Rivers", "exam": "CGPSC Pre", "text": "निम्नलिखित में से कौन सी नदी पश्चिम की ओर बहकर खंभात की खाड़ी (अरब सागर) में गिरती है और भ्रंश घाटी (Rift Valley) से बहती है?", "options": {"A": "गोदावरी", "B": "महानदी", "C": "नर्मदा", "D": "कावेरी"}, "ans": "C", "expl": "नर्मदा और ताप्ती नदियां विंध्याचल और सतपुड़ा के मध्य भ्रंश घाटी से होकर पश्चिम की ओर अरब सागर में गिरती हैं और डेल्टा नहीं बनातीं।"}, {"id": "q_geo_3", "subject": "Indian Geography", "topic": "Soils", "subtopic": "Black Soil", "exam": "CGVYAPAM", "text": "कपास की खेती के लिए सर्वाधिक उपयुक्त 'रेगुर मिट्टी' (Regur Soil) को अन्य किस नाम से जाना जाता है?", "options": {"A": "जलोढ़ मिट्टी", "B": "काली मिट्टी (Black Soil)", "C": "लाल-पीली मिट्टी", "D": "लैटेराइट मिट्टी"}, "ans": "B", "expl": "दक्कन ट्रैप के बेसाल्ट चट्टानों के क्षरण से निर्मित काली मिट्टी में नमी धारण की अत्यधिक क्षमता होती है, इसे रेगुर कहते हैं।"}, {"id": "q_eco_1", "subject": "Economy", "topic": "Banking & RBI", "subtopic": "Monetary Policy", "exam": "CGPSC Pre", "text": "रेपो दर (Repo Rate) वह ब्याज दर है जिस पर:", "options": {"A": "वाणिज्यिक बैंक RBI के पास जमा रखते हैं", "B": "भारतीय रिजर्व बैंक (RBI) वाणिज्यिक बैंकों को अल्पकालिक ऋण देता है", "C": "बैंक जनता को ऋण देते हैं", "D": "सरकार विदेशी सरकारों से ऋण लेती है"}, "ans": "B", "expl": "Repo Rate (Repurchase Option) वह दर है जिस पर केंद्रीय बैंक (RBI) प्रतिभूतियों के बदले वाणिज्यिक बैंकों को अल्पकालिक नकदी प्रदान करता है।"}, {"id": "q_eco_2", "subject": "Economy", "topic": "National Income", "subtopic": "GDP", "exam": "CGPSC Pre", "text": "सकल घरेलू उत्पाद (GDP) की परिभाषा के अनुसार इसमें शामिल है:", "options": {"A": "एक वित्तीय वर्ष में देश की भौगोलिक सीमा के भीतर उत्पादित अंतिम वस्तुओं और सेवाओं का कुल मौद्रिक मूल्य", "B": "केवल विदेशों से अर्जित शुद्ध आय", "C": "केवल कृषि क्षेत्र का कुल उत्पादन", "D": "देश के नागरिकों द्वारा विदेशों में उत्पादित आय"}, "ans": "A", "expl": "GDP किसी वित्तीय वर्ष में देश की घरेलू सीमा के भीतर उत्पादित सभी अंतिम वस्तुओं एवं सेवाओं का बाजार मूल्य होता है।"}, {"id": "q_sci_1", "subject": "General Science", "topic": "Biology", "subtopic": "Cell Biology", "exam": "CGPSC Pre", "text": "कोशिका का 'शक्तिगृह' (Powerhouse of the Cell) किसे कहा जाता है जहाँ ATP के रूप में ऊर्जा उत्पन्न होती है?", "options": {"A": "राइबोसोम", "B": "माइटोकॉन्ड्रिया (Mitochondria)", "C": "लाइसोसोम", "D": "गॉल्जीकाय"}, "ans": "B", "expl": "माइटोकॉन्ड्रिया में कोशिकीय श्वसन द्वारा ऊर्जा का उत्पादन ATP (Adenosine Triphosphate) के रूप में होता है।"}, {"id": "q_sci_2", "subject": "General Science", "topic": "Physics", "subtopic": "Optics", "exam": "CGVYAPAM", "text": "प्रकाश के किस प्रकाशीय प्रभाव के कारण आकाश का रंग नीला दिखाई देता है?", "options": {"A": "प्रकाश का अपवर्तन", "B": "प्रकाश का प्रकीर्णन (Scattering of Light)", "C": "पूर्ण आंतरिक परावर्तन", "D": "प्रकाश का विवर्तन"}, "ans": "B", "expl": "रैले के प्रकीर्णन नियम के अनुसार कम तरंगदैर्ध्य (नीला व बैंगनी प्रकाश) का प्रकीर्णन वायुमंडल के कणों द्वारा सर्वाधिक होता है।"}, {"id": "q_cg_1", "subject": "CG History", "topic": "Medieval CG", "subtopic": "Kalchuris", "exam": "CGPSC Pre", "text": "छत्तीसगढ़ में रतनपुर को राजधानी बनाकर शासन करने वाले कलचुरि शासक कौन थे जिन्होंने महामाया मंदिर का निर्माण कराया?", "options": {"A": "कलिंगराज", "B": "रत्नदेव प्रथम (1050 ई.)", "C": "पृथ्वीदेव प्रथम", "D": "जाजल्लदेव प्रथम"}, "ans": "B", "expl": "रत्नदेव प्रथम ने तुम्माण के स्थान पर रतनपुर नगर की स्थापना कर उसे अपनी राजधानी बनाया और प्रसिद्ध महामाया मंदिर बनवाया।"}, {"id": "q_cg_2", "subject": "CG History", "topic": "Kakatiya Dynasty", "subtopic": "Bhumkal Revolt", "exam": "CGPSC Pre", "text": "1910 के ऐतिहासिक 'भूमकाल विद्रोह' (Bhumkal Revolt) का महानायक कौन था जिसने अंग्रेजों के शोषण के विरुद्ध बस्तर में क्रांति का बिगुल फूंका?", "options": {"A": "गेंद सिंह", "B": "गुंडाधूर (Gundadhur)", "C": "दलगंजन सिंह", "D": "झाड़ा सिरहा"}, "ans": "B", "expl": "नेतानार के वीर गुंडाधूर ने बस्तर में भूमकाल विद्रोह का नेतृत्व किया, जिसमें लाल मिर्च, आम की टहनियां और मिट्टी का धनुष प्रतीक थे।"}, {"id": "q_cg_3", "subject": "CG Geography", "topic": "Minerals", "subtopic": "Iron Ore", "exam": "CGPSC Pre", "text": "छत्तीसगढ़ में उच्च कोटि के हेमेटाइट लौह अयस्क के लिए विश्वप्रसिद्ध 'बैलाडीला' की खदानें किस जिले में स्थित हैं?", "options": {"A": "कांकेर", "B": "दंतेवाड़ा (Dantewada)", "C": "सुकमा", "D": "बीजापुर"}, "ans": "B", "expl": "दंतेवाड़ा जिले के बैलाडीला में उत्तम गुणवत्ता का हेमेटाइट अयस्क पाया जाता है, जिसे विशाखापट्टनम बंदरगाह से जापान निर्यात किया जाता है।"}, {"id": "q_cg_4", "subject": "CG Tribes", "topic": "Festivals", "subtopic": "Bastar Dussehra", "exam": "CGPSC Pre", "text": "विश्व का सबसे लंबी अवधि (75 दिन) तक चलने वाला अनूठा पर्व 'बस्तर दशहरा' किस देवी की आराधना का पर्व है?", "options": {"A": "मां बम्लेश्वरी", "B": "मां दंतेश्वरी (Danteshwari)", "C": "मां महामाया", "D": "मां चंद्रहासिनी"}, "ans": "B", "expl": "बस्तर दशहरा में राम-रावण प्रसंग न होकर कुलदेवी मां दंतेश्वरी की आराधना, पाट जात्रा, काछनगादी और रथ परिक्रमा की परंपरा होती है।"}, {"id": "q_cg_5", "subject": "CG Language", "topic": "Chhattisgarhi Hana", "subtopic": "Proverbs", "exam": "CGPSC Pre", "text": "छत्तीसगढ़ी हाना (कहावत) 'आमा के आम, गुठली के मोल' का सही अर्थ क्या है?", "options": {"A": "बहुत घाटा होना", "B": "दोहरा लाभ होना (Double Profit)", "C": "आम खाना", "D": "व्यापार में नुकसान"}, "ans": "B", "expl": "इस हाने का अर्थ किसी कार्य से अपेक्षा से अधिक या दोहरा फायदा प्राप्त होना होता है।"}, {"id": "q_gma_1", "subject": "General Mental Ability", "topic": "Analogy", "subtopic": "Word Analogy", "exam": "CGPSC Pre", "text": "जिस प्रकार 'भारत' का संबंध 'नई दिल्ली' से है, उसी प्रकार 'छत्तीसगढ़' का संबंध किससे है?", "options": {"A": "बिलासपुर", "B": "रायपुर (नवा रायपुर)", "C": "दुर्ग", "D": "राजनांदगांव"}, "ans": "B", "expl": "देश और उसकी राजधानी का संबंध है; छत्तीसगढ़ राज्य की प्रशासनिक राजधानी रायपुर (अटल नगर/नवा रायपुर) है।"}, {"id": "q_gma_2", "subject": "General Mental Ability", "topic": "Series", "subtopic": "Alphabet Series", "exam": "CGVYAPAM", "text": "दी गई श्रेणी में अगला पद क्या होगा: A, C, F, J, O, ?", "options": {"A": "T", "B": "U", "C": "V", "D": "S"}, "ans": "B", "expl": "पदों का अंतर: +2 (A->C), +3 (C->F), +4 (F->J), +5 (J->O), अतः +6 (O->U = 15+6=21वां अक्षर U)।"}, {"id": "q_mat_1", "subject": "Maths", "topic": "Arithmetic", "subtopic": "Average", "exam": "CGPSC Pre", "text": "प्रथम 5 अभाज्य संख्याओं (Prime Numbers: 2, 3, 5, 7, 11) का औसत (Average) कितना होगा?", "options": {"A": "5.2", "B": "5.6", "C": "6.0", "D": "4.8"}, "ans": "B", "expl": "योग = 2 + 3 + 5 + 7 + 11 = 28। औसत = 28 / 5 = 5.6।"}, {"id": "q_mat_2", "subject": "Maths", "topic": "Speed and Distance", "subtopic": "Trains", "exam": "CGVYAPAM", "text": "72 किमी/घंटा की गति से चल रही 100 मीटर लंबी रेलगाड़ी एक खंभे को पार करने में कितना समय लेगी?", "options": {"A": "5 सेकंड", "B": "6 सेकंड", "C": "7 सेकंड", "D": "8 सेकंड"}, "ans": "A", "expl": "चाल = 72 * (5/18) = 20 मी/से। समय = दूरी / चाल = 100 / 20 = 5 सेकंड।"}, {"id": "q_hin_1", "subject": "Hindi", "topic": "Vyakaran", "subtopic": "Vilom", "exam": "CGPSC Pre", "text": "'उत्थान' शब्द का सही विलोम शब्द (Antonym) क्या होगा?", "options": {"A": "पतन", "B": "अधोगति", "C": "विनाश", "D": "अवनति"}, "ans": "A", "expl": "उत्थान का विलोम 'पतन' होता है।"}, {"id": "q_hin_2", "subject": "Hindi", "topic": "Vyakaran", "subtopic": "Shuddh Vartani", "exam": "CGVYAPAM", "text": "निम्नलिखित में से शुद्ध वर्तनी (Correct Spelling) वाला शब्द कौन सा है?", "options": {"A": "उज्वल", "B": "उज्ज्वल (Ujjwal)", "C": "उजवल", "D": "ऊज्जवल"}, "ans": "B", "expl": "उज्ज्वल में दोनों 'ज' आधे होते हैं (उत् + ज्वल = उज्ज्वल व्यंजन संधि)।"}, {"id": "q_eng_1", "subject": "English", "topic": "Grammar", "subtopic": "Articles", "exam": "CGVYAPAM", "text": "Fill in the blank: 'He is _____ honest officer serving in Chhattisgarh police.'", "options": {"A": "a", "B": "an", "C": "the", "D": "no article"}, "ans": "B", "expl": "'Honest' begins with a silent 'h' and vowel sound /ɒ/, hence 'an' is used before it."}, {"id": "q_eng_2", "subject": "English", "topic": "Idioms", "subtopic": "Meaning", "exam": "CGPSC Pre", "text": "What is the meaning of the idiom 'Once in a blue moon'?", "options": {"A": "Very frequently", "B": "Very rarely (कभी-कभार)", "C": "Every month", "D": "At midnight"}, "ans": "B", "expl": "'Once in a blue moon' refers to an event that happens extremely rarely."}, {"id": "q_cmp_1", "subject": "Computer", "topic": "Basics", "subtopic": "Hardware", "exam": "CGVYAPAM", "text": "कंप्यूटर का 'मस्तिष्क' (Brain of Computer) किसे कहा जाता है जो समस्त गणनाएं व नियंत्रण करता है?", "options": {"A": "Monitor", "B": "CPU (Central Processing Unit)", "C": "Keyboard", "D": "Hard Disk"}, "ans": "B", "expl": "CPU कंप्यूटर के सभी हार्डवेयर घटकों को नियंत्रित करता है और निर्देशों को संसाधित करता है।"}, {"id": "q_cmp_2", "subject": "Computer", "topic": "Software", "subtopic": "Operating System", "exam": "CGVYAPAM", "text": "निम्नलिखित में से कौन सा एक ओपन-सोर्स (Open Source) ऑपरेटिंग सिस्टम है?", "options": {"A": "MS Windows", "B": "Linux (लिनक्स)", "C": "Apple macOS", "D": "MS DOS"}, "ans": "B", "expl": "लिनक्स (Linux) एक स्वतंत्र एवं ओपन-सोर्स ऑपरेटिंग सिस्टम कर्नेल है जिसका सोर्स कोड सभी के लिए उपलब्ध है।"}, {"id": "q_cdp_1", "subject": "CDP", "topic": "Learning Theories", "subtopic": "Classical Conditioning", "exam": "CG Shikshak", "text": "कुत्ते पर प्रयोग कर 'शास्त्रीय अनुबंधन सिद्धांत' (Classical Conditioning Theory) का प्रतिपादन किस मनोवैज्ञानिक ने किया था?", "options": {"A": "बी.एफ. स्किनर", "B": "इवान पावलोव (Ivan Pavlov)", "C": "एडवर्ड थार्नडाइक", "D": "जीन पियाजे"}, "ans": "B", "expl": "पावलोव ने भोजन और घंटी की आवाज के माध्यम से अनुबंधित अनुक्रिया (Conditioned Response) का सिद्धांत दिया।"}, {"id": "q_cdp_2", "subject": "CDP", "topic": "Child Psychology", "subtopic": "Trial and Error", "exam": "CG Shikshak", "text": "थार्नडाइक (Thorndike) ने सीखने का कौन सा मुख्य नियम प्रतिपादित किया था?", "options": {"A": "तत्परता का नियम (Law of Readiness)", "B": "अभ्यास का नियम (Law of Exercise)", "C": "प्रभाव का नियम (Law of Effect)", "D": "उपर्युक्त सभी (All of the above)"}, "ans": "D", "expl": "थार्नडाइक ने सीखने के 3 मुख्य नियम (तत्परता, अभ्यास और प्रभाव) दिए थे।"}];
+  let defaultSeedQuestions = [];
   let cachedQs = null;
   try {
     cachedQs = JSON.parse(localStorage.getItem('cg_cached_questions'));
+    if (Array.isArray(cachedQs)) {
+      // Purge any dummy seed questions (q_*) and synthetic/auto-generated questions (synth_*, auto_*)
+      cachedQs = cachedQs.filter(q => q && q.id && !q.id.toString().startsWith('synth_') && !q.id.toString().startsWith('auto_') && !q.id.toString().startsWith('q_'));
+      localStorage.setItem('cg_cached_questions', JSON.stringify(cachedQs));
+    }
   } catch(e){}
-  // Base questions always include curated defaultSeedQuestions plus any cached questions
+  // Clean question map strictly from database cache (no seed or synthetic dummy questions)
   const qMap = new Map();
-  if (typeof defaultSeedQuestions !== 'undefined' && Array.isArray(defaultSeedQuestions)) {
-    defaultSeedQuestions.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
-  }
   if (Array.isArray(cachedQs)) {
-    cachedQs.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+    cachedQs.forEach(q => {
+      if(q && q.id && !q.id.toString().startsWith('synth_') && !q.id.toString().startsWith('auto_') && !q.id.toString().startsWith('q_')) {
+        qMap.set(q.id.toString(), q);
+      }
+    });
   }
   let questions = Array.from(qMap.values());
   let members = [], attemptedQIds = JSON.parse(localStorage.getItem('cg_attempted_qids')) || [];
@@ -1439,7 +1644,7 @@
 
   // --- REVISED OVERALL SYLLABUS PERCENTAGE & REVISION LOGIC ---
   function computeOverallUserProgress() {
-    const totalDbQ = Math.max(questions.length, 619);
+    const totalDbQ = questions.length;
     if(!currentUser) {
       updateDashboardProgressUI(0, 0, totalDbQ, 0);
       return { pct: 0, revisions: 0, correctCount: 0 };
@@ -1570,8 +1775,7 @@
     if (dob) currentUser.dob = dob;
 
     localStorage.setItem('cg_auth_user', JSON.stringify(currentUser));
-    const fnEl = document.getElementById('footerUserName');
-    if (fnEl) fnEl.innerText = `@${currentUser.username}`;
+    updateHeaderUserDisplay();
     renderProfilePage();
 
     try {
@@ -1640,14 +1844,33 @@
   function showAuth() {
     document.getElementById('auth-screen').style.display = 'block';
     document.getElementById('portal-screen').style.display = 'none';
-    document.getElementById('footerUserBox').style.display = 'none';
+    const fb = document.getElementById('footerUserBox');
+    if (fb) fb.style.display = 'none';
+    const uBtn = document.getElementById('headerUserBtn');
+    if (uBtn) uBtn.style.display = 'none';
+  }
+
+  function updateHeaderUserDisplay() {
+    const btn = document.getElementById('headerUserBtn');
+    const fnEl = document.getElementById('headerUserFirstName');
+    if (!currentUser || !currentUser.username) {
+      if (btn) btn.style.display = 'none';
+      return;
+    }
+    if (btn) btn.style.display = 'inline-flex';
+    if (fnEl) {
+      const raw = (currentUser.name || currentUser.username || 'Aspirant').trim();
+      const firstName = raw.split(/\s+/)[0] || 'Aspirant';
+      fnEl.innerText = firstName;
+    }
   }
 
   function showPortal() {
     document.getElementById('auth-screen').style.display = 'none';
     document.getElementById('portal-screen').style.display = 'block';
-    document.getElementById('footerUserBox').style.display = 'flex';
-    document.getElementById('footerUserName').innerText = `@${currentUser.username}`; // Show only username, not full name
+    const fb = document.getElementById('footerUserBox');
+    if (fb) fb.style.display = 'none';
+    updateHeaderUserDisplay();
     navigate(localStorage.getItem('cg_active_tab') || 'tab-home');
   }
 
@@ -1670,11 +1893,16 @@
   }
 
   async function memberRegister() {
-    const name = document.getElementById('memRegName').value.trim();
-    const user = document.getElementById('memRegUser').value.trim().toLowerCase();
-    const dob = document.getElementById('memRegDob').value;
-    const pass = document.getElementById('memRegPass').value.trim();
-    if(!name || !user || !dob || !pass) return alert('Please fill all fields!');
+    const name = (document.getElementById('memRegName')?.value || '').trim();
+    const user = (document.getElementById('memRegUser')?.value || '').trim().toLowerCase();
+    const mobile = (document.getElementById('memRegMobile')?.value || '').trim();
+    const dob = document.getElementById('memRegDob')?.value || '';
+    const pass = (document.getElementById('memRegPass')?.value || '').trim();
+
+    if(!name || !user || !pass) return alert('Please fill in your Name, Username, and Password!');
+    if(/\s/.test(user)) return alert('Username cannot have spaces!');
+    if(!dob) return alert('Please enter your Date of Birth / जन्म तिथि!');
+    if(mobile && mobile.length < 10) return alert('Mobile number must be at least 10 digits!');
     if(/\s/.test(user)) return alert('Username cannot have spaces!');
 
     const newUser = {
@@ -1819,6 +2047,10 @@
     if(tabId === 'tab-revision') { document.getElementById('fNavRev')?.classList.add('active'); document.getElementById('revision-quiz-player').style.display = 'none'; switchRevisionSubTab('wrong'); }
     if(tabId === 'tab-profile') { renderProfilePage(); }
     if(tabId === 'tab-results') { document.getElementById('fNavRes')?.classList.add('active'); switchResultsSubTab('prev'); }
+    if(tabId === 'tab-analysis') {
+      if (typeof populateAnalysisDropdowns === 'function') populateAnalysisDropdowns();
+      if (typeof runAnalysisForSelectedExam === 'function') runAnalysisForSelectedExam();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -2741,36 +2973,28 @@
     renderTestView();
   }
 
-  // --- SMART MOCK QUESTION SYNTHESIZER ---
+  // --- AUTHENTIC QUESTION SELECTOR (NO AUTOMATIC SYNTHETIC QUESTIONS GENERATED) ---
   function fillWithMockQuestions(existingPool, subjectCategory, targetCount) {
-    let list = [...existingPool].sort(() => Math.random() - 0.5);
+    let list = Array.isArray(existingPool) ? [...existingPool] : [];
+    // Strictly do not create artificial questions; only use existing genuine pool and database questions
     if (list.length >= targetCount) {
       return list.slice(0, targetCount);
     }
-
-    const templates = getSeedTemplatesForSubject(subjectCategory);
-    let attempts = 0;
-    while (list.length < targetCount && attempts < 250) {
-      attempts++;
-      const t = templates[Math.floor(Math.random() * templates.length)];
-      if (t) {
-        const uniqueId = `synth_${Date.now()}_${Math.floor(Math.random() * 100000)}_${list.length}`;
-        list.push({
-          id: uniqueId,
-          subject: t.subject,
-          topic: t.topic || 'General',
-          subtopic: t.subtopic || 'PYQ',
-          exam: 'CGPSC / CGVYAPAM',
-          text: t.text,
-          options: { ...t.options },
-          ans: t.ans,
-          expl: t.expl
-        });
-      } else {
-        break;
+    if (subjectCategory && typeof questions !== 'undefined' && Array.isArray(questions)) {
+      const c = subjectCategory.toLowerCase();
+      const realMatches = questions.filter(q => {
+        if (!q || !q.id || q.id.toString().startsWith('synth_') || q.id.toString().startsWith('auto_')) return false;
+        const s = (q.subject || '').toLowerCase();
+        return s === c || s.includes(c) || c.includes(s);
+      });
+      for (const q of realMatches) {
+        if (!list.some(item => (item.id || '').toString() === (q.id || '').toString())) {
+          list.push(q);
+          if (list.length >= targetCount) break;
+        }
       }
     }
-    return list.slice(0, targetCount);
+    return list;
   }
 
   function getSeedTemplatesForSubject(cat) {
@@ -4083,17 +4307,20 @@
         if(!snap.empty) {
           let list = [];
           snap.forEach(d => {
+            if (d.id && (d.id.startsWith('synth_') || d.id.startsWith('auto_'))) return;
             let q = { id: d.id, ...d.data() };
+            if (q.id && (q.id.toString().startsWith('synth_') || q.id.toString().startsWith('auto_'))) return;
             if(typeof q.options === 'string') { try { q.options = JSON.parse(q.options); } catch(e){} }
             if(typeof q.matchRows === 'string') { try { q.matchRows = JSON.parse(q.matchRows); } catch(e){} }
             if(typeof q.statements === 'string') { try { q.statements = JSON.parse(q.statements); } catch(e){} }
             list.push(q);
           });
           let qMap = new Map();
-          if (typeof defaultSeedQuestions !== 'undefined' && Array.isArray(defaultSeedQuestions)) {
-            defaultSeedQuestions.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
-          }
-          list.forEach(q => { if(q && q.id) qMap.set(q.id.toString(), q); });
+          list.forEach(q => {
+            if(q && q.id && !q.id.toString().startsWith('synth_') && !q.id.toString().startsWith('auto_') && !q.id.toString().startsWith('q_')) {
+              qMap.set(q.id.toString(), q);
+            }
+          });
           questions = Array.from(qMap.values());
           localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
           localStorage.setItem('cg_questions_last_sync', now.toString());
@@ -4125,9 +4352,11 @@
             if (!deltaSnap.empty) {
               console.log(`Delta update: Syncing ${deltaSnap.size} new/modified questions...`);
               let qMap = new Map();
-              questions.forEach(q => { if(q.id) qMap.set(q.id.toString(), q); });
+              questions.filter(q => q && q.id && !q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_') && !q.id.toString().startsWith('auto_')).forEach(q => { if(q.id) qMap.set(q.id.toString(), q); });
               deltaSnap.forEach(d => {
+                if (d.id && (d.id.startsWith('synth_') || d.id.startsWith('auto_') || d.id.startsWith('q_'))) return;
                 let q = { id: d.id, ...d.data() };
+                if (q.id && (q.id.toString().startsWith('synth_') || q.id.toString().startsWith('auto_') || q.id.toString().startsWith('q_'))) return;
                 if(typeof q.options === 'string') { try { q.options = JSON.parse(q.options); } catch(e){} }
                 if(typeof q.matchRows === 'string') { try { q.matchRows = JSON.parse(q.matchRows); } catch(e){} }
                 if(typeof q.statements === 'string') { try { q.statements = JSON.parse(q.statements); } catch(e){} }
@@ -4797,6 +5026,18 @@
 
   async function init() {
     initSplashVideo();
+    // Immediate purge of any legacy seed or synthetic questions from in-memory and local storage
+    if (Array.isArray(questions)) {
+      questions = questions.filter(q => q && q.id && !q.id.toString().startsWith('q_') && !q.id.toString().startsWith('synth_') && !q.id.toString().startsWith('auto_'));
+      try { localStorage.setItem('cg_cached_questions', JSON.stringify(questions)); } catch(e){}
+    }
+    // If questions was previously polluted (e.g. 718 count) or unpurged, force reload fresh from Firestore database
+    if (!localStorage.getItem('cg_db_exact_sync_685') || (questions && questions.length > 685)) {
+      localStorage.setItem('cg_db_exact_sync_685', 'true');
+      try {
+        if (typeof fetchQuestionsFromCloud === 'function') fetchQuestionsFromCloud(true);
+      } catch(e){}
+    }
     try {
       if (currentUser && currentUser.username) {
         showPortal();
@@ -4836,78 +5077,4 @@
   }
 </script>
 </body>
-</html>  <!-- TAB: DEDICATED EXAM PYQ ANALYSIS & PREPARATION CHECKLIST -->
-  <div id="tab-analysis" class="tab-view" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
-      <div>
-        <h2 style="font-family:'Outfit',sans-serif; margin:0; background:linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size:1.6rem;">
-          📊 Exam PYQ Analysis & Weightage
-        </h2>
-        <p style="color:var(--muted); font-size:0.86rem; margin-top:4px; margin-bottom:0;">
-          Detailed topic distribution, frequency trends, and downloadable preparation checklist (0 database reads).
-        </p>
-      </div>
-      <button class="btn btn-warning" onclick="downloadAnalysisChecklistPDF()" style="font-weight:700; display:flex; align-items:center; gap:6px; box-shadow:0 4px 15px rgba(234,179,8,0.3);">
-        📥 Download Preparation Checklist PDF
-      </button>
-    </div>
-
-    <!-- FILTER CONTROLS (EXAM & SUBJECT) -->
-    <div class="card" style="margin-bottom:18px; padding:16px;">
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; align-items:end;">
-        <div>
-          <label>Target Exam</label>
-          <select id="analysisExamSelect" onchange="runAnalysisForSelectedExam()">
-            <option value="ALL">All Exams</option>
-          </select>
-        </div>
-        <div>
-          <label>Target Subject</label>
-          <select id="analysisSubjectSelect" onchange="runAnalysisForSelectedExam()">
-            <option value="ALL">All Subjects</option>
-          </select>
-        </div>
-        <div>
-          <button class="btn btn-primary" style="width:100%; font-weight:700;" onclick="runAnalysisForSelectedExam()">
-            🔄 Analyze Weightage
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- KEY STATS OVERVIEW -->
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:20px;">
-      <div class="card" style="text-align:center; padding:16px;">
-        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Total PYQs Analyzed</div>
-        <div id="statAnalysisTotalQ" style="font-size:1.8rem; font-weight:800; color:#38bdf8; margin-top:4px;">0</div>
-      </div>
-      <div class="card" style="text-align:center; padding:16px;">
-        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Key Topics Identified</div>
-        <div id="statAnalysisTotalTopics" style="font-size:1.8rem; font-weight:800; color:#34d399; margin-top:4px;">0</div>
-      </div>
-      <div class="card" style="text-align:center; padding:16px;">
-        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">High-Yield Ratio</div>
-        <div id="statAnalysisHighYield" style="font-size:1.8rem; font-weight:800; color:#facc15; margin-top:4px;">0%</div>
-      </div>
-      <div class="card" style="text-align:center; padding:16px;">
-        <div style="color:var(--muted); font-size:0.82rem; font-weight:600;">Checklist Completed</div>
-        <div id="statAnalysisChecklistDone" style="font-size:1.8rem; font-weight:800; color:#a78bfa; margin-top:4px;">0 / 0</div>
-      </div>
-    </div>
-
-    <!-- TOPIC WEIGHTAGE BREAKDOWN & TICK-BOX CHECKLIST -->
-    <div class="card" style="padding:20px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
-        <h3 style="font-family:'Outfit',sans-serif; margin:0; color:#f8fafc; font-size:1.15rem;">
-          🎯 Topic Importance & Preparation Checklist
-        </h3>
-        <span style="font-size:0.82rem; color:var(--muted);">Checklist items save locally in your browser/app</span>
-      </div>
-
-      <div id="analysisTableContainer" style="overflow-x:auto;">
-        <!-- Dynamically rendered table -->
-      </div>
-    </div>
-  </div>
-
-  
+</html>

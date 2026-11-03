@@ -286,12 +286,33 @@
 
     /* Official Google Translate widget styled in header */
 
-    .container { max-width: 1080px; margin: 14px auto 20px auto; padding: 0 14px; width: 100%; }
-    .nav-bar { display: none; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 20px; scrollbar-width: none; }
-    @media(min-width: 768px) { .nav-bar { display: flex; } }
+    .container { max-width: 1280px; margin: 10px auto 20px auto; padding: 0 16px; width: 100%; box-sizing: border-box; }
+    .nav-bar { 
+      display: none; 
+      gap: 8px; 
+      overflow-x: auto; 
+      padding: 6px 0; 
+      margin-bottom: 16px; 
+      scrollbar-width: none; 
+      position: relative; 
+    }
+    @media(min-width: 768px) { .nav-bar { display: flex; flex-wrap: wrap; } }
     .nav-bar::-webkit-scrollbar { display: none; }
-    .nav-btn { background: var(--card); backdrop-filter: blur(12px); color: var(--muted); border: 1px solid var(--border); padding: 10px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; white-space: nowrap; font-size: 0.85rem; transition: all 0.25s ease; }
-    .nav-btn:hover { border-color: var(--primary); color: #fff; transform: translateY(-1px); }
+    .nav-btn { 
+      background: var(--card); 
+      backdrop-filter: blur(12px); 
+      color: var(--muted); 
+      border: 1px solid var(--border); 
+      padding: 10px 16px; 
+      border-radius: 12px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      white-space: nowrap; 
+      font-size: 0.85rem; 
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease; 
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { border-color: var(--primary); color: #fff; }
     .nav-btn.active { background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; border-color: #60a5fa; box-shadow: 0 4px 16px rgba(37,99,235,0.4); }
     .floating-bottom-nav { position: fixed; bottom: calc(10px + var(--safe-b)); left: 50%; transform: translateX(-50%); width: calc(100% - 24px); max-width: 480px; background: rgba(11,17,33,0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; display: flex; justify-content: space-around; align-items: center; padding: 6px 4px; z-index: 1000; box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 20px rgba(59,130,246,0.15); }
     @media(min-width: 768px) { .floating-bottom-nav { display: none; } }
@@ -497,19 +518,121 @@
       padding-top: 14px;
     }
 
+    /* ==========================================================================
+       EXAM ACTIVE MODE (REAL CBT FULL-SCREEN DESKTOP & MOBILE WORKSPACE)
+       Hides top header/nav-bar to maximize vertical workspace.
+       Fixes question palette and anchors action buttons firmly to bottom edge.
+       ========================================================================== */
+    body.exam-active-mode {
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-height: 100vh !important;
+      max-height: 100dvh !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      padding-top: env(safe-area-inset-top, 0px) !important;
+      padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+      box-sizing: border-box !important;
+    }
+    body.exam-active-mode header,
+    body.exam-active-mode .nav-bar,
+    body.exam-active-mode .floating-bottom-nav {
+      display: none !important;
+    }
+    body.exam-active-mode .container {
+      max-width: 100vw !important;
+      width: 100vw !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      padding: 4px 10px calc(4px + env(safe-area-inset-bottom, 0px)) 10px !important;
+      margin: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+    }
+    body.exam-active-mode #portal-screen {
+      flex: 1 !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+    /* Strictly enforce display:none for hidden elements even under exam-active-mode */
+    .tab-view[style*="display: none"],
+    .tab-view[style*="display:none"],
+    #test-player[style*="display: none"],
+    #test-player[style*="display:none"],
+    #prac-player[style*="display: none"],
+    #prac-player[style*="display:none"],
+    #testConfigWrapper[style*="display: none"],
+    #testConfigWrapper[style*="display:none"],
+    #pracConfigWrapper[style*="display: none"],
+    #pracConfigWrapper[style*="display:none"] {
+      display: none !important;
+    }
+
+    body.exam-active-mode .tab-view:not([style*="display: none"]):not([style*="display:none"]) {
+      flex: 1 !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+    body.exam-active-mode #test-player:not([style*="display: none"]):not([style*="display:none"]),
+    body.exam-active-mode #prac-player:not([style*="display: none"]):not([style*="display:none"]) {
+      flex: 1 !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+    }
+    body.exam-active-mode #test-player > .card,
+    body.exam-active-mode #prac-player > .card {
+      flex: 1 !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      min-height: 0 !important;
+      padding: 4px 10px 8px 10px !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+    body.exam-active-mode #activeTestTitleBanner {
+      flex-shrink: 0 !important;
+      margin-bottom: 6px !important;
+      padding: 6px 12px !important;
+    }
+    body.exam-active-mode #testSectionTabsBar {
+      flex-shrink: 0 !important;
+      margin-bottom: 6px !important;
+    }
+    body.exam-active-mode .exam-split-layout {
+      flex: 1 !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      max-height: 100% !important;
+      overflow: hidden !important;
+    }
+
     @media (min-width: 768px) {
-      .container {
-        max-width: 1340px;
-      }
       .exam-split-layout {
         display: grid !important;
-        grid-template-columns: 310px minmax(0, 1fr) !important; /* Palette on LEFT, Question on RIGHT by default */
-        gap: 18px !important;
+        grid-template-columns: 310px minmax(0, 1fr) !important;
+        gap: 14px !important;
         align-items: stretch !important;
-        height: min(78vh, 740px) !important;
-        min-height: 520px !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
       }
-      /* If user flips to Palette on RIGHT */
       .exam-split-layout.palette-on-right {
         grid-template-columns: minmax(0, 1fr) 310px !important;
       }
@@ -530,7 +653,7 @@
         background: rgba(15, 23, 42, 0.95);
         border: 1px solid rgba(56, 189, 248, 0.35);
         border-radius: 16px;
-        padding: 14px;
+        padding: 12px 14px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
         overflow: hidden !important;
       }
@@ -539,13 +662,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding-bottom: 6px;
+        padding-bottom: 4px;
       }
       .exam-palette-pane .cbt-legend-box {
         flex-shrink: 0 !important;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
       }
       .exam-palette-pane .palette-scroll-content {
         flex: 1 !important;
@@ -572,13 +695,13 @@
         background: rgba(15, 23, 42, 0.95);
         border: 1px solid rgba(56, 189, 248, 0.3);
         border-radius: 16px;
-        padding: 18px 20px;
+        padding: 14px 18px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         overflow: hidden !important;
       }
       .exam-question-pane .q-header-bar {
         flex-shrink: 0 !important;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
       }
       .exam-question-pane .q-scrollable-body {
         flex: 1 !important;
@@ -590,12 +713,12 @@
         flex-shrink: 0 !important;
         margin-top: auto !important;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        padding-top: 14px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
+        padding-top: 8px !important;
+        padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px)) !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
 
       #t-mobile-palette-btn, #p-mobile-palette-btn {
@@ -603,6 +726,126 @@
       }
       #palettePopupModal {
         display: none !important;
+      }
+    }
+
+    /* Single-Row Compact Button Group for Footer */
+    .q-btn-row {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      gap: 8px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .q-btn-row .btn {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      min-height: 38px !important;
+      height: 38px !important;
+      padding: 4px 8px !important;
+      font-size: 0.82rem !important;
+      font-weight: 700 !important;
+      border-radius: 8px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1.2 !important;
+    }
+    .q-btn-row .btn.btn-review-next {
+      flex: 1.28 1 0 !important;
+    }
+    .mobile-only-txt { display: none; }
+    .desktop-only-txt { display: inline; }
+
+    /* Compact Header Badges and Buttons */
+    .q-header-right .btn-sm {
+      padding: 3px 8px !important;
+      font-size: 0.76rem !important;
+      min-height: 28px !important;
+      height: 28px !important;
+      border-radius: 6px !important;
+    }
+    .q-header-right #testTimerBadge {
+      padding: 3px 8px !important;
+      font-size: 0.8rem !important;
+    }
+    .badge-exam-tag {
+      padding: 2px 6px !important;
+      font-size: 0.72rem !important;
+    }
+    body.exam-active-mode .test-opt {
+      padding: 10px 14px !important;
+      margin-bottom: 8px !important;
+      border-radius: 10px !important;
+      font-size: 0.88rem !important;
+    }
+
+    @media (max-width: 767px) {
+      .exam-palette-pane,
+      body.exam-active-mode .exam-palette-pane {
+        display: none !important; /* Always hide sidebar palette on mobile; mobile uses popup modal */
+      }
+      body.exam-active-mode .container {
+        padding: 4px 6px calc(6px + env(safe-area-inset-bottom, 0px)) 6px !important;
+      }
+      body.exam-active-mode #test-player > .card,
+      body.exam-active-mode #prac-player > .card {
+        padding: 2px 4px !important;
+      }
+      body.exam-active-mode .exam-split-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+      }
+      body.exam-active-mode .exam-question-pane {
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        overflow: hidden !important;
+        padding: 8px 10px !important;
+      }
+      body.exam-active-mode .exam-question-pane .q-header-bar {
+        flex-shrink: 0 !important;
+        margin-bottom: 4px !important;
+      }
+      body.exam-active-mode .exam-question-pane .q-scrollable-body {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        padding-right: 4px !important;
+      }
+      body.exam-active-mode .exam-question-pane .q-fixed-footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+        padding-top: 6px !important;
+        padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      .mobile-only-txt { display: inline; }
+      .desktop-only-txt { display: none; }
+      .q-btn-row {
+        gap: 5px !important;
+      }
+      .q-btn-row .btn {
+        font-size: 0.74rem !important;
+        padding: 4px 4px !important;
+        min-height: 36px !important;
+        height: 36px !important;
+      }
+      body.exam-active-mode .test-opt {
+        padding: 8px 10px !important;
+        margin-bottom: 6px !important;
+        font-size: 0.84rem !important;
       }
     }
 
@@ -756,7 +999,8 @@
     #appSplashVideo::-webkit-media-controls-panel,
     #appSplashVideo::-webkit-media-controls-play-button,
     #appSplashVideo::-webkit-media-controls-start-playback-button,
-    #appSplashVideo::-webkit-media-controls-overlay-play-button {
+    #appSplashVideo::-webkit-media-controls-overlay-play-button,
+    video::-webkit-media-controls-start-playback-button {
       display: none !important;
       -webkit-appearance: none !important;
       opacity: 0 !important;
@@ -773,14 +1017,17 @@
 <body>
 <!-- APP LAUNCH SPLASH VIDEO OVERLAY (MOBILE APP ONLY) -->
 <div id="splashScreenVideoOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#FFFFFF; z-index:9999999; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.45s ease; overflow:hidden;">
-  <video id="appSplashVideo" autoplay playsinline webkit-playsinline disablePictureInPicture controlslist="nodownload nofullscreen noremoteplayback" disableremoteplayback style="width:100%; height:100%; object-fit:contain; background:#FFFFFF; pointer-events:none; opacity:1;">
+  <video id="appSplashVideo" autoplay playsinline webkit-playsinline disablePictureInPicture controlslist="nodownload nofullscreen noremoteplayback" disableremoteplayback poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3Crect width='1' height='1' fill='%23ffffff'/%3E%3C/svg%3E" style="width:100%; height:100%; object-fit:contain; background:#FFFFFF; pointer-events:none; opacity:0; transition:opacity 0.15s ease;">
     <source src="splash_video.mp4" type="video/mp4">
   </video>
   <script>
     try {
       var _sv = document.getElementById('appSplashVideo');
-      if (_sv && (window.location.protocol === 'file:' || navigator.userAgent.includes('CrackCGPSCApp'))) {
-        _sv.play().catch(function(){});
+      if (_sv) {
+        _sv.addEventListener('playing', function(){ _sv.style.opacity = '1'; }, { once: true });
+        if (window.location.protocol === 'file:' || navigator.userAgent.includes('CrackCGPSCApp')) {
+          _sv.play().catch(function(){});
+        }
       }
     } catch(e){}
   </script>
@@ -1103,15 +1350,15 @@
       <div id="test-player" style="display: none;">
         <div class="card">
           <!-- Active Test Series Title Banner -->
-          <div id="activeTestTitleBanner" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:linear-gradient(135deg, rgba(37,99,235,0.18), rgba(168,85,247,0.15)); padding:10px 14px; border-radius:12px; border:1px solid rgba(56,189,248,0.3);">
+          <div id="activeTestTitleBanner" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-bottom:6px; background:linear-gradient(135deg, rgba(37,99,235,0.18), rgba(168,85,247,0.15)); padding:6px 12px; border-radius:12px; border:1px solid rgba(56,189,248,0.3);">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span style="font-size:1.2rem;">🎯</span>
-              <span id="activeTestTitleText" style="font-family:'Outfit',sans-serif; font-size:1.05rem; font-weight:800; color:#38bdf8;">Mock Test</span>
-              <span id="activeSectionBadgeHeader" style="display:none; font-size:0.8rem; background:rgba(59,130,246,0.25); border:1px solid #3b82f6; color:#93c5fd; padding:3px 10px; border-radius:8px; font-weight:600;"></span>
+              <span style="font-size:1.1rem;">🎯</span>
+              <span id="activeTestTitleText" style="font-family:'Outfit',sans-serif; font-size:0.95rem; font-weight:800; color:#38bdf8;">Mock Test</span>
+              <span id="activeSectionBadgeHeader" style="display:none; font-size:0.75rem; background:rgba(59,130,246,0.25); border:1px solid #3b82f6; color:#93c5fd; padding:2px 8px; border-radius:6px; font-weight:600;"></span>
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span id="activeTestModeBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">LIVE EXAM</span>
-              <button class="btn btn-danger btn-sm" onclick="exitTestModeConfirm()" style="padding:4px 10px; font-weight:600;">✕ Quit Test</button>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span id="activeTestModeBadge" style="font-size:0.72rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 6px; border-radius:6px; font-weight:700;">LIVE EXAM</span>
+              <button class="btn btn-danger btn-sm" onclick="exitTestModeConfirm()" style="padding:3px 8px; font-size:0.75rem; min-height:28px; font-weight:600;">✕ Quit Test</button>
             </div>
           </div>
 
@@ -1145,16 +1392,15 @@
             <div class="exam-question-pane">
               <div class="q-header-bar">
                 <div class="q-header-left">
-                  <span id="t-counter" style="color: #60a5fa; font-weight: 700; font-size: 1.05rem;">Question 1</span>
+                  <span id="t-counter" style="color: #60a5fa; font-weight: 700; font-size: 0.95rem;">Question 1</span>
                   <span class="badge-sub" id="t-hier-badge" style="display:none;"></span>
                 </div>
                 <div class="q-header-right">
                   <div id="t-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
-                  <span id="testTimerBadge" style="background: rgba(239,68,68,0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 5px 12px; border-radius: 8px; font-size: 0.86rem; font-weight: bold; display:none;">⏱ 00:00</span>
+                  <span id="testTimerBadge" style="background: rgba(239,68,68,0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; display:none;">⏱ 00:00</span>
                   <span class="badge-exam-tag" id="t-exam-badge"></span>
                   <button class="btn btn-warning btn-sm" id="t-mobile-palette-btn" onclick="openPaletteModal()">📋 Palette</button>
                   <button class="btn btn-secondary btn-sm" id="t-star-btn" onclick="toggleBookmarkCurrentQ()">⭐ Save</button>
-                  <button class="btn btn-secondary btn-sm" onclick="exitTestModeConfirm()">Exit</button>
                 </div>
               </div>
               <div class="q-scrollable-body">
@@ -1163,9 +1409,12 @@
                 <div id="t-opts"></div>
               </div>
               <div class="q-fixed-footer">
-                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                  <button class="btn btn-secondary" onclick="moveTestQ(-1, event)" style="min-width:90px;">Previous</button>
-                  <button class="btn btn-review-next" onclick="markForReviewAndNext(event)">Mark for Review & Next</button>
+                <div class="q-btn-row">
+                  <button class="btn btn-secondary" onclick="moveTestQ(-1, event)">Previous</button>
+                  <button class="btn btn-review-next" onclick="markForReviewAndNext(event)">
+                    <span class="desktop-only-txt">Mark for Review & Next</span>
+                    <span class="mobile-only-txt">Review & Next</span>
+                  </button>
                   <button class="btn btn-save-next" id="t-save-next-btn" onclick="handleSaveNextOrSubmit(event)">Save & Next</button>
                 </div>
               </div>
@@ -1254,7 +1503,7 @@
             <!-- 2. PRACTICE QUESTION PANE WITH INTERNAL SCROLL -->
             <div class="exam-question-pane">
               <div class="q-header-bar">
-                <div class="q-header-left"><span id="p-counter" style="color: var(--success); font-weight: 700; font-size: 1.05rem;">Practice Q 1</span><span class="badge-sub" id="p-hier-badge"></span></div>
+                <div class="q-header-left"><span id="p-counter" style="color: var(--success); font-weight: 700; font-size: 0.95rem;">Practice Q 1</span><span class="badge-sub" id="p-hier-badge"></span></div>
                 <div class="q-header-right">
                   <div id="p-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
                   <span class="badge-exam-tag" id="p-exam-badge"></span>
@@ -1270,8 +1519,10 @@
                 <div id="p-expl" style="display:none;" class="expl-box"></div>
               </div>
               <div class="q-fixed-footer">
-                <button class="btn btn-secondary" onclick="movePracQ(-1, event)">Previous</button>
-                <button class="btn" id="pracNextBtn" onclick="movePracQ(1, event)">Next</button>
+                <div class="q-btn-row">
+                  <button class="btn btn-secondary" onclick="movePracQ(-1, event)">Previous</button>
+                  <button class="btn" id="pracNextBtn" onclick="movePracQ(1, event)">Next</button>
+                </div>
               </div>
             </div>
           </div>
@@ -2331,13 +2582,67 @@
     showAuth();
   }
 
+  function setExamActiveMode(isActive) {
+    if (isActive) {
+      document.body.classList.add('exam-active-mode');
+    } else {
+      document.body.classList.remove('exam-active-mode');
+    }
+  }
+
+  function showTestPlayer(title) {
+    setExamActiveMode(true);
+    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+    const tabTest = document.getElementById('tab-test');
+    if (tabTest) tabTest.style.display = 'block';
+    const testCfg = document.getElementById('testConfigWrapper');
+    if (testCfg) testCfg.style.display = 'none';
+    const testPlay = document.getElementById('test-player');
+    if (testPlay) testPlay.style.display = 'block';
+
+    const tabPrac = document.getElementById('tab-practice');
+    if (tabPrac) tabPrac.style.display = 'none';
+    const pracPlay = document.getElementById('prac-player');
+    if (pracPlay) pracPlay.style.display = 'none';
+    const pracCfg = document.getElementById('pracConfigWrapper');
+    if (pracCfg) pracCfg.style.display = 'none';
+
+    if (title && document.getElementById('activeTestTitleText')) {
+      document.getElementById('activeTestTitleText').innerText = title;
+    }
+  }
+
+  function showPracticePlayer() {
+    setExamActiveMode(true);
+    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
+    const tabPrac = document.getElementById('tab-practice');
+    if (tabPrac) tabPrac.style.display = 'block';
+    const pracCfg = document.getElementById('pracConfigWrapper');
+    if (pracCfg) pracCfg.style.display = 'none';
+    const pracRes = document.getElementById('prac-result-card');
+    if (pracRes) pracRes.style.display = 'none';
+    const pracPlay = document.getElementById('prac-player');
+    if (pracPlay) pracPlay.style.display = 'block';
+
+    const tabTest = document.getElementById('tab-test');
+    if (tabTest) tabTest.style.display = 'none';
+    const testPlay = document.getElementById('test-player');
+    if (testPlay) testPlay.style.display = 'none';
+    const testCfg = document.getElementById('testConfigWrapper');
+    if (testCfg) testCfg.style.display = 'none';
+  }
+
   function navigate(tabId) {
-    if(document.getElementById('test-player').style.display === 'block' || document.getElementById('prac-player').style.display === 'block') {
+    setExamActiveMode(false);
+    if(document.getElementById('test-player')?.style.display === 'block' || document.getElementById('prac-player')?.style.display === 'block') {
       if(!confirm('A test is in progress. Navigating away will cancel it. Continue?')) return;
       if(testTimerInterval) clearInterval(testTimerInterval);
-      document.getElementById('test-player').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'none';
     }
+    
+    // Always hide players when navigating between main tabs
+    if (document.getElementById('test-player')) document.getElementById('test-player').style.display = 'none';
+    if (document.getElementById('prac-player')) document.getElementById('prac-player').style.display = 'none';
+
     localStorage.setItem('cg_active_tab', tabId);
     document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-btn, .f-nav-item').forEach(b => b.classList.remove('active'));
@@ -2349,8 +2654,9 @@
     if(dBtn) dBtn.classList.add('active');
 
     if(tabId === 'tab-home') { document.getElementById('fNavHome')?.classList.add('active'); renderHomeDashboard(); }
-    if(tabId === 'tab-test') { document.getElementById('fNavTest')?.classList.add('active'); document.getElementById('testConfigWrapper').style.display = 'block'; document.getElementById('test-player').style.display = 'none'; }
-    if(tabId === 'tab-practice') { document.getElementById('fNavPrac')?.classList.add('active'); document.getElementById('pracConfigWrapper').style.display = 'block'; document.getElementById('prac-player').style.display = 'none'; document.getElementById('prac-result-card').style.display = 'none'; }
+    if(tabId === 'tab-mock') { document.getElementById('navMockBtn')?.classList.add('active'); }
+    if(tabId === 'tab-test') { document.getElementById('fNavTest')?.classList.add('active'); document.getElementById('testConfigWrapper').style.display = 'block'; }
+    if(tabId === 'tab-practice') { document.getElementById('fNavPrac')?.classList.add('active'); document.getElementById('pracConfigWrapper').style.display = 'block'; document.getElementById('prac-result-card').style.display = 'none'; }
     if(tabId === 'tab-flt') buildFltSubjectInputs();
     if(tabId === 'tab-revision') { document.getElementById('fNavRev')?.classList.add('active'); document.getElementById('revision-quiz-player').style.display = 'none'; switchRevisionSubTab('wrong'); }
     if(tabId === 'tab-profile') { renderProfilePage(); }
@@ -3232,13 +3538,10 @@
 
     if (mode === 'test') {
       startTestTimer(getSelectedTimerMinutes('testDurationTopic', 'customTopicMinutes'));
-      document.getElementById('testConfigWrapper').style.display = 'none';
-      document.getElementById('test-player').style.display = 'block';
+      showTestPlayer(`${sub === 'ALL' ? 'Topic Test' : sub} ${top !== 'ALL' ? '- ' + top : ''}`);
       renderTestView();
     } else {
-      document.getElementById('pracConfigWrapper').style.display = 'none';
-      document.getElementById('prac-result-card').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'block';
+      showPracticePlayer();
       renderPracticeView();
     }
   }
@@ -3285,15 +3588,10 @@
 
     if(mode === 'test') {
       startTestTimer(getSelectedTimerMinutes('testDurationNcert', 'customNcertMinutes'));
-      document.getElementById('testConfigWrapper').style.display = 'none';
-      document.getElementById('test-player').style.display = 'block';
-      if(document.getElementById('activeTestTitleText')) {
-        document.getElementById('activeTestTitleText').innerText = `${b} - ${s === 'ALL' ? 'All Subjects' : s} ${ch !== 'ALL' ? '('+ch+')' : ''}`;
-      }
+      showTestPlayer(`${b} - ${s === 'ALL' ? 'All Subjects' : s} ${ch !== 'ALL' ? '('+ch+')' : ''}`);
       renderTestView();
     } else {
-      document.getElementById('pracConfigWrapper').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'block';
+      showPracticePlayer();
       renderPracticeView();
     }
   }
@@ -3330,15 +3628,10 @@
 
     if(mode === 'test') {
       startTestTimer(getSelectedTimerMinutes('testDurationExam', 'customExamMinutes'));
-      document.getElementById('testConfigWrapper').style.display = 'none';
-      document.getElementById('test-player').style.display = 'block';
-      if(document.getElementById('activeTestTitleText')) {
-        document.getElementById('activeTestTitleText').innerText = `${e === 'ALL' ? 'All Exams' : e} PYQ Mock`;
-      }
+      showTestPlayer(`${e === 'ALL' ? 'All Exams' : e} PYQ Mock`);
       renderTestView();
     } else {
-      document.getElementById('pracConfigWrapper').style.display = 'none';
-      document.getElementById('prac-player').style.display = 'block';
+      showPracticePlayer();
       renderPracticeView();
     }
   }
@@ -3419,13 +3712,7 @@
     currentQIdx = 0;
     startTestTimer(120); // 2 Hours
 
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    if(document.getElementById('activeTestTitleText')) {
-      document.getElementById('activeTestTitleText').innerText = window.currentCustomTestLabel;
-    }
+    showTestPlayer(window.currentCustomTestLabel);
     renderTestView();
   }
   function startCgpscPaper2Mock() {
@@ -3447,13 +3734,7 @@
     currentQIdx = 0;
 
     startTestTimer(120);
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    if(document.getElementById('activeTestTitleText')) {
-      document.getElementById('activeTestTitleText').innerText = window.currentCustomTestLabel;
-    }
+    showTestPlayer(window.currentCustomTestLabel);
     renderTestView();
   }
 
@@ -3610,13 +3891,7 @@
     currentQIdx = 0;
 
     startTestTimer(120);
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    if(document.getElementById('activeTestTitleText')) {
-      document.getElementById('activeTestTitleText').innerText = window.currentCustomTestLabel;
-    }
+    showTestPlayer(window.currentCustomTestLabel);
     renderTestView();
   }
 
@@ -3677,13 +3952,7 @@
     currentQIdx = 0;
 
     startTestTimer(120);
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
-    if(document.getElementById('activeTestTitleText')) {
-      document.getElementById('activeTestTitleText').innerText = window.currentCustomTestLabel;
-    }
+    showTestPlayer(window.currentCustomTestLabel);
     renderTestView();
   }
 
@@ -4268,10 +4537,7 @@
     window.currentCustomTestLabel = document.getElementById('customFltNameInput').value.trim() || 'Custom FLT';
     
     startTestTimer(getSelectedTimerMinutes('testDurationFlt', 'customFltMinutes'));
-    document.querySelectorAll('.tab-view').forEach(t => t.style.display = 'none');
-    document.getElementById('tab-test').style.display = 'block';
-    document.getElementById('testConfigWrapper').style.display = 'none';
-    document.getElementById('test-player').style.display = 'block';
+    showTestPlayer(window.currentCustomTestLabel);
     renderTestView();
   }
 
@@ -4704,7 +4970,7 @@
       let cleanText = qText.replace(/(?:https?:\/\/)?drive\.google\.com\/[^\s"'<>]+/gi, '')
                            .replace(/https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp)(?:\?[^\s"'<>]*)?/gi, '')
                            .trim();
-      bodyHtml = `<div style="line-height:1.65;">${formatRichText(cleanText || qText)}</div>`;
+      bodyHtml = `<div class="standard-q-body" style="line-height:1.65; white-space:pre-line; word-break:break-word;">${formatRichText(cleanText || qText)}</div>`;
     }
 
     return bodyHtml + (imgHtml ? `<div style="margin-top:10px;">${imgHtml}</div>` : '');
@@ -4753,6 +5019,7 @@
   }
 
   function renderTestView() {
+    setExamActiveMode(true);
     if(!activeQuestions.length) return;
     const q = activeQuestions[currentQIdx];
     document.getElementById('t-counter').innerText = `Question ${currentQIdx + 1} of ${activeQuestions.length}`;
@@ -4805,9 +5072,9 @@
       if (currentQIdx === activeQuestions.length - 1) {
         saveNextBtn.innerText = 'Submit Test';
         saveNextBtn.className = 'btn btn-danger';
-        saveNextBtn.style.padding = '10px 22px';
+        saveNextBtn.style.padding = '';
         saveNextBtn.style.fontWeight = '700';
-        saveNextBtn.style.boxShadow = '0 4px 14px rgba(239, 68, 68, 0.45)';
+        saveNextBtn.style.boxShadow = '0 2px 10px rgba(239, 68, 68, 0.45)';
       } else {
         saveNextBtn.innerText = 'Save & Next';
         saveNextBtn.className = 'btn btn-save-next';
@@ -5034,11 +5301,26 @@
   }
 
   function exitTestModeConfirm() {
-    if(confirm('Submit and evaluate current test attempt?')) submitTestEngine();
-    else { document.getElementById('test-player').style.display = 'none'; document.getElementById('testConfigWrapper').style.display = 'block'; if(testTimerInterval) clearInterval(testTimerInterval); }
+    if(confirm('Submit and evaluate current test attempt?')) {
+      submitTestEngine();
+    } else {
+      setExamActiveMode(false);
+      if(testTimerInterval) clearInterval(testTimerInterval);
+      document.getElementById('test-player').style.display = 'none';
+      const prevMode = activeEngineMode;
+      activeEngineMode = null;
+      if(prevMode === 'teaching_mock' || prevMode === 'vyapam_mock' || prevMode === 'cgpsc_paper1' || prevMode === 'cgpsc_paper2') {
+        navigate('tab-mock');
+      } else if(prevMode === 'flt') {
+        navigate('tab-flt');
+      } else {
+        navigate('tab-test');
+      }
+    }
   }
 
   function renderPracticeView() {
+    setExamActiveMode(true);
     if(!activeQuestions.length) return;
     const q = activeQuestions[currentQIdx];
     document.getElementById('p-counter').innerText = `Practice Q ${currentQIdx + 1} of ${activeQuestions.length}`;
@@ -5107,6 +5389,7 @@
   function movePracQ(step, e) { if(e) e.preventDefault(); if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) { currentQIdx += step; renderPracticeView(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
   function finishPracticeQuiz(e) {
     if(e) e.preventDefault();
+    setExamActiveMode(false);
     let c = 0, w = 0;
     activeQuestions.forEach((q, i) => { if(userResponses[i]) { if(userResponses[i] === q.ans) c++; else w++; } });
     document.getElementById('prac-player').style.display = 'none';
@@ -5117,9 +5400,15 @@
     document.getElementById('pracResWrong').innerText = w;
     document.getElementById('pracResAcc').innerText = ((c + w) > 0 ? ((c / (c + w)) * 100).toFixed(1) : 0) + '%';
   }
-  function exitPracMode() { document.getElementById('prac-player').style.display = 'none'; document.getElementById('prac-result-card').style.display = 'none'; document.getElementById('pracConfigWrapper').style.display = 'block'; }
+  function exitPracMode() {
+    setExamActiveMode(false);
+    document.getElementById('prac-player').style.display = 'none';
+    document.getElementById('prac-result-card').style.display = 'none';
+    navigate('tab-practice');
+  }
 
   function submitTestEngine() {
+    setExamActiveMode(false);
     if(testTimerInterval) clearInterval(testTimerInterval);
     let correct = 0, wrong = 0, unattempted = 0;
     let wrongQs = [], correctQs = [], unattemptedQs = [];

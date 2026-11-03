@@ -37,6 +37,21 @@
   </script>
   <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
+  <!-- MathJax Configuration & Library for Mathematical & Scientific Symbols/Formulas -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
   <style>
     :root {
       --bg: #060913; --card: rgba(15,23,42,0.75); --card-in: rgba(10,15,29,0.85);
@@ -516,6 +531,147 @@
       }
     }
 
+    /* Bilingual Toggle Bar */
+    .bilingual-toggle-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 12px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 10px;
+      padding: 6px 12px;
+    }
+    .bi-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .bi-pill-group {
+      display: inline-flex;
+      background: rgba(10, 15, 29, 0.85);
+      border-radius: 8px;
+      padding: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .bi-pill-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .bi-pill-btn.active {
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+
+    /* Question & Option Image Cards */
+    .q-image-card {
+      margin: 12px 0;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 8px;
+      display: inline-block;
+      max-width: 100%;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
+    .q-image-card:hover {
+      border-color: #38bdf8;
+      transform: scale(1.01);
+    }
+    .q-img-elem {
+      max-width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      display: block;
+      border-radius: 8px;
+      margin: 0 auto;
+    }
+    .q-img-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: #38bdf8;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .opt-img-elem {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      display: block;
+      border-radius: 6px;
+      margin-top: 6px;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Image Lightbox Fullscreen Modal */
+    .image-lightbox-modal {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.93);
+      z-index: 9999999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 2.4rem;
+      color: #f8fafc;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 10;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+    .lightbox-img {
+      max-width: 95vw;
+      max-height: 85vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.4);
+    }
+    .lightbox-caption {
+      margin-top: 10px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+
+    /* Suppress any Android WebView / browser video player controls or play icons */
+    #appSplashVideo::-webkit-media-controls,
+    #appSplashVideo::-webkit-media-controls-enclosure,
+    #appSplashVideo::-webkit-media-controls-panel,
+    #appSplashVideo::-webkit-media-controls-play-button,
+    #appSplashVideo::-webkit-media-controls-start-playback-button,
+    #appSplashVideo::-webkit-media-controls-overlay-play-button {
+      display: none !important;
+      -webkit-appearance: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
 </style>
   <script>
     // If running in a regular web browser, hide splash screen overlay immediately before first paint
@@ -527,7 +683,7 @@
 <body>
 <!-- APP LAUNCH SPLASH VIDEO OVERLAY (MOBILE APP ONLY) -->
 <div id="splashScreenVideoOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#060913; z-index:9999999; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.45s ease; overflow:hidden;">
-  <video id="appSplashVideo" autoplay playsinline webkit-playsinline muted disablePictureInPicture style="width:100%; height:100%; object-fit:contain; background:#060913; pointer-events:none;">
+  <video id="appSplashVideo" autoplay playsinline webkit-playsinline muted disablePictureInPicture controlslist="nodownload nofullscreen noremoteplayback" disableremoteplayback style="width:100%; height:100%; object-fit:contain; background:#060913; pointer-events:none; opacity:0; transition:opacity 0.28s ease;">
     <source src="splash_video.mp4" type="video/mp4">
   </video>
 </div>
@@ -875,6 +1031,7 @@
               <button class="btn btn-secondary btn-sm" onclick="exitTestModeConfirm()">Exit</button>
             </div>
           </div>
+          <div id="t-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
           <div class="formatted-text" id="t-body"></div>
           <div id="t-match-wrap"></div>
           <div id="t-opts"></div>
@@ -964,6 +1121,7 @@
               <button class="btn btn-secondary btn-sm" onclick="exitPracMode()">Exit</button>
             </div>
           </div>
+          <div id="p-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
           <div class="formatted-text" id="p-body"></div>
           <div id="p-match-wrap"></div>
           <div id="p-opts"></div>
@@ -1229,6 +1387,7 @@
           </div>
         </div>
         <div id="revPaletteDrawer" style="display:none; background:var(--card-in); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px;"><div class="palette-grid" id="revPaletteGrid"></div></div>
+        <div id="rq-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
         <div class="formatted-text" id="rq-body"></div>
         <div id="rq-match-wrap"></div>
         <div id="rq-opts"></div>
@@ -1337,6 +1496,17 @@
             <button class="btn btn-danger btn-sm" style="width:100%; font-weight:700;" onclick="deleteCurrentUserId()">🗑 Delete Account / खाता हटाएं</button>
           </div>
         </div>
+
+        <!-- Dedicated Logout Option at Very End of Profile & Settings Page -->
+        <div class="card" style="margin-top:22px; text-align:center; border:1.5px solid rgba(239,68,68,0.35); background:linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(30,41,59,0.7) 100%); padding:20px; border-radius:18px; box-shadow:0 8px 24px rgba(239,68,68,0.12);">
+          <h4 style="font-family:'Outfit',sans-serif; color:#f87171; margin:0 0 6px 0; font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <span>🚪</span> Account Sign Out / लॉगआउट
+          </h4>
+          <p style="color:var(--muted); font-size:0.84rem; margin:0 0 14px 0;">Sign out of your account session on this device safely.</p>
+          <button class="btn btn-danger" style="padding:10px 32px; font-weight:700; font-size:0.95rem; border-radius:10px; box-shadow:0 4px 14px rgba(239,68,68,0.35);" onclick="logout()">
+            🚪 Sign Out
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1412,16 +1582,7 @@
         </div>
       </div>
 
-      <!-- Dedicated Logout Option at Very End of Profile & Settings Page -->
-      <div class="card" style="margin-top:22px; text-align:center; border:1.5px solid rgba(239,68,68,0.35); background:linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(30,41,59,0.7) 100%); padding:20px; border-radius:18px; box-shadow:0 8px 24px rgba(239,68,68,0.12);">
-        <h4 style="font-family:'Outfit',sans-serif; color:#f87171; margin:0 0 6px 0; font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <span>🚪</span> Account Sign Out / लॉगआउट
-        </h4>
-        <p style="color:var(--muted); font-size:0.84rem; margin:0 0 14px 0;">Sign out of your account session on this device safely.</p>
-        <button class="btn btn-danger" style="padding:10px 32px; font-weight:700; font-size:0.95rem; border-radius:10px; box-shadow:0 4px 14px rgba(239,68,68,0.35);" onclick="logout()">
-          🚪 Sign Out
-        </button>
-      </div>
+
     </div>
 
 <!-- TAB: DEDICATED EXAM PYQ ANALYSIS & PREPARATION CHECKLIST -->
@@ -1514,6 +1675,13 @@
     </div>
     <div class="palette-grid" id="modalExamPaletteGrid"></div>
   </div>
+</div>
+
+<!-- FULLSCREEN IMAGE LIGHTBOX MODAL FOR QUESTIONS & OPTIONS -->
+<div id="imageLightboxModal" class="image-lightbox-modal" style="display:none;" onclick="closeImageLightbox()">
+  <span class="lightbox-close" onclick="closeImageLightbox()">&times;</span>
+  <img id="imageLightboxImg" class="lightbox-img" src="" alt="Enlarged Question Diagram" onclick="event.stopPropagation()">
+  <div class="lightbox-caption" id="imageLightboxCaption">Tap outside or ✕ to close</div>
 </div>
 
 <script>
@@ -2067,33 +2235,90 @@
     subjects = Array.from(comb);
   }
 
+  // --- CATEGORIZATION & ZERO-COUNT ELIMINATION HELPERS ---
+  function isQuestionInCategory(q, cat) {
+    if (!q || !q.subject) return false;
+    const s = q.subject.trim();
+    const sLower = s.toLowerCase();
+    const isCg = s.startsWith('CG ') || s.startsWith('CG_') || sLower.includes('chhattisgarh') || sLower.includes('छत्तीसगढ़');
+    const isOther = ['maths', 'math', 'reasoning', 'general mental ability', 'mental ability', 'aptitude', 'cdp', 'pedagogy', 'child development', 'current affairs'].some(k => sLower.includes(k));
+
+    if (cat === 'cg') return isCg;
+    if (cat === 'other') return isOther && !isCg;
+    return !isCg && !isOther;
+  }
+
+  function isQuestionMatchingSubject(q, subName) {
+    if (!q || !q.subject) return false;
+    if (!subName || subName === 'ALL') return true;
+    const qs = q.subject.trim();
+    if (qs === subName) return true;
+    if ((subName === 'Economy' || subName === 'Indian Economy') && (qs === 'Economy' || qs === 'Indian Economy')) return true;
+    if ((subName === 'History' || subName === 'Indian History') && (qs === 'History' || qs === 'Indian History')) return true;
+    if ((subName === 'Geography' || subName === 'Indian Geography') && (qs === 'Geography' || qs === 'Indian Geography')) return true;
+    return false;
+  }
+
+  function countQuestionsForSubject(subName) {
+    if (!subName || subName === 'ALL') return 0;
+    const pool = Array.isArray(questions) ? questions : [];
+    return pool.filter(q => isQuestionMatchingSubject(q, subName)).length;
+  }
+
+  function getCategorySubjectsFromDB(cat) {
+    const pool = Array.isArray(questions) ? questions : [];
+    // 1. Gather all actual subjects that exist in the database for this category
+    const dbSubs = Array.from(new Set(pool.filter(q => isQuestionInCategory(q, cat)).map(q => q.subject?.trim()).filter(Boolean)));
+    // 2. Also consider default standard names if they match real questions
+    const standardList = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    const combined = Array.from(new Set([...dbSubs, ...standardList])).filter(Boolean);
+    // 3. Strictly filter out any subject that has 0 questions in database
+    return combined.filter(s => countQuestionsForSubject(s) > 0).sort((a, b) => a.localeCompare(b));
+  }
+
   function updateTestSubjectOptions() {
-    const cat = document.getElementById('testGsCategory').value;
-    const list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    const catEl = document.getElementById('testGsCategory');
     const subEl = document.getElementById('testSub');
-    if (!subEl) return;
+    if (!catEl || !subEl) return;
+    const cat = catEl.value || 'indian';
 
-    // Filter questions in this category
-    const catQs = questions.filter(q => list.includes(q.subject) || (cat === 'cg' && q.subject?.startsWith('CG ')));
+    const validSubs = getCategorySubjectsFromDB(cat);
+    const pool = Array.isArray(questions) ? questions : [];
+    const catQs = pool.filter(q => isQuestionInCategory(q, cat));
 
-    // Provide "All Subjects" as first option, followed by individual subjects
-    subEl.innerHTML = `<option value="ALL" selected>All Subjects (${catQs.length} Qs)</option>` + 
-      list.map(s => `<option value="${s}">${s} (${questions.filter(q => (s === 'Economy' || s === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === s)).length} Qs)</option>`).join('');
+    if (validSubs.length === 0) {
+      subEl.innerHTML = `<option value="ALL">No Subjects with Questions Available</option>`;
+    } else {
+      subEl.innerHTML = `<option value="ALL" selected>All Subjects (${catQs.length} Qs)</option>` + 
+        validSubs.map(s => {
+          const cnt = countQuestionsForSubject(s);
+          return `<option value="${s}">${s} (${cnt} Qs)</option>`;
+        }).join('');
+    }
 
     cascadeTopics('testSub', 'testTop', 'testSubtop');
     toggleTestHistoryEraDropdown();
   }
 
   function updatePracSubjectOptions() {
-    const cat = document.getElementById('pracGsCategory').value;
-    const list = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
+    const catEl = document.getElementById('pracGsCategory');
     const subEl = document.getElementById('pracSub');
-    if (!subEl) return;
+    if (!catEl || !subEl) return;
+    const cat = catEl.value || 'indian';
 
-    const catQs = questions.filter(q => list.includes(q.subject) || (cat === 'cg' && q.subject?.startsWith('CG ')));
+    const validSubs = getCategorySubjectsFromDB(cat);
+    const pool = Array.isArray(questions) ? questions : [];
+    const catQs = pool.filter(q => isQuestionInCategory(q, cat));
 
-    subEl.innerHTML = `<option value="ALL" selected>All Subjects (${catQs.length} Qs)</option>` + 
-      list.map(s => `<option value="${s}">${s} (${questions.filter(q => (s === 'Economy' || s === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === s)).length} Qs)</option>`).join('');
+    if (validSubs.length === 0) {
+      subEl.innerHTML = `<option value="ALL">No Subjects with Questions Available</option>`;
+    } else {
+      subEl.innerHTML = `<option value="ALL" selected>All Subjects (${catQs.length} Qs)</option>` + 
+        validSubs.map(s => {
+          const cnt = countQuestionsForSubject(s);
+          return `<option value="${s}">${s} (${cnt} Qs)</option>`;
+        }).join('');
+    }
 
     cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
     togglePracHistoryEraDropdown();
@@ -2218,6 +2443,19 @@
     if (era === 'Medieval') return 450;
     return 250;
   }
+  function refreshAllDropdowns() {
+    syncDynamicSubjects();
+    if (typeof populateAllSubjectDropdowns === 'function') populateAllSubjectDropdowns();
+    if (typeof initNcertCascades === 'function') {
+      initNcertCascades('ncertTestBook', 'ncertTestClass', 'ncertTestSub', 'ncertTestChap');
+      initNcertCascades('ncertPracBook', 'ncertPracClass', 'ncertPracSub', 'ncertPracChap');
+    }
+    if (typeof initExamCascades === 'function') {
+      initExamCascades('examTestName', 'examTestYear', 'examTestSub', 'examTestTop', 'examTestSubtop');
+      initExamCascades('examPracName', 'examPracYear', 'examPracSub', 'examPracTop', 'examPracSubtop');
+    }
+  }
+
   function populateAllSubjectDropdowns() {
     syncDynamicSubjects();
     updateTestSubjectOptions();
@@ -2250,7 +2488,7 @@
       return;
     }
 
-    let pool = questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
+    let pool = questions.filter(q => isQuestionMatchingSubject(q, sub));
 
     if (isHistory) {
       const eraFilterEl = document.getElementById(isTest ? 'testEraFilter' : 'pracEraFilter');
@@ -2296,7 +2534,7 @@
       return;
     }
 
-    let pool = questions.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub));
+    let pool = questions.filter(q => isQuestionMatchingSubject(q, sub));
     pool = pool.filter(q => q.topic === top);
 
     const subtopics = [...new Set(pool.map(q => q.subtopic).filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -2304,104 +2542,338 @@
     subtopEl.innerHTML = `<option value="ALL" selected>All Sub-topics (${pool.length} Qs)</option>` + 
       subtopics.map(st => `<option value="${st}">${st} (${pool.filter(q => q.subtopic === st).length} Qs)</option>`).join('');
   }
+  // --- STANDARDIZED EXAM PARSER & EXACT MATCHER ---
+  function getQuestionExamYear(q) {
+    if (!q) return '';
+    if (q.year) return String(q.year).trim();
+    if (q.exam_year) return String(q.exam_year).trim();
+    if (q.examYear) return String(q.examYear).trim();
+    const rawExam = String(q.exam || q.exam_name || q.examName || q.examTitle || '');
+    const m = rawExam.match(/\b(19\d{2}|20\d{2})\b/);
+    return m ? m[0] : '';
+  }
+
+  function isQuestionMatchingYear(q, y) {
+    if (!y || y === 'ALL') return true;
+    const targetY = String(y).trim();
+    const qy = getQuestionExamYear(q);
+    if (qy === targetY) return true;
+    const rawExam = String(q.exam || q.exam_name || q.examName || q.examTitle || '');
+    if (rawExam.includes(targetY)) return true;
+    return false;
+  }
+
+  function getNormalizedExamName(rawExam) {
+    if (!rawExam) return '';
+    let clean = String(rawExam).replace(/\b(19\d{2}|20\d{2})\b/g, '');
+    clean = clean.replace(/\(\s*\)/g, '').replace(/\[\s*\]/g, '');
+    clean = clean.replace(/^[\s\-–—_:,\/\(\)]+/, '').replace(/[\s\-–—_:,\/\(\)]+$/, '').trim();
+    clean = clean.replace(/\s{2,}/g, ' ');
+    return clean || String(rawExam).trim();
+  }
+
+  function isQuestionMatchingExam(q, examName) {
+    if (!examName || examName === 'ALL') return true;
+    if (!q) return false;
+    const rawExam = q.exam || q.exam_name || q.examName || q.examTitle || '';
+    if (!rawExam) return false;
+    const normQ = getNormalizedExamName(rawExam);
+    if (normQ.toLowerCase() === examName.toLowerCase()) return true;
+    const cleanQ = normQ.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanTarget = examName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanTarget && cleanQ.includes(cleanTarget)) return true;
+    return false;
+  }
+
+  // --- STRICT NCERT / SCERT TAG DETECTOR & ISOLATION LOGIC ---
+  function isNcertOrScertQuestion(q) {
+    if (!q) return false;
+    // Explicit dedicated fields
+    if (q.ncert_book || q.ncert_class || q.ncert_chapter) return true;
+
+    const checkStr = (val) => {
+      if (!val) return false;
+      if (Array.isArray(val)) return val.some(v => typeof v === 'string' && /\b(ncert|scert)\b/i.test(v));
+      if (typeof val === 'string') return /\b(ncert|scert)\b/i.test(val);
+      return false;
+    };
+
+    // Strictly check tags, book, source, board, exam, type, category
+    // NOTE: q.topic and q.subtopic are deliberately excluded to avoid false positives!
+    return checkStr(q.tags) || checkStr(q.tag) || checkStr(q.source) || 
+           checkStr(q.book) || checkStr(q.board) || checkStr(q.exam) || 
+           checkStr(q.type) || checkStr(q.category);
+  }
+
+  function getNcertQuestionBook(q) {
+    if (!isNcertOrScertQuestion(q)) return null;
+
+    const allMeta = [
+      q.book, q.ncert_book, q.source, q.board, q.exam, q.type, q.tag,
+      Array.isArray(q.tags) ? q.tags.join(' ') : q.tags
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    if (allMeta.includes('scert') || allMeta.includes('cg scert')) {
+      return 'CG SCERT';
+    }
+    return 'NCERT';
+  }
+
+  function getQuestionNcertClass(q) {
+    if (!q) return '';
+    if (q.ncert_class) return String(q.ncert_class).trim();
+    if (q.class) return String(q.class).trim();
+    if (q.grade) return String(q.grade).trim();
+    // Check tags or source for explicit Class pattern
+    const meta = [Array.isArray(q.tags) ? q.tags.join(' ') : q.tags, q.tag, q.source, q.book].filter(Boolean).join(' ');
+    const m = meta.match(/\b(?:class|grade|कक्षा)\s*([0-9]{1,2}|VI|VII|VIII|IX|X|XI|XII)\b/i);
+    if (m) return `Class ${m[1]}`;
+    return '';
+  }
+
+  function getQuestionNcertChapter(q) {
+    if (!q) return '';
+    if (q.ncert_chapter) return String(q.ncert_chapter).trim();
+    if (q.chapter) return String(q.chapter).trim();
+    if (q.chapter_name) return String(q.chapter_name).trim();
+    if (q.chap) return String(q.chap).trim();
+    // Do NOT fallback to q.topic! Return empty if not explicitly a textbook chapter
+    return '';
+  }
+
   function initNcertCascades(bId, cId, sId, chId) {
     const bEl = document.getElementById(bId);
     if (!bEl) return;
-    const books = ['NCERT', 'CG SCERT'];
-    bEl.innerHTML = books.map(b => `<option value="${b}">${b}</option>`).join('');
+    const pool = (Array.isArray(questions) ? questions : []).filter(q => isNcertOrScertQuestion(q));
+
+    // Only books that actually have tagged questions in the database
+    const books = Array.from(new Set(pool.map(q => getNcertQuestionBook(q)).filter(Boolean))).sort();
+
+    if (!books.length) {
+      bEl.innerHTML = `<option value="NONE">No NCERT / SCERT Tagged Questions Available (0 Qs)</option>`;
+      const cEl = document.getElementById(cId);
+      const sEl = document.getElementById(sId);
+      const chEl = document.getElementById(chId);
+      if (cEl) cEl.innerHTML = `<option value="ALL">--</option>`;
+      if (sEl) sEl.innerHTML = `<option value="ALL">--</option>`;
+      if (chEl) chEl.innerHTML = `<option value="ALL">--</option>`;
+      return;
+    }
+
+    bEl.innerHTML = books.map(b => {
+      const cnt = pool.filter(q => getNcertQuestionBook(q) === b).length;
+      return `<option value="${b}">${b} (${cnt} Qs)</option>`;
+    }).join('');
+
     cascadeNcertClassesForPortal(bId, cId, sId, chId);
   }
 
   function cascadeNcertClassesForPortal(bId, cId, sId, chId) {
     const cEl = document.getElementById(cId);
     if (!cEl) return;
-    const classes = ['Class 6th', 'Class 7th', 'Class 8th', 'Class 9th', 'Class 10th', 'Class 11th', 'Class 12th'];
-    cEl.innerHTML = classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    const bVal = document.getElementById(bId)?.value;
+    if (!bVal || bVal === 'NONE') {
+      cEl.innerHTML = `<option value="ALL">--</option>`;
+      cascadeNcertSubjects(bId, cId, sId, chId);
+      return;
+    }
+
+    const pool = (Array.isArray(questions) ? questions : []).filter(q => isNcertOrScertQuestion(q) && getNcertQuestionBook(q) === bVal);
+    const rawClasses = Array.from(new Set(pool.map(q => getQuestionNcertClass(q)).filter(Boolean))).sort((a,b) => a.localeCompare(b, undefined, { numeric: true }));
+
+    if (rawClasses.length > 0) {
+      cEl.innerHTML = `<option value="ALL">All Classes (${pool.length} Qs)</option>` + 
+        rawClasses.map(c => {
+          const cnt = pool.filter(q => getQuestionNcertClass(q) === c).length;
+          return `<option value="${c}">${c} (${cnt} Qs)</option>`;
+        }).join('');
+    } else {
+      cEl.innerHTML = `<option value="ALL">All Questions (${pool.length} Qs)</option>`;
+    }
+
     cascadeNcertSubjects(bId, cId, sId, chId);
   }
 
   function cascadeNcertSubjects(bId, cId, sId, chId) {
-    const bVal = document.getElementById(bId)?.value || 'NCERT';
     const sEl = document.getElementById(sId);
     if (!sEl) return;
-    let subs = [
-      { id: 'Indian History', label: 'History' },
-      { id: 'Indian Geography', label: 'Geography' },
-      { id: 'Polity', label: 'Polity' },
-      { id: 'Economy', label: 'Economy' },
-      { id: 'General Science', label: 'General Science' }
-    ];
-    if (bVal === 'CG SCERT') {
-      subs.push({ id: 'CG GS', label: 'Chhattisgarh Studies' });
+    const bVal = document.getElementById(bId)?.value;
+    const cVal = document.getElementById(cId)?.value || 'ALL';
+
+    if (!bVal || bVal === 'NONE') {
+      sEl.innerHTML = `<option value="ALL">--</option>`;
+      cascadeNcertChapters(bId, cId, sId, chId);
+      return;
     }
-    sEl.innerHTML = '<option value="ALL">All Subjects</option>' + 
-      subs.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+
+    const pool = (Array.isArray(questions) ? questions : []).filter(q => {
+      if (!isNcertOrScertQuestion(q)) return false;
+      if (getNcertQuestionBook(q) !== bVal) return false;
+      if (cVal !== 'ALL') {
+        const qc = getQuestionNcertClass(q);
+        if (qc && qc !== cVal) return false;
+      }
+      return true;
+    });
+
+    const subs = Array.from(new Set(pool.map(q => q.subject).filter(Boolean))).sort();
+
+    if (!subs.length) {
+      sEl.innerHTML = `<option value="ALL">No Subjects Available</option>`;
+    } else {
+      sEl.innerHTML = `<option value="ALL">All Subjects (${pool.length} Qs)</option>` + 
+        subs.map(s => {
+          const cnt = pool.filter(q => isQuestionMatchingSubject(q, s)).length;
+          return `<option value="${s}">${s} (${cnt} Qs)</option>`;
+        }).join('');
+    }
+
     cascadeNcertChapters(bId, cId, sId, chId);
   }
 
   function cascadeNcertChapters(bId, cId, sId, chId) {
     const chEl = document.getElementById(chId);
     if (!chEl) return;
-    const chaps = [
-      'Chapter 1 - Fundamentals & Core Concepts',
-      'Chapter 2 - Historical Events & Development',
-      'Chapter 3 - Constitution, Society & Environment',
-      'Chapter 4 - Advanced PYQ Questions & Analysis'
-    ];
-    chEl.innerHTML = '<option value="ALL">All Chapters</option>' + 
-      chaps.map(c => `<option value="${c}">${c}</option>`).join('');
+    const bVal = document.getElementById(bId)?.value;
+    const cVal = document.getElementById(cId)?.value || 'ALL';
+    const sVal = document.getElementById(sId)?.value || 'ALL';
+
+    if (!bVal || bVal === 'NONE') {
+      chEl.innerHTML = `<option value="ALL">--</option>`;
+      return;
+    }
+
+    const pool = (Array.isArray(questions) ? questions : []).filter(q => {
+      if (!isNcertOrScertQuestion(q)) return false;
+      if (getNcertQuestionBook(q) !== bVal) return false;
+      if (cVal !== 'ALL') {
+        const qc = getQuestionNcertClass(q);
+        if (qc && qc !== cVal) return false;
+      }
+      if (sVal !== 'ALL' && !isQuestionMatchingSubject(q, sVal)) return false;
+      return true;
+    });
+
+    const chaps = Array.from(new Set(pool.map(q => getQuestionNcertChapter(q)).filter(Boolean))).sort();
+
+    if (chaps.length > 0) {
+      chEl.innerHTML = `<option value="ALL">All Chapters (${pool.length} Qs)</option>` + 
+        chaps.map(ch => {
+          const cnt = pool.filter(q => getQuestionNcertChapter(q) === ch).length;
+          return `<option value="${ch}">${ch} (${cnt} Qs)</option>`;
+        }).join('');
+    } else {
+      chEl.innerHTML = `<option value="ALL">All Questions (${pool.length} Qs)</option>`;
+    }
   }
 
+  // --- EXAM CASCADES (ZERO-COUNT ELIMINATED & 100% ACCURATE GROUPING) ---
   function initExamCascades(nId, yId, sId, tId, stId) {
-    let exams = Array.from(new Set(questions.map(q => q.exam ? q.exam.replace(/\b(19\d{2}|20\d{2})\b/g, '').trim() : '').filter(Boolean))).sort();
-    document.getElementById(nId).innerHTML = `<option value="ALL">All Exams (${questions.length} Qs)</option>` + exams.map(e => {
-      const cnt = questions.filter(q => q.exam?.toLowerCase().includes(e.toLowerCase())).length;
-      return `<option value="${e}">${e} (${cnt} Qs)</option>`;
-    }).join('');
+    const nEl = document.getElementById(nId);
+    if (!nEl) return;
+    const pool = Array.isArray(questions) ? questions : [];
+
+    // Group real questions by normalized exam name
+    const examMap = new Map();
+    pool.forEach(q => {
+      const rawExam = q.exam || q.exam_name || q.examName || q.examTitle || '';
+      if (!rawExam) return;
+      const norm = getNormalizedExamName(rawExam);
+      if (!norm) return;
+      if (!examMap.has(norm)) examMap.set(norm, 0);
+      examMap.set(norm, examMap.get(norm) + 1);
+    });
+
+    // Only include exams where count > 0 (prevents (0 Qs) completely)
+    const validExams = Array.from(examMap.keys()).filter(e => examMap.get(e) > 0).sort();
+
+    nEl.innerHTML = `<option value="ALL">All Exams (${pool.length} Qs)</option>` + 
+      validExams.map(e => `<option value="${e}">${e} (${examMap.get(e)} Qs)</option>`).join('');
+
     cascadeExamYears(nId, yId, sId, tId, stId);
   }
 
   function cascadeExamYears(nId, yId, sId, tId, stId) {
-    const examVal = document.getElementById(nId).value;
-    let pool = questions.filter(q => examVal === 'ALL' || q.exam?.toLowerCase().includes(examVal.toLowerCase()));
-    let years = Array.from(new Set(pool.map(q => { const m = q.exam?.match(/\b(19\d{2}|20\d{2})\b/); return m ? m[0] : ''; }).filter(Boolean))).sort((a,b)=>b-a);
-    document.getElementById(yId).innerHTML = `<option value="ALL">All Years (${pool.length} Qs)</option>` + years.map(y => {
-      const cnt = pool.filter(q => q.exam?.includes(y)).length;
-      return `<option value="${y}">${y} (${cnt} Qs)</option>`;
-    }).join('');
+    const yEl = document.getElementById(yId);
+    if (!yEl) return;
+    const examVal = document.getElementById(nId)?.value || 'ALL';
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => isQuestionMatchingExam(q, examVal));
+    let years = Array.from(new Set(pool.map(q => getQuestionExamYear(q)).filter(Boolean))).sort((a,b)=>b-a);
+    let validYears = years.filter(y => pool.filter(q => isQuestionMatchingYear(q, y)).length > 0);
+
+    yEl.innerHTML = `<option value="ALL">All Years (${pool.length} Qs)</option>` + 
+      validYears.map(y => {
+        const cnt = pool.filter(q => isQuestionMatchingYear(q, y)).length;
+        return `<option value="${y}">${y} (${cnt} Qs)</option>`;
+      }).join('');
+
     cascadeExamSubjects(nId, yId, sId, tId, stId);
   }
 
   function cascadeExamSubjects(nId, yId, sId, tId, stId) {
-    const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value;
-    let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)));
+    const sEl = document.getElementById(sId);
+    if (!sEl) return;
+    const eVal = document.getElementById(nId)?.value || 'ALL';
+    const yVal = document.getElementById(yId)?.value || 'ALL';
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => 
+      isQuestionMatchingExam(q, eVal) && isQuestionMatchingYear(q, yVal)
+    );
     let subs = Array.from(new Set(pool.map(q => q.subject).filter(Boolean))).sort();
-    document.getElementById(sId).innerHTML = `<option value="ALL">All Subjects (${pool.length} Qs)</option>` + subs.map(s => {
-      const cnt = pool.filter(q => q.subject === s).length;
-      return `<option value="${s}">${s} (${cnt} Qs)</option>`;
-    }).join('');
+    let validSubs = subs.filter(s => pool.filter(q => isQuestionMatchingSubject(q, s)).length > 0);
+
+    sEl.innerHTML = `<option value="ALL">All Subjects (${pool.length} Qs)</option>` + 
+      validSubs.map(s => {
+        const cnt = pool.filter(q => isQuestionMatchingSubject(q, s)).length;
+        return `<option value="${s}">${s} (${cnt} Qs)</option>`;
+      }).join('');
+
     cascadeExamTopicsForPortal(nId, yId, sId, tId, stId);
   }
 
   function cascadeExamTopicsForPortal(nId, yId, sId, tId, stId) {
-    const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value, sVal = document.getElementById(sId).value;
-    let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)) && (sVal === 'ALL' || q.subject === sVal));
+    const tEl = document.getElementById(tId);
+    if (!tEl) return;
+    const eVal = document.getElementById(nId)?.value || 'ALL';
+    const yVal = document.getElementById(yId)?.value || 'ALL';
+    const sVal = document.getElementById(sId)?.value || 'ALL';
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => 
+      isQuestionMatchingExam(q, eVal) && 
+      isQuestionMatchingYear(q, yVal) && 
+      isQuestionMatchingSubject(q, sVal)
+    );
     let topics = Array.from(new Set(pool.map(q => q.topic).filter(Boolean))).sort();
-    document.getElementById(tId).innerHTML = `<option value="ALL">All Topics (${pool.length} Qs)</option>` + topics.map(t => {
-      const cnt = pool.filter(q => q.topic === t).length;
-      return `<option value="${t}">${t} (${cnt} Qs)</option>`;
-    }).join('');
+    let validTopics = topics.filter(t => pool.filter(q => q.topic === t).length > 0);
+
+    tEl.innerHTML = `<option value="ALL">All Topics (${pool.length} Qs)</option>` + 
+      validTopics.map(t => {
+        const cnt = pool.filter(q => q.topic === t).length;
+        return `<option value="${t}">${t} (${cnt} Qs)</option>`;
+      }).join('');
+
     cascadeExamSubtopicsForPortal(nId, yId, sId, tId, stId);
   }
 
   function cascadeExamSubtopicsForPortal(nId, yId, sId, tId, stId) {
-    const eVal = document.getElementById(nId).value, yVal = document.getElementById(yId).value, sVal = document.getElementById(sId).value, tVal = document.getElementById(tId).value;
-    let pool = questions.filter(q => (eVal === 'ALL' || q.exam?.toLowerCase().includes(eVal.toLowerCase())) && (yVal === 'ALL' || q.exam?.includes(yVal)) && (sVal === 'ALL' || q.subject === sVal) && (tVal === 'ALL' || q.topic === tVal));
+    const stEl = document.getElementById(stId);
+    if (!stEl) return;
+    const eVal = document.getElementById(nId)?.value || 'ALL';
+    const yVal = document.getElementById(yId)?.value || 'ALL';
+    const sVal = document.getElementById(sId)?.value || 'ALL';
+    const tVal = document.getElementById(tId)?.value || 'ALL';
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => 
+      isQuestionMatchingExam(q, eVal) && 
+      isQuestionMatchingYear(q, yVal) && 
+      isQuestionMatchingSubject(q, sVal) && 
+      (tVal === 'ALL' || q.topic === tVal)
+    );
     let subtopics = Array.from(new Set(pool.map(q => q.subtopic).filter(Boolean))).sort();
-    document.getElementById(stId).innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>` + subtopics.map(st => {
-      const cnt = pool.filter(q => q.subtopic === st).length;
-      return `<option value="${st}">${st} (${cnt} Qs)</option>`;
-    }).join('');
+    let validSubtopics = subtopics.filter(st => pool.filter(q => q.subtopic === st).length > 0);
+
+    stEl.innerHTML = `<option value="ALL">All Sub-Topics (${pool.length} Qs)</option>` + 
+      validSubtopics.map(st => {
+        const cnt = pool.filter(q => q.subtopic === st).length;
+        return `<option value="${st}">${st} (${cnt} Qs)</option>`;
+      }).join('');
   }
 
   function checkCustomTimerSelect(sId, wId) {
@@ -2575,12 +3047,11 @@
     const top = document.getElementById(mode === 'test' ? 'testTop' : 'pracTop')?.value || 'ALL';
     const subtop = document.getElementById(mode === 'test' ? 'testSubtop' : 'pracSubtop')?.value || 'ALL';
 
-    // 1. Category Filter if subject is ALL
+    // 1. Category & Subject Filter
     if (sub === 'ALL') {
-      const catSubs = (cat === 'indian') ? indianGsSubs : ((cat === 'cg') ? cgGsSubs : otherSubs);
-      pool = pool.filter(q => catSubs.includes(q.subject) || (cat === 'cg' && q.subject?.startsWith('CG ')));
+      pool = pool.filter(q => isQuestionInCategory(q, cat));
     } else {
-      pool = pool.filter(q => (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : q.subject === sub);
+      pool = pool.filter(q => isQuestionMatchingSubject(q, sub));
     }
 
     // 2. Era filter for History
@@ -2626,26 +3097,34 @@
   function startNcertEngine(mode) {
     if (typeof closePaletteModal === 'function') closePaletteModal();
     const p = mode === 'test' ? 'ncertTest' : 'ncertPrac';
-    const b = document.getElementById(p+'Book')?.value || 'NCERT New Syllabus';
-    const c = document.getElementById(p+'Class')?.value || 'Class 10th';
+    const b = document.getElementById(p+'Book')?.value;
+    const c = document.getElementById(p+'Class')?.value || 'ALL';
     const s = document.getElementById(p+'Sub')?.value || 'ALL';
     const ch = document.getElementById(p+'Chap')?.value || 'ALL';
 
-    let pool = [];
-    if (s === 'ALL') {
-      pool = questions.filter(q => ['Indian History', 'Indian Geography', 'Polity', 'Economy', 'General Science'].includes(q.subject));
-      if (pool.length < 20) {
-        pool = pickBalancedQuestionsForSection(['Indian History', 'Indian Geography', 'Polity', 'Economy', 'General Science'], 20);
-      }
-    } else {
-      pool = questions.filter(q => q.subject === s || q.subject?.includes(s));
-      if (pool.length < 20) {
-        pool = fillWithMockQuestions(pool, s, 20);
-      }
+    if (!b || b === 'NONE') {
+      alert('No questions with NCERT or SCERT tags are available in the database.');
+      return;
     }
 
-    if (pool.length > 25) {
-      pool = pool.slice(0, 25);
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => {
+      if (!isNcertOrScertQuestion(q)) return false;
+      if (getNcertQuestionBook(q) !== b) return false;
+      if (c !== 'ALL') {
+        const qc = getQuestionNcertClass(q);
+        if (qc && qc !== c) return false;
+      }
+      if (s !== 'ALL' && !isQuestionMatchingSubject(q, s)) return false;
+      if (ch !== 'ALL') {
+        const qch = getQuestionNcertChapter(q);
+        if (qch !== ch) return false;
+      }
+      return true;
+    });
+
+    if (!pool.length) {
+      alert('No questions with NCERT / SCERT tag match this exact selection in database.');
+      return;
     }
 
     activeEngineMode = mode;
@@ -2659,7 +3138,7 @@
       document.getElementById('testConfigWrapper').style.display = 'none';
       document.getElementById('test-player').style.display = 'block';
       if(document.getElementById('activeTestTitleText')) {
-        document.getElementById('activeTestTitleText').innerText = `${b} - ${c} (${s === 'ALL' ? 'All Subjects' : s})`;
+        document.getElementById('activeTestTitleText').innerText = `${b} - ${s === 'ALL' ? 'All Subjects' : s} ${ch !== 'ALL' ? '('+ch+')' : ''}`;
       }
       renderTestView();
     } else {
@@ -2678,18 +3157,17 @@
           t = document.getElementById(p+'Top')?.value || 'ALL', 
           st = document.getElementById(p+'Subtop')?.value || 'ALL';
 
-    let pool = questions.filter(q => 
-      (e === 'ALL' || q.exam?.toLowerCase().includes(e.toLowerCase())) && 
-      (y === 'ALL' || q.exam?.includes(y)) && 
-      (s === 'ALL' || q.subject === s) && 
+    let pool = (Array.isArray(questions) ? questions : []).filter(q => 
+      isQuestionMatchingExam(q, e) && 
+      isQuestionMatchingYear(q, y) && 
+      isQuestionMatchingSubject(q, s) && 
       (t === 'ALL' || q.topic === t) && 
       (st === 'ALL' || q.subtopic === st)
     );
 
-    // Guaranteed launch: If filtered pool has fewer than 15 questions, fill with smart mock questions so test ALWAYS starts
-    if (pool.length < 15) {
-      const fallbackSubject = (s && s !== 'ALL') ? s : 'Indian History';
-      pool = fillWithMockQuestions(pool, fallbackSubject, 20);
+    if (!pool.length) {
+      alert('No questions found in database matching this exact Exam criteria.');
+      return;
     }
 
     activeEngineMode = mode; 
@@ -3565,18 +4043,384 @@
     return str;
   }
 
-  function formatQuestionBody(q) {
-    if(q.type === 'ar') {
-      return `<div style="margin-bottom:8px; font-weight:600;">${q.arText || q.ar_text || 'Assertion & Reason:'}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">Assertion (A):</span><span class="ar-text">${q.assertion||q.Assertion||''}</span></div><div class="ar-item"><span class="ar-label">Reason (R):</span><span class="ar-text">${q.reason||q.Reason||''}</span></div></div>`;
+  // --- MATHJAX FORMULA & SCIENTIFIC SYMBOL RENDERER ---
+  function renderMathInElement(targetEl) {
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      try {
+        const el = targetEl || document.body;
+        window.MathJax.typesetPromise([el]).catch(err => {
+          console.warn('MathJax render warning:', err);
+        });
+      } catch(e) {
+        console.warn('MathJax exception:', e);
+      }
     }
-    if(q.type === 'statement') {
-      let stArr = q.statements;
+  }
+
+  // --- GOOGLE DRIVE DIRECT IMAGE CONVERTER & LIGHTBOX ---
+  function extractGoogleDriveFileId(url) {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    // Format 1: /file/d/FILE_ID
+    const m1 = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]{20,})/i);
+    if (m1) return m1[1];
+    // Format 2: id=FILE_ID or &id=FILE_ID or ?id=FILE_ID
+    const m2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]{20,})/i);
+    if (m2) return m2[1];
+    // Format 3: /d/FILE_ID (e.g. lh3.googleusercontent.com/d/FILE_ID)
+    const m3 = trimmed.match(/\/d\/([a-zA-Z0-9_-]{20,})/i);
+    if (m3) return m3[1];
+    // Format 4: Raw file ID if string is 25-50 characters of base64url
+    if (/^[a-zA-Z0-9_-]{25,50}$/.test(trimmed)) {
+      return trimmed;
+    }
+    return null;
+  }
+
+  function convertGoogleDriveToDirectImageUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    const trimmed = url.trim();
+    const fileId = extractGoogleDriveFileId(trimmed);
+    if (fileId) {
+      // Primary: Google Drive high-resolution thumbnail endpoint.
+      // Highly reliable, doesn't throw 403 on WebView cross-origin requests
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1200`;
+    }
+    return trimmed;
+  }
+
+  function handleImageFallback(imgElem) {
+    if (!imgElem) return;
+    const src = imgElem.src || '';
+    const fileId = extractGoogleDriveFileId(src);
+    if (!fileId) return;
+
+    if (src.includes('thumbnail')) {
+      // Step 2 fallback: Try lh3.googleusercontent.com
+      imgElem.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+    } else if (src.includes('lh3.googleusercontent.com')) {
+      // Step 3 fallback: Try direct uc export view
+      imgElem.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
+    } else {
+      // Final friendly fallback card: allow user to open Google Drive directly
+      const parent = imgElem.closest('.q-image-card');
+      if (parent) {
+        parent.innerHTML = `
+          <div style="padding:14px 18px; background:rgba(30,41,59,0.92); border:1px dashed #38bdf8; border-radius:10px; text-align:center; margin:8px 0;">
+            <div style="font-size:1.4rem; margin-bottom:4px;">📊</div>
+            <div style="font-size:0.86rem; color:#f1f5f9; font-weight:700; margin-bottom:4px;">चित्र / Diagram (Google Drive)</div>
+            <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:10px;">यदि चित्र लोड न हो, तो नीचे क्लिक करके देखें:</div>
+            <a href="https://drive.google.com/file/d/${fileId}/view" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; padding:7px 16px; font-weight:700;">
+              <span>🔍</span> Google Drive पर चित्र देखें / Open Diagram
+            </a>
+          </div>`;
+      }
+    }
+  }
+
+  function openImageLightbox(src) {
+    if (!src) return;
+    const modal = document.getElementById('imageLightboxModal');
+    const img = document.getElementById('imageLightboxImg');
+    if (modal && img) {
+      img.src = src;
+      modal.style.display = 'flex';
+    }
+  }
+
+  function closeImageLightbox() {
+    const modal = document.getElementById('imageLightboxModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function extractImagesFromQuestion(q) {
+    if (!q) return [];
+    const list = [];
+
+    function addCandidate(val) {
+      if (!val) return;
+      if (typeof val === 'string') {
+        const trimmed = val.trim();
+        if (!trimmed) return;
+        // Check for Google Drive URL or File ID
+        if (/drive\.google\.com|docs\.google\.com|lh3\.googleusercontent\.com/i.test(trimmed) ||
+            /^[a-zA-Z0-9_-]{25,50}$/.test(trimmed)) {
+          list.push(convertGoogleDriveToDirectImageUrl(trimmed));
+          return;
+        }
+        // Standard image URL
+        if (/^https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp)(?:\?[^\s"'<>]*)?$/i.test(trimmed)) {
+          list.push(trimmed);
+          return;
+        }
+        // Common image hosting domains
+        if (/^https?:\/\/(?:i\.imgur\.com|postimg\.cc|cloudinary\.com|res\.cloudinary\.com|firebasestorage\.googleapis\.com)/i.test(trimmed)) {
+          list.push(trimmed);
+          return;
+        }
+      } else if (Array.isArray(val)) {
+        val.forEach(addCandidate);
+      } else if (typeof val === 'object') {
+        addCandidate(val.url || val.src || val.link || val.imageUrl || val.directUrl || val.thumbnail);
+      }
+    }
+
+    // 1. Scan all object properties on q matching image / diagram / drive / chart keywords
+    for (const k of Object.keys(q)) {
+      const lk = k.toLowerCase();
+      if (lk.includes('img') || lk.includes('image') || lk.includes('photo') || 
+          lk.includes('pic') || lk.includes('diagram') || lk.includes('figure') || 
+          lk.includes('fig') || lk.includes('chart') || lk.includes('graph') || 
+          lk.includes('drive') || lk.includes('media') || lk.includes('attachment') ||
+          lk === 'url' || lk === 'link') {
+        addCandidate(q[k]);
+      }
+    }
+
+    // 2. Scan question text bodies (English, Hindi, statements, assertion, etc.)
+    const textBlob = `${q.text || ''} ${q.question || ''} ${q.text_hi || ''} ${q.text_en || ''} ${q.textHi || ''} ${q.textEn || ''} ${q.question_hi || ''} ${q.question_en || ''} ${q.assertion || ''} ${q.reason || ''} ${q.statement || ''} ${q.statements || ''}`;
+    
+    // Extract drive links in text
+    const driveMatches = textBlob.match(/(?:https?:\/\/)?drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=|uc\?export=view&id=|thumbnail\?id=)[a-zA-Z0-9_-]+/gi);
+    if (driveMatches) {
+      driveMatches.forEach(u => list.push(convertGoogleDriveToDirectImageUrl(u)));
+    }
+
+    // Extract standard image URLs in text
+    const imgMatches = textBlob.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp)(?:\?[^\s"'<>]*)?/gi);
+    if (imgMatches) {
+      imgMatches.forEach(u => list.push(u));
+    }
+
+    return Array.from(new Set(list.filter(Boolean)));
+  }
+
+  function formatOptionContent(rawOpt) {
+    if (rawOpt === null || rawOpt === undefined) return '';
+    if (typeof rawOpt === 'object' && rawOpt.text !== undefined) {
+      let t = formatRichText(rawOpt.text || '');
+      let img = rawOpt.image || rawOpt.img || rawOpt.imageUrl || rawOpt.imageLink || rawOpt.driveLink;
+      if (img) {
+        const direct = convertGoogleDriveToDirectImageUrl(img);
+        return `<div>${t}</div><img src="${direct}" class="opt-img-elem" referrerpolicy="no-referrer" onclick="event.stopPropagation(); openImageLightbox('${direct}')" alt="Option Image" loading="lazy" onerror="handleImageFallback(this)" />`;
+      }
+      return t;
+    }
+    let str = String(rawOpt).trim();
+    const driveFileId = extractGoogleDriveFileId(str);
+    if (driveFileId) {
+      const direct = `https://drive.google.com/thumbnail?id=${driveFileId}&sz=w1200`;
+      const cleanText = str.replace(/(?:https?:\/\/)?drive\.google\.com\/[^\s"'<>]+/gi, '').replace(driveFileId, '').trim();
+      return `${cleanText ? `<div>${formatRichText(cleanText)}</div>` : ''}<img src="${direct}" class="opt-img-elem" referrerpolicy="no-referrer" onclick="event.stopPropagation(); openImageLightbox('${direct}')" alt="Option Image" loading="lazy" onerror="handleImageFallback(this)" />`;
+    }
+    const imgExtMatch = str.match(/https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg)(?:\?[^\s"'<>]*)?/i);
+    if (imgExtMatch) {
+      const direct = imgExtMatch[0];
+      const cleanText = str.replace(direct, '').trim();
+      return `${cleanText ? `<div>${formatRichText(cleanText)}</div>` : ''}<img src="${direct}" class="opt-img-elem" referrerpolicy="no-referrer" onclick="event.stopPropagation(); openImageLightbox('${direct}')" alt="Option Image" loading="lazy" />`;
+    }
+    return formatRichText(str);
+  }
+
+  // --- BILINGUAL QUESTION DETECTOR & CONTENT RETRIEVER ---
+  window.activeQuestionLang = window.activeQuestionLang || 'hi';
+
+  function isBilingualQuestion(q) {
+    if (!q) return false;
+
+    // 1. Explicit boolean or truthy flags (handles true, 'true', 1, '1', 'yes')
+    const biFlag = q.bilingual !== undefined ? q.bilingual : (q.isBilingual !== undefined ? q.isBilingual : (q.is_bilingual !== undefined ? q.is_bilingual : null));
+    if (biFlag === true || biFlag === 'true' || biFlag === 1 || biFlag === '1' || biFlag === 'yes') return true;
+
+    const langFlag = String(q.lang || q.language || '').toLowerCase().trim();
+    if (langFlag === 'bilingual' || langFlag === 'both' || langFlag === 'hi_en' || langFlag === 'en_hi') return true;
+
+    // 2. Dedicated Hindi content exists
+    const hasHi = Boolean(
+      q.question_hi || q.text_hi || q.textHi || q.questionHi || q.questionHindi || 
+      q.hi || q.hindi || q.hindiText || q.qText_hi || q.qTextHi ||
+      q.options_hi || q.optionsHindi || q.optionsHi ||
+      q.optionA_hi || q.optionAHi || q.optA_hi ||
+      q.expl_hi || q.explanation_hi || q.explanationHi || q.explanationHindi
+    );
+
+    // 3. Dedicated English content exists
+    const hasEn = Boolean(
+      q.question_en || q.text_en || q.textEn || q.questionEn || q.questionEnglish || 
+      q.en || q.english || q.englishText || q.qText_en || q.qTextEn ||
+      q.options_en || q.optionsEnglish || q.optionsEn ||
+      q.optionA_en || q.optionAEn || q.optA_en ||
+      q.expl_en || q.explanation_en || q.explanationEn || q.explanationEnglish
+    );
+
+    const hasDefault = Boolean(q.text || q.question || q.statement || q.assertion);
+
+    // If Hindi field exists AND (English field exists OR default text exists) -> BILINGUAL!
+    if (hasHi && (hasEn || hasDefault)) return true;
+    if (hasEn && (hasHi || hasDefault)) return true;
+
+    // 4. Delimiters in text like [Hindi] ... [English] or (EN) / (HI)
+    const raw = String(q.text || q.question || '');
+    if (/(?:\[\s*english\s*\]|\[\s*en\s*\]|english\s*:|\(en\))/i.test(raw) && 
+        /(?:\[\s*hindi\s*\]|\[\s*hi\s*\]|hindi\s*:|हिन्दी\s*:|\(hi\))/i.test(raw)) {
+      return true;
+    }
+
+    // 5. Significant Devanagari AND Latin script in the same question text (e.g. dual language text)
+    const devanagariCount = (raw.match(/[\u0900-\u097F]/g) || []).length;
+    const latinCount = (raw.match(/[a-zA-Z]/g) || []).length;
+    if (devanagariCount >= 12 && latinCount >= 12) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function getBilingualQuestionContent(q, lang) {
+    if (!q) return { text: '', options: {}, expl: '' };
+    if (!isBilingualQuestion(q)) {
+      return {
+        text: q.text || q.question || q.assertion || '',
+        options: (typeof q.options === 'object' && q.options !== null) ? q.options : { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD },
+        expl: q.expl || q.explanation || ''
+      };
+    }
+
+    let text = '';
+    let options = null;
+    let expl = '';
+
+    if (lang === 'hi') {
+      text = q.question_hi || q.text_hi || q.textHi || q.questionHi || q.questionHindi || q.hi || q.hindi || q.hindiText || q.qText_hi || q.qTextHi;
+      options = q.options_hi || q.optionsHindi || q.optionsHi;
+      expl = q.expl_hi || q.explanation_hi || q.explanationHi || q.explanationHindi;
+    } else {
+      text = q.question_en || q.text_en || q.textEn || q.questionEn || q.questionEnglish || q.en || q.english || q.englishText || q.qText_en || q.qTextEn;
+      options = q.options_en || q.optionsEnglish || q.optionsEn;
+      expl = q.expl_en || q.explanation_en || q.explanationEn || q.explanationEnglish;
+    }
+
+    // Individual options optionA_hi / optionA_en etc:
+    if (!options) {
+      if (lang === 'hi' && (q.optionA_hi || q.optionAHi || q.optA_hi)) {
+        options = {
+          A: q.optionA_hi || q.optionAHi || q.optA_hi || q.optionA,
+          B: q.optionB_hi || q.optionBHi || q.optB_hi || q.optionB,
+          C: q.optionC_hi || q.optionCHi || q.optC_hi || q.optionC,
+          D: q.optionD_hi || q.optionDHi || q.optD_hi || q.optionD
+        };
+      } else if (lang === 'en' && (q.optionA_en || q.optionAEn || q.optA_en)) {
+        options = {
+          A: q.optionA_en || q.optionAEn || q.optA_en || q.optionA,
+          B: q.optionB_en || q.optionBEn || q.optB_en || q.optionB,
+          C: q.optionC_en || q.optionCEn || q.optC_en || q.optionC,
+          D: q.optionD_en || q.optionDEn || q.optD_en || q.optionD
+        };
+      }
+    }
+
+    if (!text) {
+      const raw = String(q.text || q.question || '');
+      if (/(?:\[\s*hindi\s*\]|\[\s*hi\s*\]|hindi\s*:|हिन्दी\s*:)/i.test(raw) ||
+          /(?:\[\s*english\s*\]|\[\s*en\s*\]|english\s*:)/i.test(raw)) {
+        if (lang === 'hi') {
+          const m = raw.match(/(?:\[\s*hindi\s*\]|\[\s*hi\s*\]|hindi\s*:|हिन्दी\s*:)([\s\S]*?)(?:\[\s*english\s*\]|\[\s*en\s*\]|english\s*:|$)/i);
+          if (m && m[1] && m[1].trim()) text = m[1].trim();
+          else text = raw;
+        } else {
+          const m = raw.match(/(?:\[\s*english\s*\]|\[\s*en\s*\]|english\s*:)([\s\S]*?)(?:\[\s*hindi\s*\]|\[\s*hi\s*\]|hindi\s*:|हिन्दी\s*:|$)/i);
+          if (m && m[1] && m[1].trim()) text = m[1].trim();
+          else text = raw;
+        }
+      } else if (raw.includes(' / ')) {
+        const parts = raw.split(' / ');
+        const firstIsDev = /[\u0900-\u097F]/.test(parts[0]);
+        if (lang === 'hi') {
+          text = firstIsDev ? parts[0].trim() : (parts[1] || parts[0]).trim();
+        } else {
+          text = firstIsDev ? (parts[1] || parts[0]).trim() : parts[0].trim();
+        }
+      } else {
+        text = raw;
+      }
+    }
+
+    if (!options) {
+      options = (typeof q.options === 'object' && q.options !== null) ? q.options : { A: q.optionA, B: q.optionB, C: q.optionC, D: q.optionD };
+    }
+    if (!expl) {
+      expl = q.expl || q.explanation || '';
+    }
+
+    return { text, options, expl };
+  }
+
+  function updateBilingualToggleBar(prefix, q) {
+    const bar = document.getElementById(prefix + '-bilingual-bar');
+    if (!bar) return;
+    if (!isBilingualQuestion(q)) {
+      bar.style.display = 'none';
+      return;
+    }
+    bar.style.display = 'flex';
+    const curLang = window.activeQuestionLang || 'hi';
+    bar.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span class="bi-title" style="font-size:0.84rem; font-weight:700; color:#38bdf8; display:flex; align-items:center; gap:5px;">
+          <span>🌐</span> द्विभाषी / Bilingual:
+        </span>
+      </div>
+      <div class="bi-pill-group" style="display:inline-flex; background:rgba(15,23,42,0.9); border-radius:8px; padding:3px; border:1px solid rgba(56,189,248,0.35);">
+        <button type="button" class="bi-pill-btn ${curLang === 'hi' ? 'active' : ''}" onclick="switchActiveQuestionLanguage('hi')" style="padding:5px 14px; font-weight:700; font-size:0.84rem; border-radius:6px; cursor:pointer;">हिन्दी</button>
+        <button type="button" class="bi-pill-btn ${curLang === 'en' ? 'active' : ''}" onclick="switchActiveQuestionLanguage('en')" style="padding:5px 14px; font-weight:700; font-size:0.84rem; border-radius:6px; cursor:pointer;">English</button>
+      </div>
+    `;
+  }
+
+  function switchActiveQuestionLanguage(lang) {
+    window.activeQuestionLang = lang;
+    if (document.getElementById('test-player')?.style.display === 'block') {
+      renderTestView();
+    } else if (document.getElementById('prac-player')?.style.display === 'block') {
+      renderPracticeView();
+    } else if (document.getElementById('revision-quiz-player')?.style.display === 'block') {
+      if (typeof renderRevisionQuizView === 'function') renderRevisionQuizView();
+    }
+  }
+
+  function formatQuestionBody(q, lang) {
+    if (!q) return '';
+    const currentLang = lang || window.activeQuestionLang || 'hi';
+    const qContent = getBilingualQuestionContent(q, currentLang);
+    const qText = qContent.text || q.text || q.question || q.assertion || '';
+
+    // Extract diagram/figure images
+    const images = extractImagesFromQuestion(q);
+    let imgHtml = '';
+    if (images && images.length > 0) {
+      imgHtml = images.map(imgUrl => `
+        <div class="q-image-card" onclick="openImageLightbox('${imgUrl}')" title="Tap to enlarge figure">
+          <img src="${imgUrl}" alt="Question Figure / Diagram" class="q-img-elem" referrerpolicy="no-referrer" loading="lazy" onerror="handleImageFallback(this)" />
+          <div class="q-img-badge"><span>🔍</span> चित्र बड़ा करने के लिए टैप करें / Tap to enlarge</div>
+        </div>
+      `).join('');
+    }
+
+    let bodyHtml = '';
+    if(q.type === 'ar') {
+      const arText = (currentLang === 'en') ? (q.arText_en || q.arText || 'Assertion & Reason:') : (q.arText_hi || q.arText || 'अभिकथन एवं कारण (Assertion & Reason):');
+      const aText = (currentLang === 'en') ? (q.assertion_en || q.assertion || '') : (q.assertion_hi || q.assertion || '');
+      const rText = (currentLang === 'en') ? (q.reason_en || q.reason || '') : (q.reason_hi || q.reason || '');
+      bodyHtml = `<div style="margin-bottom:8px; font-weight:600;">${formatRichText(arText)}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">Assertion (A):</span><span class="ar-text">${formatRichText(aText)}</span></div><div class="ar-item"><span class="ar-label">Reason (R):</span><span class="ar-text">${formatRichText(rText)}</span></div></div>`;
+    } else if(q.type === 'statement') {
+      let stArr = (currentLang === 'en') ? (q.statements_en || q.statements) : (q.statements_hi || q.statements);
       if(typeof stArr === 'string') { try { stArr = JSON.parse(stArr); } catch(e){} }
-      if(!Array.isArray(stArr) && q.text) stArr = q.text.split('\n').filter(l => l.trim());
-      return `<div style="margin-bottom:10px; font-weight:600;">${q.stIntro || 'Consider the following statements:'}</div>` +
+      if(!Array.isArray(stArr) && qText) stArr = qText.split('\n').filter(l => l.trim());
+      const stIntro = (currentLang === 'en') ? (q.stIntro_en || q.stIntro || 'Consider the following statements:') : (q.stIntro_hi || q.stIntro || 'निम्नलिखित कथनों पर विचार कीजिए:');
+      const stConclusion = (currentLang === 'en') ? (q.stConclusion_en || q.stConclusion || 'Which of the statements given above is/are correct?') : (q.stConclusion_hi || q.stConclusion || 'उपर्युक्त कथनों में से कौन-सा/से सही है/हैं?');
+      bodyHtml = `<div style="margin-bottom:10px; font-weight:600;">${formatRichText(stIntro)}</div>` +
         (Array.isArray(stArr)?stArr:[]).map((st, i) => {
           let sText = (st || '').toString().trim();
-          // Detect if statement already starts with an index/prefix like 1., A., i., (1), (A), etc.
           let prefix = '';
           let body = sText;
           const match = sText.match(/^([A-Za-z0-9ivxlcdmIVXLCDM]+[\.\)\:\-]\s*|\([A-Za-z0-9ivxlcdmIVXLCDM]+\)\s*)/);
@@ -3586,24 +4430,29 @@
           } else {
             prefix = (i + 1) + '.';
           }
-          return `<div class="statement-preview-item"><span class="st-num">${prefix}</span><span>${body}</span></div>`;
+          return `<div class="statement-preview-item"><span class="st-num">${prefix}</span><span>${formatRichText(body)}</span></div>`;
         }).join('') +
-        `<div style="margin-top:8px; font-weight:600; color:#93c5fd;">${q.stConclusion || 'Which of the statements given above is/are correct?'}</div>`;
-    }
-    if(q.type === 'match') {
-      let rows = q.matchRows;
+        `<div style="margin-top:8px; font-weight:600; color:#93c5fd;">${formatRichText(stConclusion)}</div>`;
+    } else if(q.type === 'match') {
+      let rows = (currentLang === 'en') ? (q.matchRows_en || q.matchRows) : (q.matchRows_hi || q.matchRows);
       if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
-      return `<div style="margin-bottom:8px; font-weight:600;">${q.text || 'Match the following lists:'}</div><div class="match-table-wrapper"><table class="match-table"><thead><tr><th>#</th><th>${q.matchHead1||'List I'}</th><th>Seq</th><th>${q.matchHead2||'List II'}</th></tr></thead><tbody>` +
+      const matchIntro = (currentLang === 'en') ? (q.text_en || q.text || 'Match the following lists:') : (q.text_hi || q.text || 'सुमेलित कीजिए:');
+      bodyHtml = `<div style="margin-bottom:8px; font-weight:600;">${formatRichText(matchIntro)}</div><div class="match-table-wrapper"><table class="match-table"><thead><tr><th>#</th><th>${q.matchHead1||'List I'}</th><th>Seq</th><th>${q.matchHead2||'List II'}</th></tr></thead><tbody>` +
         (Array.isArray(rows)?rows:[]).map(r => {
-          // Clean double brackets like ((i)) into clean single brackets (i)
           let c3Raw = (r.c3 || '').toString().trim();
           let c3Clean = c3Raw.replace(/^\(+|\)+$/g, '').trim();
           let c3Formatted = c3Clean ? `(${c3Clean})` : '';
-          return `<tr><td><strong>${r.c1||''}</strong></td><td>${r.c2||''}</td><td><strong>${c3Formatted}</strong></td><td>${r.c4||''}</td></tr>`;
+          return `<tr><td><strong>${r.c1||''}</strong></td><td>${formatRichText(r.c2||'')}</td><td><strong>${c3Formatted}</strong></td><td>${formatRichText(r.c4||'')}</td></tr>`;
         }).join('') +
         `</tbody></table></div>`;
+    } else {
+      let cleanText = qText.replace(/(?:https?:\/\/)?drive\.google\.com\/[^\s"'<>]+/gi, '')
+                           .replace(/https?:\/\/[^\s"'<>]+\.(?:png|jpe?g|webp|gif|svg|bmp)(?:\?[^\s"'<>]*)?/gi, '')
+                           .trim();
+      bodyHtml = `<div style="line-height:1.65;">${formatRichText(cleanText || qText)}</div>`;
     }
-    return q.text || q.assertion || '';
+
+    return bodyHtml + (imgHtml ? `<div style="margin-top:10px;">${imgHtml}</div>` : '');
   }
 
   function updateTestSectionTabsUI() {
@@ -3661,21 +4510,28 @@
     const starBtn = document.getElementById('t-star-btn');
     starBtn.style.background = isSaved ? '#facc15' : 'rgba(30,41,59,0.85)';
     starBtn.style.color = isSaved ? '#000' : '#fff';
-    document.getElementById('t-body').innerHTML = formatQuestionBody(q);
 
-    let opts = q.options;
+    // Show bilingual toggle button if bilingual content exists
+    updateBilingualToggleBar('t', q);
+
+    const curLang = window.activeQuestionLang || 'hi';
+    document.getElementById('t-body').innerHTML = formatQuestionBody(q, curLang);
+
+    const qContent = getBilingualQuestionContent(q, curLang);
+    let opts = qContent.options;
     if(typeof opts === 'string') { try { opts = JSON.parse(opts); } catch(e){} }
     if(!opts || typeof opts !== 'object') opts = { A: q.optionA||'', B: q.optionB||'', C: q.optionC||'', D: q.optionD||'' };
 
     document.getElementById('t-opts').innerHTML = ['A','B','C','D'].map(k => `
       <div class="test-opt ${userResponses[currentQIdx] === k ? 'selected' : ''}" onclick="selectTestOption('${k}')">
         <div class="opt-radio-circle"></div>
-        <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k]||''}</span></div>
+        <div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${formatOptionContent(opts[k])}</span></div>
       </div>
     `).join('');
     
     updateTestSectionTabsUI();
     renderExamPalette();
+    renderMathInElement(document.getElementById('test-player'));
   }
 
   function selectTestOption(k) {
@@ -3754,16 +4610,23 @@
     document.getElementById('p-counter').innerText = `Practice Q ${currentQIdx + 1} of ${activeQuestions.length}`;
     document.getElementById('p-exam-badge').innerText = q.exam || 'PYQ';
     document.getElementById('p-hier-badge').innerText = `${q.subject || 'GS'} > ${q.topic || 'General'}`;
-    document.getElementById('p-body').innerHTML = formatQuestionBody(q);
+
+    // Show bilingual toggle button if bilingual content exists
+    updateBilingualToggleBar('p', q);
+
+    const curLang = window.activeQuestionLang || 'hi';
+    document.getElementById('p-body').innerHTML = formatQuestionBody(q, curLang);
     const chosen = userResponses[currentQIdx];
-    let opts = q.options;
+
+    const qContent = getBilingualQuestionContent(q, curLang);
+    let opts = qContent.options;
     if(typeof opts === 'string') { try { opts = JSON.parse(opts); } catch(e){} }
     if(!opts || typeof opts !== 'object') opts = { A: q.optionA||'', B: q.optionB||'', C: q.optionC||'', D: q.optionD||'' };
 
     document.getElementById('p-opts').innerHTML = ['A','B','C','D'].map(k => {
       let cls = '';
       if(chosen) { if(k === q.ans) cls = 'opt-correct'; else if(k === chosen) cls = 'opt-wrong'; }
-      return `<div class="test-opt ${cls}" onclick="handlePracticeClick('${k}')"><div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k]||''}</span></div></div>`;
+      return `<div class="test-opt ${cls}" onclick="handlePracticeClick('${k}')"><div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${formatOptionContent(opts[k])}</span></div></div>`;
     }).join('');
 
     const expl = document.getElementById('p-expl');
@@ -3778,11 +4641,12 @@
       expl.style.borderRadius = '10px';
       expl.style.padding = '16px';
       expl.style.marginTop = '16px';
-      const cleanExpl = formatRichText(q.expl || 'Answer verified from official answer key.');
+      const cleanExpl = formatRichText(qContent.expl || q.expl || 'Answer verified from official answer key.');
       expl.innerHTML = `<div style="font-weight:700; color:#38bdf8; margin-bottom:8px; display:flex; align-items:center; gap:6px;">💡 Detailed Explanation / विस्तृत व्याख्या:</div><div style="color:#f1f5f9;">${cleanExpl}</div>`;
     } else {
       expl.style.display = 'none';
     }
+    renderMathInElement(document.getElementById('prac-player'));
   }
 
   function handlePracticeClick(k) {
@@ -4021,9 +4885,10 @@
           <span style="font-size:0.82rem; font-weight:700; color:${item.userAns === item.q.ans ? 'var(--success)' : 'var(--danger)'};">Your Answer: ${item.userAns || 'Skipped'} | Correct: (${item.q.ans})</span>
         </div>
         <div style="margin-bottom:10px; font-size:0.96rem;">${formatQuestionBody(item.q)}</div>
-        <div style="font-size:0.88rem; color:var(--muted); background:rgba(7,10,18,0.7); padding:12px; border-radius:10px; border-left:3px solid var(--primary);"><strong style="color:#38bdf8;">Explanation:</strong> ${item.q.expl || 'Official solution verified.'}</div>
+        <div style="font-size:0.88rem; color:var(--muted); background:rgba(7,10,18,0.7); padding:12px; border-radius:10px; border-left:3px solid var(--primary);"><strong style="color:#38bdf8;">Explanation:</strong> ${formatRichText(item.q.expl || 'Official solution verified.')}</div>
       </div>
     `).join('');
+    renderMathInElement(document.getElementById('review-questions-list'));
   }
 
   function switchResultsSubTab(s) {
@@ -4235,19 +5100,33 @@
     const q = revQuizQuestions[revQuizIdx];
     document.getElementById('rq-counter').innerText = `Revision Q ${revQuizIdx + 1} of ${revQuizQuestions.length}`;
     document.getElementById('rq-hier-badge').innerText = `${q.subject || 'GS'} > ${q.topic || ''}`;
-    document.getElementById('rq-body').innerHTML = formatQuestionBody(q);
+
+    // Show bilingual toggle button if bilingual content exists
+    updateBilingualToggleBar('rq', q);
+
+    const curLang = window.activeQuestionLang || 'hi';
+    document.getElementById('rq-body').innerHTML = formatQuestionBody(q, curLang);
     const chosen = revQuizResponses[revQuizIdx];
-    let opts = q.options;
+
+    const qContent = getBilingualQuestionContent(q, curLang);
+    let opts = qContent.options;
     if(typeof opts === 'string') { try { opts = JSON.parse(opts); } catch(e){} }
     if(!opts || typeof opts !== 'object') opts = { A: q.optionA||'', B: q.optionB||'', C: q.optionC||'', D: q.optionD||'' };
 
     document.getElementById('rq-opts').innerHTML = ['A','B','C','D'].map(k => {
       let cls = '';
       if(chosen) { if(k === q.ans) cls = 'opt-correct'; else if(k === chosen) cls = 'opt-wrong'; }
-      return `<div class="test-opt ${cls}" onclick="handleRevisionQuizClick('${k}')"><div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${opts[k]||''}</span></div></div>`;
+      return `<div class="test-opt ${cls}" onclick="handleRevisionQuizClick('${k}')"><div class="test-opt-label"><span class="opt-letter">(${k})</span><span class="opt-text">${formatOptionContent(opts[k])}</span></div></div>`;
     }).join('');
     const expl = document.getElementById('rq-expl');
-    if(chosen) { expl.style.display = 'block'; expl.innerHTML = `<strong>Explanation:</strong> ${q.expl || 'Answer verified.'}`; } else expl.style.display = 'none';
+    if(chosen) {
+      expl.style.display = 'block';
+      const cleanExpl = formatRichText(qContent.expl || q.expl || 'Answer verified.');
+      expl.innerHTML = `<strong>Explanation:</strong> ${cleanExpl}`;
+    } else {
+      expl.style.display = 'none';
+    }
+    renderMathInElement(document.getElementById('revision-quiz-player'));
   }
 
   function handleRevisionQuizClick(k) { if(revQuizResponses[revQuizIdx]) return; revQuizResponses[revQuizIdx] = k; renderRevisionQuizView(); }
@@ -4374,6 +5253,7 @@
         }
       }
       syncDynamicSubjects();
+      refreshAllDropdowns();
       computeOverallUserProgress();
     } catch(e) {
       console.log("Cache load active:", e);
@@ -4400,6 +5280,7 @@
             questions = Array.from(qMap.values());
             localStorage.setItem('cg_cached_questions', JSON.stringify(questions));
             syncDynamicSubjects();
+            refreshAllDropdowns();
             console.log("Background synced live new questions without re-reading database!");
           }
         }, err => console.log("Realtime listener note:", err));
@@ -4533,6 +5414,7 @@
     `).join('') || `<tr><td colspan="4" style="text-align:center; padding:18px; color:var(--muted);">No users on leaderboard yet.</td></tr>`;
   }
   function handleAndroidBack() {
+    if(document.getElementById('imageLightboxModal')?.style.display === 'flex') { closeImageLightbox(); return true; }
     if(document.getElementById('palettePopupModal')?.style.display === 'block') { closePaletteModal(); return true; }
     if(document.getElementById('test-player')?.style.display === 'block') { exitTestModeConfirm(); return true; }
     if(document.getElementById('prac-player')?.style.display === 'block') { exitPracMode(); return true; }
@@ -4583,13 +5465,13 @@
     // This completely prevents showing any grey box, video outline, or player controls
     const onVideoReady = () => {
       overlay.style.display = 'flex';
+      v.style.opacity = '1';
       requestAnimationFrame(() => {
         overlay.style.opacity = '1';
       });
     };
 
     v.addEventListener('playing', onVideoReady, { once: true });
-    v.addEventListener('canplay', onVideoReady, { once: true });
     v.addEventListener('ended', dismissSplashVideo, { once: true });
     v.addEventListener('error', dismissSplashVideo, { once: true });
 
@@ -4674,6 +5556,76 @@
     box.style.display = 'block';
   }
 
+  // --- HELPER: RENDER QUESTION OPTIONS IN ANALYSIS ACCORDION ---
+  function renderAnalysisQuestionOptions(q) {
+    let opts = q.options;
+    if (!opts) return '';
+    if (typeof opts === 'string') {
+      try { opts = JSON.parse(opts); } catch(e){}
+    }
+    if (!opts || typeof opts !== 'object') return '';
+
+    const keys = ['A', 'B', 'C', 'D', 'E'].filter(k => opts[k] !== undefined && opts[k] !== null && String(opts[k]).trim() !== '');
+    if (!keys.length) return '';
+
+    return `
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px; margin:10px 0 6px 0;">
+        ${keys.map(k => {
+          const isAns = (String(q.ans || '').trim().toUpperCase() === k);
+          const style = isAns 
+            ? 'background:rgba(16,185,129,0.18); border:1.5px solid #10b981; color:#a7f3d0; font-weight:700;' 
+            : 'background:rgba(15,23,42,0.65); border:1px solid rgba(148,163,184,0.22); color:#cbd5e1;';
+          return `
+            <div style="padding:7px 12px; border-radius:8px; font-size:0.83rem; display:flex; gap:8px; align-items:flex-start; ${style}">
+              <span style="font-weight:800; min-width:18px;">${k}.</span>
+              <span style="flex:1;">${formatRichText(String(opts[k]))}</span>
+              ${isAns ? '<span style="color:#34d399; font-weight:800; margin-left:4px;">✓</span>' : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  // --- TOGGLE TOPIC QUESTIONS ACCORDION IN ANALYSIS ---
+  function toggleAnalysisTopicQuestions(idx, forceOpen) {
+    const row = document.getElementById(`analysisTopicQuestionsRow_${idx}`);
+    const caret = document.getElementById(`topicCaret_${idx}`);
+    const btn = document.getElementById(`btnToggleTopicQs_${idx}`);
+    if (!row) return;
+
+    const isCurrentlyOpen = row.style.display !== 'none';
+    const shouldOpen = (forceOpen !== undefined) ? forceOpen : !isCurrentlyOpen;
+
+    row.style.display = shouldOpen ? 'table-row' : 'none';
+    if (caret) caret.innerText = shouldOpen ? '▲' : '▼';
+    if (btn) {
+      btn.style.background = shouldOpen ? 'rgba(56,189,248,0.25)' : 'rgba(56,189,248,0.12)';
+      btn.style.borderColor = shouldOpen ? '#38bdf8' : 'rgba(56,189,248,0.4)';
+    }
+  }
+
+  // --- PRACTICE SPECIFIC TOPIC QUESTIONS DIRECTLY FROM ANALYSIS ---
+  function practiceSpecificTopic(sub, top) {
+    sub = decodeURIComponent(sub);
+    top = decodeURIComponent(top);
+    navigate('tab-practice');
+    setTimeout(() => {
+      switchPracMode('topic');
+      const sEl = document.getElementById('pracSub');
+      if (sEl) {
+        sEl.value = sub;
+        cascadeTopics('pracSub', 'pracTop', 'pracSubtop');
+        const tEl = document.getElementById('pracTop');
+        if (tEl) {
+          tEl.value = top;
+          cascadeSubtopics('pracSub', 'pracTop', 'pracSubtop');
+        }
+      }
+    }, 150);
+  }
+
+  // --- SEARCH SUGGESTION SELECTION (DEEP JUMP & AUTO-EXPAND TOPIC QUESTIONS) ---
   function selectSearchSuggestion(type, val) {
     const box = document.getElementById('searchSuggestionsBox');
     if (box) box.style.display = 'none';
@@ -4682,22 +5634,42 @@
     
     setTimeout(() => {
       populateAnalysisDropdowns();
+      const pool = Array.isArray(questions) ? questions : [];
+
       if (type === 'exam') {
         const sel = document.getElementById('analysisExamSelect');
         if (sel) sel.value = val;
+        const sSel = document.getElementById('analysisSubjectSelect');
+        if (sSel) sSel.value = 'ALL';
+        runAnalysisForSelectedExam();
       } else if (type === 'subject') {
         const sel = document.getElementById('analysisSubjectSelect');
         if (sel) sel.value = val;
+        const eSel = document.getElementById('analysisExamSelect');
+        if (eSel) eSel.value = 'ALL';
+        runAnalysisForSelectedExam();
       } else if (type === 'topic') {
-        const pool = Array.isArray(questions) ? questions : [];
-        const found = pool.find(item => item.topic === val);
+        const found = pool.find(item => item.topic && item.topic.toLowerCase() === val.toLowerCase());
         if (found) {
           const sSel = document.getElementById('analysisSubjectSelect');
-          if (sSel) sSel.value = found.subject;
+          if (sSel) sSel.value = found.subject || 'ALL';
+          const eSel = document.getElementById('analysisExamSelect');
+          if (eSel) eSel.value = 'ALL';
+        }
+        runAnalysisForSelectedExam(val);
+      } else if (type === 'question') {
+        const found = pool.find(item => String(item.id) === String(val));
+        if (found) {
+          const sSel = document.getElementById('analysisSubjectSelect');
+          if (sSel) sSel.value = found.subject || 'ALL';
+          const eSel = document.getElementById('analysisExamSelect');
+          if (eSel) eSel.value = 'ALL';
+          runAnalysisForSelectedExam(found.topic, found.id);
+        } else {
+          runAnalysisForSelectedExam();
         }
       }
-      runAnalysisForSelectedExam();
-    }, 100);
+    }, 120);
   }
 
   function executeDashboardSearch() {
@@ -4710,8 +5682,15 @@
     setTimeout(() => {
       populateAnalysisDropdowns();
       if (val) {
-        // Try matching exam or subject directly
         const pool = Array.isArray(questions) ? questions : [];
+        const matchTop = pool.find(item => item.topic && item.topic.toLowerCase().includes(val.toLowerCase()));
+        if (matchTop) {
+          const sSel = document.getElementById('analysisSubjectSelect');
+          if (sSel) sSel.value = matchTop.subject || 'ALL';
+          runAnalysisForSelectedExam(matchTop.topic);
+          return;
+        }
+
         const matchEx = pool.find(item => item.exam && item.exam.toLowerCase().includes(val.toLowerCase()));
         if (matchEx) {
           const eSel = document.getElementById('analysisExamSelect');
@@ -4719,7 +5698,7 @@
         }
       }
       runAnalysisForSelectedExam();
-    }, 100);
+    }, 120);
   }
 
   // ============================================================================
@@ -4746,7 +5725,7 @@
     if (subs.includes(currSub)) sSel.value = currSub;
   }
 
-  function runAnalysisForSelectedExam() {
+  function runAnalysisForSelectedExam(targetTopicToExpand, targetQuestionIdToHighlight) {
     populateAnalysisDropdowns();
     const eVal = document.getElementById('analysisExamSelect')?.value || 'ALL';
     const sVal = document.getElementById('analysisSubjectSelect')?.value || 'ALL';
@@ -4798,6 +5777,8 @@
       return;
     }
 
+    let targetIdxToExpand = -1;
+
     let rowsHtml = topicList.map((item, idx) => {
       const weightagePct = filtered.length > 0 ? Math.round((item.count / filtered.length) * 100) : 0;
       const isHigh = item.count >= 3;
@@ -4811,8 +5792,42 @@
       if (savedChecklist[keyP]) completedChecks++;
       if (savedChecklist[keyR]) completedChecks++;
 
+      if (targetTopicToExpand && item.topic.toLowerCase() === targetTopicToExpand.toLowerCase()) {
+        targetIdxToExpand = idx;
+      }
+
+      // Render question cards for this topic
+      const questionsCardsHtml = item.questions.map((q, qIdx) => {
+        return `
+          <div id="analysis_q_${q.id}" style="background:rgba(30,41,59,0.8); border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:14px; margin-bottom:12px; transition:border 0.3s, box-shadow 0.3s;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:800; color:#facc15; font-size:0.88rem;">Q${qIdx + 1}.</span>
+                <span style="background:rgba(56,189,248,0.18); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-size:0.75rem; font-weight:700; padding:2px 8px; border-radius:6px;">
+                  ${q.exam || 'PYQ'}
+                </span>
+                ${q.subtopic ? `<span style="background:rgba(168,85,247,0.18); border:1px solid rgba(168,85,247,0.4); color:#c084fc; font-size:0.72rem; padding:2px 8px; border-radius:6px;">${q.subtopic}</span>` : ''}
+              </div>
+            </div>
+
+            <div style="color:#f8fafc; font-size:0.92rem; line-height:1.5; margin-bottom:10px; font-weight:500;">
+              ${formatRichText(q.text)}
+            </div>
+
+            ${renderAnalysisQuestionOptions(q)}
+
+            <div style="margin-top:8px; padding:8px 12px; background:rgba(16,185,129,0.1); border-left:3px solid #10b981; border-radius:6px;">
+              <div style="font-size:0.84rem; font-weight:700; color:#34d399;">
+                ✓ Correct Answer: Option ${q.ans || 'A'}
+              </div>
+              ${q.expl ? `<div style="font-size:0.8rem; color:#cbd5e1; margin-top:4px; line-height:1.4;">${formatRichText(q.expl)}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
       return `
-        <tr style="border-bottom: 1px solid var(--border); transition:background 0.2s;">
+        <tr id="analysisTopicRow_${idx}" style="border-bottom: 1px solid var(--border); transition:background 0.2s;">
           <td style="padding:12px 10px; font-weight:700; color:#94a3b8; text-align:center;">#${idx + 1}</td>
           <td style="padding:12px 14px;">
             <div style="font-weight:700; color:#f8fafc; font-size:0.95rem;">${formatRichText(item.topic)}</div>
@@ -4821,6 +5836,10 @@
           <td style="padding:12px 14px; text-align:center;">
             <span style="font-weight:800; font-size:1.05rem; color:#facc15;">${item.count}</span>
             <div style="font-size:0.72rem; color:var(--muted);">Questions</div>
+            <button id="btnToggleTopicQs_${idx}" onclick="toggleAnalysisTopicQuestions(${idx})" 
+              style="margin-top:6px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.4); color:#38bdf8; font-size:0.74rem; font-weight:700; padding:4px 8px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:all 0.2s;">
+              👁️ View Qs (${item.count}) <span id="topicCaret_${idx}">▼</span>
+            </button>
           </td>
           <td style="padding:12px 14px; width:180px;">
             <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#cbd5e1;">
@@ -4848,6 +5867,26 @@
             </div>
           </td>
         </tr>
+        <!-- EXPANDABLE ACCORDION ROW FOR THIS TOPIC'S DETAILED QUESTIONS -->
+        <tr id="analysisTopicQuestionsRow_${idx}" style="display:none; background:rgba(15,23,42,0.9); border-bottom:2px solid rgba(56,189,248,0.4);">
+          <td colspan="5" style="padding:18px 22px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(56,189,248,0.2);">
+              <div>
+                <h4 style="margin:0; font-family:'Outfit',sans-serif; color:#38bdf8; font-size:1.05rem;">
+                  📜 Questions Asked Under "${formatRichText(item.topic)}"
+                </h4>
+                <div style="font-size:0.8rem; color:#94a3b8; margin-top:2px;">
+                  Subject: <strong style="color:#f8fafc;">${item.subject}</strong> | Total Exam Questions: <strong style="color:#facc15;">${item.count}</strong>
+                </div>
+              </div>
+              <button onclick="practiceSpecificTopic('${encodeURIComponent(item.subject)}', '${encodeURIComponent(item.topic)}')" 
+                style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; padding:7px 16px; border-radius:10px; font-weight:700; font-size:0.82rem; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+                🎯 Practice These ${item.count} Questions
+              </button>
+            </div>
+            ${questionsCardsHtml}
+          </td>
+        </tr>
       `;
     }).join('');
 
@@ -4859,7 +5898,7 @@
           <tr style="border-bottom: 2px solid rgba(56,189,248,0.3); text-align:left; color:#94a3b8; font-size:0.82rem; text-transform:uppercase;">
             <th style="padding:10px; text-align:center; width:50px;">Rank</th>
             <th style="padding:10px 14px;">Topic & Subject</th>
-            <th style="padding:10px 14px; text-align:center;">PYQ Count</th>
+            <th style="padding:10px 14px; text-align:center;">PYQ Count & Questions</th>
             <th style="padding:10px 14px;">Weightage %</th>
             <th style="padding:10px 14px;">Preparation Checklist</th>
           </tr>
@@ -4869,6 +5908,38 @@
         </tbody>
       </table>
     `;
+
+    // Auto-expand target topic if requested from search suggestion
+    if (targetIdxToExpand >= 0) {
+      setTimeout(() => {
+        toggleAnalysisTopicQuestions(targetIdxToExpand, true);
+        const rowEl = document.getElementById(`analysisTopicRow_${targetIdxToExpand}`);
+        if (rowEl) {
+          rowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          rowEl.style.outline = '2px solid #38bdf8';
+          rowEl.style.background = 'rgba(56,189,248,0.18)';
+          setTimeout(() => {
+            rowEl.style.outline = '';
+            rowEl.style.background = '';
+          }, 3000);
+        }
+
+        if (targetQuestionIdToHighlight) {
+          setTimeout(() => {
+            const qEl = document.getElementById(`analysis_q_${targetQuestionIdToHighlight}`);
+            if (qEl) {
+              qEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              qEl.style.boxShadow = '0 0 20px rgba(56,189,248,0.8)';
+              qEl.style.borderColor = '#38bdf8';
+              setTimeout(() => {
+                qEl.style.boxShadow = '';
+                qEl.style.borderColor = 'rgba(56,189,248,0.25)';
+              }, 3500);
+            }
+          }, 300);
+        }
+      }, 150);
+    }
   }
 
   function togglePrepChecklistItem(key, isChecked) {

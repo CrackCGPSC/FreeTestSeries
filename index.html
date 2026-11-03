@@ -360,11 +360,14 @@
     .stat-card h4 { font-size: 1.7rem; margin-top: 6px; font-weight: 800; color: #38bdf8; font-family: 'Outfit', sans-serif; }
     .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; overflow-y: auto; padding: 20px 14px; }
     .modal-content { max-width: 480px; margin: 30px auto; background: rgba(15,23,42,0.96); border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 22px; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-    .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 320px; overflow-y: auto; margin-top: 14px; }
-    .palette-box { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(30,41,59,0.7); border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; color: var(--muted); transition: all 0.2s; }
-    .palette-box:hover { border-color: #38bdf8; color: #fff; transform: scale(1.05); }
-    .palette-box.answered { background: rgba(16,185,129,0.25); border-color: #10b981; color: #34d399; }
-    .palette-box.current { border-color: #38bdf8; background: rgba(56,189,248,0.2); box-shadow: 0 0 12px rgba(56,189,248,0.6); color: #fff; }
+    .palette-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-height: 340px; overflow-y: auto; margin-top: 10px; justify-items: center; }
+    .palette-box { width: 100%; max-width: 38px; height: 32px; display: flex; align-items: center; justify-content: center; background: #334155; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: #cbd5e1; transition: all 0.15s ease; user-select: none; box-sizing: border-box; }
+    .palette-box:hover { border-color: #38bdf8; transform: scale(1.05); }
+    .palette-box.answered { background: #10b981 !important; border-color: #059669 !important; color: #ffffff !important; }
+    .palette-box.not-answered { background: #ef4444 !important; border-color: #dc2626 !important; color: #ffffff !important; }
+    .palette-box.review { background: #8b5cf6 !important; border-color: #7c3aed !important; color: #ffffff !important; }
+    .palette-box.not-visited { background: #334155 !important; border-color: rgba(255,255,255,0.08) !important; color: #94a3b8 !important; }
+    .palette-box.current { border: 2px solid #38bdf8 !important; box-shadow: 0 0 10px rgba(56, 189, 248, 0.85) !important; transform: scale(1.06); outline: 1px solid #38bdf8; z-index: 2; }
     .review-tabs { display: flex; gap: 8px; margin: 16px 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
     .review-tab-btn { background: var(--card-in); border: 1px solid var(--border); color: var(--muted); padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 0.84rem; font-weight: 600; transition: all 0.2s; }
     .review-tab-btn.active { color: white; border-color: var(--primary); background: var(--primary); box-shadow: 0 2px 10px rgba(59,130,246,0.4); }
@@ -394,70 +397,212 @@
       flex-shrink: 0 !important;
     }
 
-    /* Desktop Mode Question Palette: Docks cleanly to right side like real CBT exam software */
-    @media (min-width: 992px) {
-      body.palette-docked-desktop #test-player,
-      body.palette-docked-desktop #prac-player,
-      body.palette-docked-desktop #revision-quiz-player {
-        margin-right: 340px !important;
-        transition: margin-right 0.25s ease;
-      }
-      /* Real Exam Desktop Mode: Question Palette is permanently docked on the right side pane */
-      #palettePopupModal {
-        display: none !important; /* Never open popup modal on desktop */
-      }
-      #palettePopupModal .modal-content {
-        border: 1px solid rgba(56, 189, 248, 0.4);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
-        border-radius: 18px;
-        background: rgba(15, 23, 42, 0.98);
-      }
-      #palettePopupModal .palette-grid {
-        max-height: 55vh;
-        grid-template-columns: repeat(5, 1fr);
-        overflow-y: auto;
-      }
+    /* CBT Real Exam Status Legend */
+    .cbt-legend-box {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 10px;
+      background: rgba(10, 15, 29, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .cbt-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    .cbt-legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .cbt-legend-count {
+      margin-left: auto;
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      min-width: 18px;
+      text-align: center;
+    }
+    .cbt-legend-dot.cbt-answered { background: #10b981; }
+    .cbt-legend-dot.cbt-not-answered { background: #ef4444; }
+    .cbt-legend-dot.cbt-review { background: #8b5cf6; }
+    .cbt-legend-dot.cbt-not-visited { background: #334155; }
+
+    /* Action Buttons: Mark for Review & Next, Save & Next */
+    .btn-review-next {
+      background: linear-gradient(135deg, #059669, #10b981) !important;
+      color: #ffffff !important;
+      border: 1px solid #10b981 !important;
+      font-weight: 700 !important;
+      padding: 10px 18px !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+      cursor: pointer;
+    }
+    .btn-review-next:hover {
+      background: linear-gradient(135deg, #047857, #059669) !important;
+      transform: translateY(-1px);
+    }
+    .btn-save-next {
+      background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+      color: #ffffff !important;
+      border: 1px solid #60a5fa !important;
+      font-weight: 700 !important;
+      padding: 10px 18px !important;
+      border-radius: 10px !important;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+      cursor: pointer;
+    }
+    .btn-save-next:hover {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+      transform: translateY(-1px);
     }
 
-
-    /* CBT Real Exam Desktop Side-by-Side Split Layout */
+    /* CBT Real Exam Desktop Side-by-Side Split Layout with Locked Height & Internal Scrolling */
     .exam-split-layout {
       display: flex;
-      gap: 18px;
-      align-items: flex-start;
+      flex-direction: column;
+      gap: 16px;
       width: 100%;
     }
-    .exam-left-pane {
-      flex: 1;
+    .exam-palette-pane {
+      display: none; /* Hidden on mobile portrait; accessible via 📋 Palette button */
+    }
+    .exam-question-pane {
+      width: 100%;
       min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
-    .exam-right-palette {
-      display: none;
+    .exam-question-pane .q-scrollable-body {
+      width: 100%;
     }
-    @media (min-width: 992px) {
-      .exam-right-palette {
-        display: block !important;
-        width: 310px;
-        flex-shrink: 0;
+    .exam-question-pane .q-fixed-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 1340px;
+      }
+      .exam-split-layout {
+        display: grid !important;
+        grid-template-columns: 310px minmax(0, 1fr) !important; /* Palette on LEFT, Question on RIGHT by default */
+        gap: 18px !important;
+        align-items: stretch !important;
+        height: min(78vh, 740px) !important;
+        min-height: 520px !important;
+      }
+      /* If user flips to Palette on RIGHT */
+      .exam-split-layout.palette-on-right {
+        grid-template-columns: minmax(0, 1fr) 310px !important;
+      }
+      .exam-split-layout.palette-on-right .exam-palette-pane {
+        order: 2 !important;
+      }
+      .exam-split-layout.palette-on-right .exam-question-pane {
+        order: 1 !important;
+      }
+
+      .exam-palette-pane {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
         background: rgba(15, 23, 42, 0.95);
         border: 1px solid rgba(56, 189, 248, 0.35);
         border-radius: 16px;
-        padding: 16px;
+        padding: 14px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-        position: sticky;
-        top: 76px;
-        max-height: calc(100vh - 100px);
-        overflow-y: auto;
+        overflow: hidden !important;
       }
-      .exam-right-palette .palette-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
+      .exam-palette-pane .palette-header-bar {
+        flex-shrink: 0 !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 6px;
+      }
+      .exam-palette-pane .cbt-legend-box {
+        flex-shrink: 0 !important;
+        margin-bottom: 8px;
+      }
+      .exam-palette-pane .palette-scroll-content {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        padding-right: 4px !important;
+      }
+      .exam-palette-pane .palette-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 6px !important;
         max-height: none !important;
-        overflow-y: auto;
+        overflow-y: visible !important;
+        margin-top: 6px;
       }
+
+      .exam-question-pane {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 16px;
+        padding: 18px 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        overflow: hidden !important;
+      }
+      .exam-question-pane .q-header-bar {
+        flex-shrink: 0 !important;
+        margin-bottom: 12px;
+      }
+      .exam-question-pane .q-scrollable-body {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        padding-right: 8px !important;
+      }
+      .exam-question-pane .q-fixed-footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
       #t-mobile-palette-btn, #p-mobile-palette-btn {
-        display: none !important; /* On desktop, palette is already permanently visible on right side! */
+        display: none !important; /* On desktop, palette is already permanently visible on side! */
+      }
+      #palettePopupModal {
+        display: none !important;
       }
     }
 
@@ -627,10 +772,18 @@
 </head>
 <body>
 <!-- APP LAUNCH SPLASH VIDEO OVERLAY (MOBILE APP ONLY) -->
-<div id="splashScreenVideoOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#060913; z-index:9999999; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.45s ease; overflow:hidden;">
-  <video id="appSplashVideo" autoplay playsinline webkit-playsinline disablePictureInPicture controlslist="nodownload nofullscreen noremoteplayback" disableremoteplayback style="width:100%; height:100%; object-fit:contain; background:#060913; pointer-events:none; opacity:0; transition:opacity 0.28s ease;">
+<div id="splashScreenVideoOverlay" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:#FFFFFF; z-index:9999999; display:flex; align-items:center; justify-content:center; opacity:1; transition:opacity 0.45s ease; overflow:hidden;">
+  <video id="appSplashVideo" autoplay playsinline webkit-playsinline disablePictureInPicture controlslist="nodownload nofullscreen noremoteplayback" disableremoteplayback style="width:100%; height:100%; object-fit:contain; background:#FFFFFF; pointer-events:none; opacity:1;">
     <source src="splash_video.mp4" type="video/mp4">
   </video>
+  <script>
+    try {
+      var _sv = document.getElementById('appSplashVideo');
+      if (_sv && (window.location.protocol === 'file:' || navigator.userAgent.includes('CrackCGPSCApp'))) {
+        _sv.play().catch(function(){});
+      }
+    } catch(e){}
+  </script>
 </div>
 <header>
   <div class="brand-container" onclick="navigate('tab-home')">
@@ -951,53 +1104,75 @@
         <div class="card">
           <!-- Active Test Series Title Banner -->
           <div id="activeTestTitleBanner" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:linear-gradient(135deg, rgba(37,99,235,0.18), rgba(168,85,247,0.15)); padding:10px 14px; border-radius:12px; border:1px solid rgba(56,189,248,0.3);">
-            <div style="display:flex; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <span style="font-size:1.2rem;">🎯</span>
               <span id="activeTestTitleText" style="font-family:'Outfit',sans-serif; font-size:1.05rem; font-weight:800; color:#38bdf8;">Mock Test</span>
+              <span id="activeSectionBadgeHeader" style="display:none; font-size:0.8rem; background:rgba(59,130,246,0.25); border:1px solid #3b82f6; color:#93c5fd; padding:3px 10px; border-radius:8px; font-weight:600;"></span>
             </div>
-            <span id="activeTestModeBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">LIVE EXAM</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="activeTestModeBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">LIVE EXAM</span>
+              <button class="btn btn-danger btn-sm" onclick="exitTestModeConfirm()" style="padding:4px 10px; font-weight:600;">✕ Quit Test</button>
+            </div>
           </div>
 
           <!-- Real exam Section Navigation Tabs Bar -->
           <div id="testSectionTabsBar" class="test-section-tabs-bar" style="display:none;"></div>
-          <div class="exam-split-layout">
-            <div class="exam-left-pane">
-          
-          <div class="q-header-bar">
-            <div class="q-header-left"><span id="t-counter" style="color: #60a5fa; font-weight: 700; font-size: 1.05rem;">Question 1</span><span class="badge-sub" id="t-hier-badge"></span></div>
-            <div class="q-header-right">
-              <div id="t-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
-              <span id="testTimerBadge" style="background: rgba(239,68,68,0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 5px 12px; border-radius: 8px; font-size: 0.86rem; font-weight: bold; display:none;">⏱ 00:00</span>
-              <span class="badge-exam-tag" id="t-exam-badge"></span>
-              <button class="btn btn-warning btn-sm" id="t-mobile-palette-btn" onclick="openPaletteModal()">📋 Palette</button>
-              <button class="btn btn-secondary btn-sm" id="t-star-btn" onclick="toggleBookmarkCurrentQ()">⭐ Save</button>
-              <button class="btn btn-secondary btn-sm" onclick="exitTestModeConfirm()">Exit</button>
-            </div>
-          </div>
-          <div class="formatted-text" id="t-body"></div>
-          <div id="t-match-wrap"></div>
-          <div id="t-opts"></div>
-          <div style="display: flex; justify-content: space-between; align-items:center; margin-top: 22px; flex-wrap:wrap; gap:10px;">
-            <div style="display:flex; gap:8px;">
-              <button class="btn btn-secondary" onclick="moveTestQ(-1, event)">Previous</button>
-              <button class="btn" onclick="moveTestQ(1, event)">Next</button>
-            </div>
-            <button class="btn btn-danger" onclick="submitTestEngine()">Submit Test</button>
-          </div>
-        </div>
-      
-            </div>
-            <!-- CBT DESKTOP SIDEBAR QUESTION PALETTE -->
-            <div class="exam-right-palette" id="desktopExamPalettePane">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+          <div class="exam-split-layout" id="cbtExamSplitLayout">
+            <!-- 1. CBT DESKTOP SIDEBAR QUESTION PALETTE -->
+            <div class="exam-palette-pane" id="desktopExamPalettePane">
+              <div class="palette-header-bar">
                 <h4 style="margin:0; color:#38bdf8; font-size:0.95rem; font-family:'Outfit',sans-serif; display:flex; align-items:center; gap:6px;">
                   <span>📋</span> Question Palette
                 </h4>
-                <span id="desktopPaletteAnsweredBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">0/0</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <button class="palette-side-toggle-btn" onclick="toggleCbtPaletteSide()" title="Swap Palette Left/Right" style="background:rgba(56,189,248,0.15); border:1px solid #38bdf8; color:#38bdf8; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:6px; cursor:pointer;">⇄ Side</button>
+                  <span id="desktopPaletteAnsweredBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">0/0</span>
+                </div>
               </div>
-              <div class="palette-grid" id="desktopInlineExamPaletteGrid"></div>
+              <!-- CBT Status Legend with Live Numerical Counts -->
+              <div class="cbt-legend-box">
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-answered"></span> <span>Answered</span> <span class="cbt-legend-count" id="cnt-answered">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-answered"></span> <span>Not Answered</span> <span class="cbt-legend-count" id="cnt-not-answered">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-review"></span> <span>Marked</span> <span class="cbt-legend-count" id="cnt-review">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-visited"></span> <span>Not Visited</span> <span class="cbt-legend-count" id="cnt-not-visited">0</span></div>
+              </div>
+              <div class="palette-scroll-content">
+                <div class="palette-grid" id="desktopInlineExamPaletteGrid"></div>
+              </div>
             </div>
-          </div></div>
+
+            <!-- 2. CBT QUESTION BOX WITH LOCKED INTERNAL SCROLL -->
+            <div class="exam-question-pane">
+              <div class="q-header-bar">
+                <div class="q-header-left">
+                  <span id="t-counter" style="color: #60a5fa; font-weight: 700; font-size: 1.05rem;">Question 1</span>
+                  <span class="badge-sub" id="t-hier-badge" style="display:none;"></span>
+                </div>
+                <div class="q-header-right">
+                  <div id="t-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
+                  <span id="testTimerBadge" style="background: rgba(239,68,68,0.2); border: 1px solid var(--danger); color: #fca5a5; padding: 5px 12px; border-radius: 8px; font-size: 0.86rem; font-weight: bold; display:none;">⏱ 00:00</span>
+                  <span class="badge-exam-tag" id="t-exam-badge"></span>
+                  <button class="btn btn-warning btn-sm" id="t-mobile-palette-btn" onclick="openPaletteModal()">📋 Palette</button>
+                  <button class="btn btn-secondary btn-sm" id="t-star-btn" onclick="toggleBookmarkCurrentQ()">⭐ Save</button>
+                  <button class="btn btn-secondary btn-sm" onclick="exitTestModeConfirm()">Exit</button>
+                </div>
+              </div>
+              <div class="q-scrollable-body">
+                <div class="formatted-text" id="t-body"></div>
+                <div id="t-match-wrap"></div>
+                <div id="t-opts"></div>
+              </div>
+              <div class="q-fixed-footer">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                  <button class="btn btn-secondary" onclick="moveTestQ(-1, event)" style="min-width:90px;">Previous</button>
+                  <button class="btn btn-review-next" onclick="markForReviewAndNext(event)">Mark for Review & Next</button>
+                  <button class="btn btn-save-next" id="t-save-next-btn" onclick="handleSaveNextOrSubmit(event)">Save & Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 2. QUIZ / PRACTICE SECTION -->
@@ -1052,39 +1227,55 @@
 
       <div id="prac-player" style="display:none;">
         <div class="card">
-          <div class="exam-split-layout">
-            <div class="exam-left-pane">
-          <div class="q-header-bar">
-            <div class="q-header-left"><span id="p-counter" style="color: var(--success); font-weight: 700; font-size: 1.05rem;">Practice Q 1</span><span class="badge-sub" id="p-hier-badge"></span></div>
-            <div class="q-header-right">
-              <div id="p-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
-              <span class="badge-exam-tag" id="p-exam-badge"></span>
-              <button class="btn btn-warning btn-sm" id="p-mobile-palette-btn" onclick="openPaletteModal()">📋 Palette</button>
-              <button class="btn btn-secondary btn-sm" id="p-star-btn" onclick="toggleBookmarkCurrentQ()">⭐ Save</button>
-              <button class="btn btn-secondary btn-sm" onclick="exitPracMode()">Exit</button>
-            </div>
-          </div>
-          <div class="formatted-text" id="p-body"></div>
-          <div id="p-match-wrap"></div>
-          <div id="p-opts"></div>
-          <div id="p-expl" style="display:none;" class="expl-box"></div>
-          <div style="display: flex; justify-content: space-between; margin-top: 22px;">
-            <button class="btn btn-secondary" onclick="movePracQ(-1, event)">Previous</button>
-            <button class="btn" id="pracNextBtn" onclick="movePracQ(1, event)">Next</button>
-          </div>
-        
-            </div>
-            <!-- CBT DESKTOP SIDEBAR QUESTION PALETTE FOR PRACTICE -->
-            <div class="exam-right-palette" id="desktopPracPalettePane">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+          <div class="exam-split-layout" id="cbtPracSplitLayout">
+            <!-- 1. CBT DESKTOP SIDEBAR QUESTION PALETTE FOR PRACTICE -->
+            <div class="exam-palette-pane" id="desktopPracPalettePane">
+              <div class="palette-header-bar">
                 <h4 style="margin:0; color:#10b981; font-size:0.95rem; font-family:'Outfit',sans-serif; display:flex; align-items:center; gap:6px;">
                   <span>📋</span> Practice Palette
                 </h4>
-                <span id="desktopPracAnsweredBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">0/0</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <button class="palette-side-toggle-btn" onclick="toggleCbtPaletteSide()" title="Swap Palette Left/Right" style="background:rgba(16,185,129,0.15); border:1px solid #10b981; color:#34d399; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:6px; cursor:pointer;">⇄ Side</button>
+                  <span id="desktopPracAnsweredBadge" style="font-size:0.75rem; background:rgba(16,185,129,0.2); border:1px solid #10b981; color:#34d399; padding:2px 8px; border-radius:6px; font-weight:700;">0/0</span>
+                </div>
               </div>
-              <div class="palette-grid" id="desktopInlinePracPaletteGrid"></div>
+              <!-- CBT Status Legend -->
+              <div class="cbt-legend-box">
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-answered"></span> <span>Answered</span> <span class="cbt-legend-count" id="prac-cnt-answered">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-answered"></span> <span>Not Answered</span> <span class="cbt-legend-count" id="prac-cnt-not-answered">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-review"></span> <span>Marked</span> <span class="cbt-legend-count" id="prac-cnt-review">0</span></div>
+                <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-visited"></span> <span>Not Visited</span> <span class="cbt-legend-count" id="prac-cnt-not-visited">0</span></div>
+              </div>
+              <div class="palette-scroll-content">
+                <div class="palette-grid" id="desktopInlinePracPaletteGrid"></div>
+              </div>
             </div>
-          </div></div>
+
+            <!-- 2. PRACTICE QUESTION PANE WITH INTERNAL SCROLL -->
+            <div class="exam-question-pane">
+              <div class="q-header-bar">
+                <div class="q-header-left"><span id="p-counter" style="color: var(--success); font-weight: 700; font-size: 1.05rem;">Practice Q 1</span><span class="badge-sub" id="p-hier-badge"></span></div>
+                <div class="q-header-right">
+                  <div id="p-bilingual-bar" class="bilingual-toggle-bar" style="display:none;"></div>
+                  <span class="badge-exam-tag" id="p-exam-badge"></span>
+                  <button class="btn btn-warning btn-sm" id="p-mobile-palette-btn" onclick="openPaletteModal()">📋 Palette</button>
+                  <button class="btn btn-secondary btn-sm" id="p-star-btn" onclick="toggleBookmarkCurrentQ()">⭐ Save</button>
+                  <button class="btn btn-secondary btn-sm" onclick="exitPracMode()">Exit</button>
+                </div>
+              </div>
+              <div class="q-scrollable-body">
+                <div class="formatted-text" id="p-body"></div>
+                <div id="p-match-wrap"></div>
+                <div id="p-opts"></div>
+                <div id="p-expl" style="display:none;" class="expl-box"></div>
+              </div>
+              <div class="q-fixed-footer">
+                <button class="btn btn-secondary" onclick="movePracQ(-1, event)">Previous</button>
+                <button class="btn" id="pracNextBtn" onclick="movePracQ(1, event)">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="prac-result-card" class="card" style="display:none; text-align:center; padding:32px;">
@@ -1614,6 +1805,13 @@
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="margin:0; color:#60a5fa; font-family:'Outfit',sans-serif; font-size:1.2rem;">📋 Question Palette</h3>
       <button class="btn btn-secondary btn-sm" onclick="closePaletteModal()">✕ Close</button>
+    </div>
+    <!-- CBT Status Legend -->
+    <div class="cbt-legend-box">
+      <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-answered"></span> <span>Answered</span> <span class="cbt-legend-count" id="modal-cnt-answered">0</span></div>
+      <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-answered"></span> <span>Not Answered</span> <span class="cbt-legend-count" id="modal-cnt-not-answered">0</span></div>
+      <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-review"></span> <span>Marked</span> <span class="cbt-legend-count" id="modal-cnt-review">0</span></div>
+      <div class="cbt-legend-item"><span class="cbt-legend-dot cbt-not-visited"></span> <span>Not Visited</span> <span class="cbt-legend-count" id="modal-cnt-not-visited">0</span></div>
     </div>
     <div class="palette-grid" id="modalExamPaletteGrid"></div>
   </div>
@@ -2840,20 +3038,26 @@
     }, 1000);
   }
 
-    // Deduplicate questions by ID and clean text
+  let markedForReview = {};
+  let visitedQuestions = new Set([0]);
+
+  function getQuestionUniqueKey(q) {
+    if (!q) return 'null_' + Math.random();
+    if (q.id) return 'id_' + String(q.id).trim();
+    const raw = (q.text || q.question || q.assertion || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    return 'txt_' + raw.slice(0, 120);
+  }
+
+  // Deduplicate questions by unique ID and normalized question content
   function deduplicateQuestions(list) {
     if (!Array.isArray(list)) return [];
-    const seenIds = new Set();
-    const seenTexts = new Set();
+    const seenKeys = new Set();
     const res = [];
     for (const q of list) {
       if (!q) continue;
-      const textKey = (q.text || '').trim().toLowerCase();
-      const idKey = q.id ? String(q.id).trim() : null;
-      if (idKey && seenIds.has(idKey)) continue;
-      if (textKey && seenTexts.has(textKey)) continue;
-      if (idKey) seenIds.add(idKey);
-      if (textKey) seenTexts.add(textKey);
+      const key = getQuestionUniqueKey(q);
+      if (seenKeys.has(key)) continue;
+      seenKeys.add(key);
       res.push(q);
     }
     return res;
@@ -3022,6 +3226,8 @@
 
     activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     if (mode === 'test') {
@@ -3073,6 +3279,8 @@
     activeTestSections = null;
     activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     if(mode === 'test') {
@@ -3116,6 +3324,8 @@
     activeTestSections = null; 
     activeQuestions = deduplicateQuestions(pool).sort(() => Math.random() - 0.5); 
     userResponses = {}; 
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     if(mode === 'test') {
@@ -3168,6 +3378,7 @@
     activeEngineMode = 'cgpsc_paper1';
     window.currentCustomTestLabel = generateSequentialMockTitle('cgpsc_paper1');
     activeTestSections = null; // Clean numbered palette 1..100
+    const testExcluded = new Set();
 
     // Part A: 50 Questions Indian GS - Balanced across core subjects (10 History, 10 Polity, 10 Geography, 10 Economy, 10 Science)
     const indSubjectDistribution = [
@@ -3179,8 +3390,8 @@
     ];
     let partA = [];
     indSubjectDistribution.forEach(spec => {
-      const pool = questions.filter(q => (spec.subject === 'Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === spec.subject));
-      partA.push(...fillWithMockQuestions(pool, spec.subject, spec.count));
+      const picked = pickSingleSubjectMockQuestions(spec.subject, spec.count, testExcluded);
+      partA.push(...picked);
     });
     partA = partA.sort(() => Math.random() - 0.5);
 
@@ -3195,14 +3406,16 @@
     ];
     let partB = [];
     cgSubjectDistribution.forEach(spec => {
-      const pool = questions.filter(q => q.subject === spec.subject || (spec.subject === 'CG Economy' && q.subject?.includes('Economy')));
-      partB.push(...fillWithMockQuestions(pool, spec.subject, spec.count));
+      const picked = pickSingleSubjectMockQuestions(spec.subject, spec.count, testExcluded);
+      partB.push(...picked);
     });
     partB = partB.sort(() => Math.random() - 0.5);
 
     // Combine: Q1..50 Indian GS, Q51..100 CG GS
     activeQuestions = deduplicateQuestions([...partA, ...partB]);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
     startTestTimer(120); // 2 Hours
 
@@ -3219,15 +3432,18 @@
     activeEngineMode = 'cgpsc_paper2';
     window.currentCustomTestLabel = generateSequentialMockTitle('cgpsc_paper2');
     activeTestSections = null; // Clean numbered palette 1..100
+    const testExcluded = new Set();
 
     // Realistic CGPSC CSAT Distribution: GMA (30), Maths (30), Hindi (20), CG Language (20) = 100 Qs
-    let gmaQs = fillWithMockQuestions(questions.filter(q => q.subject === 'General Mental Ability'), 'General Mental Ability', 30);
-    let mathQs = fillWithMockQuestions(questions.filter(q => q.subject === 'Maths'), 'Maths', 30);
-    let hindiQs = fillWithMockQuestions(questions.filter(q => q.subject === 'Hindi'), 'Hindi', 20);
-    let cgLangQs = fillWithMockQuestions(questions.filter(q => q.subject === 'CG Language'), 'CG Language', 20);
+    let gmaQs = pickSingleSubjectMockQuestions('General Mental Ability', 30, testExcluded);
+    let mathQs = pickSingleSubjectMockQuestions('Maths', 30, testExcluded);
+    let hindiQs = pickSingleSubjectMockQuestions('Hindi', 20, testExcluded);
+    let cgLangQs = pickSingleSubjectMockQuestions('CG Language', 20, testExcluded);
 
     activeQuestions = deduplicateQuestions([...gmaQs, ...mathQs, ...hindiQs, ...cgLangQs]).sort(() => Math.random() - 0.5);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     startTestTimer(120);
@@ -3242,40 +3458,113 @@
   }
 
   
-  // Helper to pick equal questions across subjects in a multi-subject section
-  function pickBalancedQuestionsForSection(subjectsList, targetCount) {
+  // Helper to pick equal questions across subjects in a multi-subject section without duplicates
+  function pickBalancedQuestionsForSection(subjectsList, targetCount, globalExcluded) {
     if (!subjectsList || !subjectsList.length) return [];
     let result = [];
     const countPerSubject = Math.max(1, Math.floor(targetCount / subjectsList.length));
+    const excluded = globalExcluded || new Set();
 
     subjectsList.forEach(sub => {
       let subPool = questions.filter(q => {
+        if (!q) return false;
+        if (excluded.has(getQuestionUniqueKey(q))) return false;
         if (sub === 'Chhattisgarh GK' || sub === 'CG GS') {
           return q.subject?.startsWith('CG') || q.subject === 'CG General Knowledge' || q.subject === 'Chhattisgarh GK';
         }
         return (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub);
+      }).sort(() => Math.random() - 0.5);
+
+      const picked = subPool.slice(0, countPerSubject);
+      picked.forEach(q => {
+        excluded.add(getQuestionUniqueKey(q));
+        result.push(q);
       });
-      let picked = fillWithMockQuestions(subPool, sub, countPerSubject);
-      result.push(...picked);
     });
 
     if (result.length < targetCount) {
-      let subIdx = 0;
-      while (result.length < targetCount) {
-        const sub = subjectsList[subIdx % subjectsList.length];
-        const extra = fillWithMockQuestions([], sub, 1);
-        result.push(...extra);
-        subIdx++;
+      // Find remaining questions from any of the subjects that haven't been picked yet
+      const remainingPool = questions.filter(q => {
+        if (!q) return false;
+        if (excluded.has(getQuestionUniqueKey(q))) return false;
+        return subjectsList.some(sub => {
+          if (sub === 'Chhattisgarh GK' || sub === 'CG GS') {
+            return q.subject?.startsWith('CG') || q.subject === 'CG General Knowledge' || q.subject === 'Chhattisgarh GK';
+          }
+          return (sub === 'Economy' || sub === 'Indian Economy') ? (q.subject === 'Economy' || q.subject === 'Indian Economy') : (q.subject === sub);
+        });
+      }).sort(() => Math.random() - 0.5);
+
+      for (const q of remainingPool) {
+        if (result.length >= targetCount) break;
+        excluded.add(getQuestionUniqueKey(q));
+        result.push(q);
       }
     }
+
+    if (result.length < targetCount) {
+      const anyUnused = questions.filter(q => q && !excluded.has(getQuestionUniqueKey(q))).sort(() => Math.random() - 0.5);
+      for (const q of anyUnused) {
+        if (result.length >= targetCount) break;
+        excluded.add(getQuestionUniqueKey(q));
+        result.push(q);
+      }
+    }
+
     return result.slice(0, targetCount).sort(() => Math.random() - 0.5);
   }
+
+  function pickSingleSubjectMockQuestions(subjectName, targetCount, globalExcluded) {
+    const excluded = globalExcluded || new Set();
+    const pool = questions.filter(q => {
+      if (!q) return false;
+      if (excluded.has(getQuestionUniqueKey(q))) return false;
+      if (subjectName === 'Chhattisgarh GK' || subjectName === 'CG GS') {
+        return q.subject?.startsWith('CG') || q.subject === 'CG General Knowledge' || q.subject === 'Chhattisgarh GK';
+      }
+      return (subjectName === 'Economy' || subjectName === 'Indian Economy')
+        ? (q.subject === 'Economy' || q.subject === 'Indian Economy')
+        : (q.subject === subjectName);
+    }).sort(() => Math.random() - 0.5);
+
+    let picked = pool.slice(0, targetCount);
+    picked.forEach(q => excluded.add(getQuestionUniqueKey(q)));
+
+    if (picked.length < targetCount) {
+      const fallbacks = questions.filter(q => {
+        if (!q) return false;
+        if (excluded.has(getQuestionUniqueKey(q))) return false;
+        const s = (q.subject || '').toLowerCase();
+        const c = subjectName.toLowerCase();
+        return s === c || s.includes(c) || c.includes(s);
+      }).sort(() => Math.random() - 0.5);
+
+      for (const q of fallbacks) {
+        if (picked.length >= targetCount) break;
+        excluded.add(getQuestionUniqueKey(q));
+        picked.push(q);
+      }
+    }
+
+    if (picked.length < targetCount) {
+      const anyUnused = questions.filter(q => q && !excluded.has(getQuestionUniqueKey(q))).sort(() => Math.random() - 0.5);
+      for (const q of anyUnused) {
+        if (picked.length >= targetCount) break;
+        excluded.add(getQuestionUniqueKey(q));
+        picked.push(q);
+      }
+    }
+
+    return picked.slice(0, targetCount).sort(() => Math.random() - 0.5);
+  }
+
   function startVyapamFullMock() {
     activeEngineMode = 'vyapam_mock';
     window.currentCustomTestLabel = generateSequentialMockTitle('vyapam_mock');
     activeTestSections = [];
     let currentStartIndex = 0;
     let selected = [];
+    const testExcluded = new Set();
 
     // Distribution: Indian GS 20, CG GS 20, Maths 10, GMA 10, Hindi 10, English 10, Computer 10, CA & GK 10 = 100 Qs
     const vyapamSpecs = [
@@ -3291,8 +3580,8 @@
 
     vyapamSpecs.forEach(spec => {
       let rawQs = (spec.subjects.length > 1) 
-        ? pickBalancedQuestionsForSection(spec.subjects, spec.count)
-        : fillWithMockQuestions(questions.filter(q => spec.subjects.includes(q.subject) || (spec.id === 'v_cg_gs' && q.subject?.startsWith('CG '))), spec.name, spec.count);
+        ? pickBalancedQuestionsForSection(spec.subjects, spec.count, testExcluded)
+        : pickSingleSubjectMockQuestions(spec.subjects[0], spec.count, testExcluded);
       let secQs = rawQs.map(q => ({
         ...q,
         options: { ...(q.options || {}) },
@@ -3314,8 +3603,10 @@
       selected.push(...secQs);
     });
 
-    activeQuestions = selected;
+    activeQuestions = deduplicateQuestions(selected);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     startTestTimer(120);
@@ -3335,6 +3626,7 @@
     activeTestSections = [];
     let currentStartIndex = 0;
     let selected = [];
+    const testExcluded = new Set();
 
     // Exact strict sequence & distribution requested by user:
     // 1. CDP 15, 2. Geography 15, 3. Indian History 15, 4. Polity 10, 5. Economy 10, 
@@ -3354,8 +3646,8 @@
 
     teachingSpecs.forEach(spec => {
       let rawQs = (spec.subjects.length > 1)
-        ? pickBalancedQuestionsForSection(spec.subjects, spec.count)
-        : fillWithMockQuestions(questions.filter(q => spec.subjects.includes(q.subject)), spec.name, spec.count);
+        ? pickBalancedQuestionsForSection(spec.subjects, spec.count, testExcluded)
+        : pickSingleSubjectMockQuestions(spec.subjects[0], spec.count, testExcluded);
       // Deep-clone questions so section properties never contaminate other sections
       let secQs = rawQs.map(q => ({
         ...q,
@@ -3378,8 +3670,10 @@
       selected.push(...secQs);
     });
 
-    activeQuestions = selected;
+    activeQuestions = deduplicateQuestions(selected);
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
 
     startTestTimer(120);
@@ -3903,6 +4197,7 @@
     let selected = [];
     activeTestSections = [];
     let currentStartIndex = 0;
+    const globalTestExcluded = new Set();
 
     fltSections.forEach(sec => {
       if(!sec.enabled) return;
@@ -3923,10 +4218,19 @@
           if(allowedTopics && allowedTopics.size > 0) {
             pool = pool.filter(q => allowedTopics.has((q.topic || 'General').trim()));
           }
+          // Filter out already chosen questions
+          pool = pool.filter(q => q && !globalTestExcluded.has(getQuestionUniqueKey(q)));
+
           let sampled = [...pool].sort(() => Math.random() - 0.5).slice(0, count);
+          sampled.forEach(q => globalTestExcluded.add(getQuestionUniqueKey(q)));
+
           if (sampled.length < count) {
-            // Fill remainder with synthetic realistic questions
-            sampled = fillWithMockQuestions(sampled, s, count);
+            const unusedPool = questions.filter(q => q && !globalTestExcluded.has(getQuestionUniqueKey(q)) && (q.subject === s || (q.subject && s.includes(q.subject)))).sort(() => Math.random() - 0.5);
+            for (const q of unusedPool) {
+              if (sampled.length >= count) break;
+              globalTestExcluded.add(getQuestionUniqueKey(q));
+              sampled.push(q);
+            }
           }
           sampled.forEach(q => {
             q.fltSectionId = sec.id;
@@ -3956,8 +4260,10 @@
     if(!selected.length) return alert('Please enter question counts in at least one enabled section.');
 
     activeEngineMode = 'flt';
-    activeQuestions = selected; // Preserves User Selected Section Sequence!
+    activeQuestions = deduplicateQuestions(selected); // Preserves User Selected Section Sequence without repeats!
     userResponses = {};
+    markedForReview = {};
+    visitedQuestions = new Set([0]);
     currentQIdx = 0;
     window.currentCustomTestLabel = document.getElementById('customFltNameInput').value.trim() || 'Custom FLT';
     
@@ -4165,10 +4471,13 @@
   }
 
   // --- BILINGUAL QUESTION DETECTOR & CONTENT RETRIEVER ---
-  window.activeQuestionLang = window.activeQuestionLang || 'hi';
+  window.activeQuestionLang = window.activeQuestionLang || 'en';
 
   function isBilingualQuestion(q) {
     if (!q) return false;
+    const raw = String(q.text || q.question || q.assertion || '');
+    const hasDevanagariInDefault = /[\u0900-\u097F]/.test(raw);
+    const hasLatinInDefault = /[a-zA-Z]{4,}/.test(raw);
 
     // 1. Explicit boolean or truthy flags (handles true, 'true', 1, '1', 'yes')
     const biFlag = q.bilingual !== undefined ? q.bilingual : (q.isBilingual !== undefined ? q.isBilingual : (q.is_bilingual !== undefined ? q.is_bilingual : null));
@@ -4195,14 +4504,12 @@
       q.expl_en || q.explanation_en || q.explanationEn || q.explanationEnglish
     );
 
-    const hasDefault = Boolean(q.text || q.question || q.statement || q.assertion);
-
-    // If Hindi field exists AND (English field exists OR default text exists) -> BILINGUAL!
-    if (hasHi && (hasEn || hasDefault)) return true;
-    if (hasEn && (hasHi || hasDefault)) return true;
+    // Must have genuine representation of BOTH languages:
+    if (hasHi && hasEn) return true;
+    if (hasHi && hasLatinInDefault) return true;
+    if (hasEn && hasDevanagariInDefault) return true;
 
     // 4. Delimiters in text like [Hindi] ... [English] or (EN) / (HI)
-    const raw = String(q.text || q.question || '');
     if (/(?:\[\s*english\s*\]|\[\s*en\s*\]|english\s*:|\(en\))/i.test(raw) && 
         /(?:\[\s*hindi\s*\]|\[\s*hi\s*\]|hindi\s*:|हिन्दी\s*:|\(hi\))/i.test(raw)) {
       return true;
@@ -4211,7 +4518,7 @@
     // 5. Significant Devanagari AND Latin script in the same question text (e.g. dual language text)
     const devanagariCount = (raw.match(/[\u0900-\u097F]/g) || []).length;
     const latinCount = (raw.match(/[a-zA-Z]/g) || []).length;
-    if (devanagariCount >= 12 && latinCount >= 12) {
+    if (devanagariCount >= 10 && latinCount >= 10) {
       return true;
     }
 
@@ -4305,7 +4612,7 @@
       return;
     }
     bar.style.display = 'inline-flex';
-    const curLang = window.activeQuestionLang || 'hi';
+    const curLang = window.activeQuestionLang || 'en';
     bar.innerHTML = `
       <div class="bi-pill-group">
         <button type="button" class="bi-pill-btn ${curLang === 'hi' ? 'active' : ''}" onclick="switchActiveQuestionLanguage('hi')">हिन्दी</button>
@@ -4327,9 +4634,18 @@
 
   function formatQuestionBody(q, lang) {
     if (!q) return '';
-    const currentLang = lang || window.activeQuestionLang || 'hi';
+    const currentLang = lang || window.activeQuestionLang || 'en';
     const qContent = getBilingualQuestionContent(q, currentLang);
     const qText = qContent.text || q.text || q.question || q.assertion || '';
+
+    // Check if the question genuinely contains Hindi / Devanagari text
+    const hasHindiContent = Boolean(
+      q.question_hi || q.text_hi || q.statements_hi || q.assertion_hi ||
+      (q.options_hi && Object.keys(q.options_hi).length) ||
+      /[\u0900-\u097F]/.test(String(q.text || q.question || q.assertion || ''))
+    );
+    // Only show Hindi intro / conclusion if currentLang is 'hi' AND question genuinely has Hindi
+    const shouldUseHindi = (currentLang === 'hi' && hasHindiContent);
 
     // Extract diagram/figure images
     const images = extractImagesFromQuestion(q);
@@ -4345,16 +4661,18 @@
 
     let bodyHtml = '';
     if(q.type === 'ar') {
-      const arText = (currentLang === 'en') ? (q.arText_en || q.arText || 'Assertion & Reason:') : (q.arText_hi || q.arText || 'अभिकथन एवं कारण (Assertion & Reason):');
-      const aText = (currentLang === 'en') ? (q.assertion_en || q.assertion || '') : (q.assertion_hi || q.assertion || '');
-      const rText = (currentLang === 'en') ? (q.reason_en || q.reason || '') : (q.reason_hi || q.reason || '');
-      bodyHtml = `<div style="margin-bottom:8px; font-weight:600;">${formatRichText(arText)}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">Assertion (A):</span><span class="ar-text">${formatRichText(aText)}</span></div><div class="ar-item"><span class="ar-label">Reason (R):</span><span class="ar-text">${formatRichText(rText)}</span></div></div>`;
+      const arText = shouldUseHindi ? (q.arText_hi || q.arText || 'अभिकथन एवं कारण (Assertion & Reason):') : (q.arText_en || q.arText || 'Assertion & Reason:');
+      const aText = shouldUseHindi ? (q.assertion_hi || q.assertion || '') : (q.assertion_en || q.assertion || '');
+      const rText = shouldUseHindi ? (q.reason_hi || q.reason || '') : (q.reason_en || q.reason || '');
+      const aLabel = shouldUseHindi ? 'अभिकथन (A):' : 'Assertion (A):';
+      const rLabel = shouldUseHindi ? 'कारण (R):' : 'Reason (R):';
+      bodyHtml = `<div style="margin-bottom:8px; font-weight:600;">${formatRichText(arText)}</div><div class="ar-block"><div class="ar-item"><span class="ar-label">${aLabel}</span><span class="ar-text">${formatRichText(aText)}</span></div><div class="ar-item"><span class="ar-label">${rLabel}</span><span class="ar-text">${formatRichText(rText)}</span></div></div>`;
     } else if(q.type === 'statement') {
-      let stArr = (currentLang === 'en') ? (q.statements_en || q.statements) : (q.statements_hi || q.statements);
+      let stArr = shouldUseHindi ? (q.statements_hi || q.statements) : (q.statements_en || q.statements);
       if(typeof stArr === 'string') { try { stArr = JSON.parse(stArr); } catch(e){} }
       if(!Array.isArray(stArr) && qText) stArr = qText.split('\n').filter(l => l.trim());
-      const stIntro = (currentLang === 'en') ? (q.stIntro_en || q.stIntro || 'Consider the following statements:') : (q.stIntro_hi || q.stIntro || 'निम्नलिखित कथनों पर विचार कीजिए:');
-      const stConclusion = (currentLang === 'en') ? (q.stConclusion_en || q.stConclusion || 'Which of the statements given above is/are correct?') : (q.stConclusion_hi || q.stConclusion || 'उपर्युक्त कथनों में से कौन-सा/से सही है/हैं?');
+      const stIntro = shouldUseHindi ? (q.stIntro_hi || q.stIntro || 'निम्नलिखित कथनों पर विचार कीजिए:') : (q.stIntro_en || q.stIntro || 'Consider the following statements:');
+      const stConclusion = shouldUseHindi ? (q.stConclusion_hi || q.stConclusion || 'उपर्युक्त कथनों में से कौन-सा/से सही है/हैं?') : (q.stConclusion_en || q.stConclusion || 'Which of the statements given above is/are correct?');
       bodyHtml = `<div style="margin-bottom:10px; font-weight:600;">${formatRichText(stIntro)}</div>` +
         (Array.isArray(stArr)?stArr:[]).map((st, i) => {
           let sText = (st || '').toString().trim();
@@ -4371,9 +4689,9 @@
         }).join('') +
         `<div style="margin-top:8px; font-weight:600; color:#93c5fd;">${formatRichText(stConclusion)}</div>`;
     } else if(q.type === 'match') {
-      let rows = (currentLang === 'en') ? (q.matchRows_en || q.matchRows) : (q.matchRows_hi || q.matchRows);
+      let rows = shouldUseHindi ? (q.matchRows_hi || q.matchRows) : (q.matchRows_en || q.matchRows);
       if(typeof rows === 'string') { try { rows = JSON.parse(rows); } catch(e){} }
-      const matchIntro = (currentLang === 'en') ? (q.text_en || q.text || 'Match the following lists:') : (q.text_hi || q.text || 'सुमेलित कीजिए:');
+      const matchIntro = shouldUseHindi ? (q.text_hi || q.text || 'सुमेलित कीजिए:') : (q.text_en || q.text || 'Match the following lists:');
       bodyHtml = `<div style="margin-bottom:8px; font-weight:600;">${formatRichText(matchIntro)}</div><div class="match-table-wrapper"><table class="match-table"><thead><tr><th>#</th><th>${q.matchHead1||'List I'}</th><th>Seq</th><th>${q.matchHead2||'List II'}</th></tr></thead><tbody>` +
         (Array.isArray(rows)?rows:[]).map(r => {
           let c3Raw = (r.c3 || '').toString().trim();
@@ -4441,7 +4759,20 @@
     document.getElementById('t-exam-badge').innerText = q.exam || 'PYQ';
     
     const secPrefix = q.fltSectionShortName ? `${q.fltSectionIcon || '📌'} ${q.fltSectionShortName} > ` : '';
-    document.getElementById('t-hier-badge').innerText = `${secPrefix}${q.subject || 'GS'} > ${q.topic || 'General'}`;
+    const hierEl = document.getElementById('t-hier-badge');
+    if (hierEl) {
+      hierEl.style.display = 'none';
+      hierEl.innerText = '';
+    }
+    const secHeaderEl = document.getElementById('activeSectionBadgeHeader');
+    if (secHeaderEl) {
+      if (q.fltSectionShortName || q.subject) {
+        secHeaderEl.style.display = 'inline-flex';
+        secHeaderEl.innerHTML = `${q.fltSectionIcon || '📚'} ${q.fltSectionShortName || q.subject}`;
+      } else {
+        secHeaderEl.style.display = 'none';
+      }
+    }
 
     const isSaved = (currentUser?.revision_store?.saved || []).some(item => item?.id?.toString() === q.id?.toString());
     const starBtn = document.getElementById('t-star-btn');
@@ -4451,7 +4782,7 @@
     // Show bilingual toggle button if bilingual content exists
     updateBilingualToggleBar('t', q);
 
-    const curLang = window.activeQuestionLang || 'hi';
+    const curLang = window.activeQuestionLang || 'en';
     document.getElementById('t-body').innerHTML = formatQuestionBody(q, curLang);
 
     const qContent = getBilingualQuestionContent(q, curLang);
@@ -4467,13 +4798,103 @@
     `).join('');
     
     updateTestSectionTabsUI();
+    
+    // Morph Save & Next into Submit Test on the final question
+    const saveNextBtn = document.getElementById('t-save-next-btn');
+    if (saveNextBtn) {
+      if (currentQIdx === activeQuestions.length - 1) {
+        saveNextBtn.innerText = 'Submit Test';
+        saveNextBtn.className = 'btn btn-danger';
+        saveNextBtn.style.padding = '10px 22px';
+        saveNextBtn.style.fontWeight = '700';
+        saveNextBtn.style.boxShadow = '0 4px 14px rgba(239, 68, 68, 0.45)';
+      } else {
+        saveNextBtn.innerText = 'Save & Next';
+        saveNextBtn.className = 'btn btn-save-next';
+        saveNextBtn.style.padding = '';
+        saveNextBtn.style.fontWeight = '';
+        saveNextBtn.style.boxShadow = '';
+      }
+    }
+
     renderExamPalette();
     renderMathInElement(document.getElementById('test-player'));
   }
 
+  function handleSaveNextOrSubmit(e) {
+    if (e) e.preventDefault();
+    if (currentQIdx === activeQuestions.length - 1) {
+      visitedQuestions.add(currentQIdx);
+      if (userResponses[currentQIdx] !== undefined) {
+        markedForReview[currentQIdx] = false;
+      }
+      renderExamPalette();
+      if (confirm('Are you sure you want to Submit and evaluate this test?')) {
+        submitTestEngine();
+      }
+    } else {
+      saveAndNextTestQ(e);
+    }
+  }
+
+  function applyCbtPaletteSide(side) {
+    const testSplit = document.getElementById('cbtExamSplitLayout');
+    const pracSplit = document.getElementById('cbtPracSplitLayout');
+    const isRight = (side === 'right');
+    if (testSplit) {
+      if (isRight) testSplit.classList.add('palette-on-right');
+      else testSplit.classList.remove('palette-on-right');
+    }
+    if (pracSplit) {
+      if (isRight) pracSplit.classList.add('palette-on-right');
+      else pracSplit.classList.remove('palette-on-right');
+    }
+  }
+
+  function toggleCbtPaletteSide() {
+    const current = localStorage.getItem('cbt_palette_side') || 'left';
+    const next = (current === 'left') ? 'right' : 'left';
+    localStorage.setItem('cbt_palette_side', next);
+    applyCbtPaletteSide(next);
+  }
+
   function selectTestOption(k) {
+    visitedQuestions.add(currentQIdx);
     if(userResponses[currentQIdx] === k) delete userResponses[currentQIdx]; else userResponses[currentQIdx] = k;
     renderTestView();
+    renderExamPalette();
+  }
+
+  function saveAndNextTestQ(e) {
+    if(e) e.preventDefault();
+    visitedQuestions.add(currentQIdx);
+    if (userResponses[currentQIdx] !== undefined) {
+      markedForReview[currentQIdx] = false;
+    }
+    if (currentQIdx < activeQuestions.length - 1) {
+      currentQIdx++;
+      visitedQuestions.add(currentQIdx);
+      renderTestView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      renderTestView();
+    }
+    renderExamPalette();
+  }
+
+  function markForReviewAndNext(e) {
+    if(e) e.preventDefault();
+    visitedQuestions.add(currentQIdx);
+    markedForReview[currentQIdx] = true;
+    if (currentQIdx < activeQuestions.length - 1) {
+      currentQIdx++;
+      visitedQuestions.add(currentQIdx);
+      renderTestView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      renderTestView();
+    }
+    renderExamPalette();
   }
 
   function renderExamPalette() {
@@ -4481,14 +4902,80 @@
     const desktopGrid = document.getElementById('desktopInlineExamPaletteGrid');
     const desktopPracGrid = document.getElementById('desktopInlinePracPaletteGrid');
 
-    const answeredCount = Object.keys(userResponses || {}).length;
     const totalCount = activeQuestions.length;
+    let countAnswered = 0;
+    let countNotAnswered = 0;
+    let countReview = 0;
+    let countNotVisited = 0;
+
+    for (let i = 0; i < totalCount; i++) {
+      if (userResponses[i] !== undefined) {
+        countAnswered++;
+      } else if (markedForReview[i]) {
+        countReview++;
+      } else if (visitedQuestions.has(i)) {
+        countNotAnswered++;
+      } else {
+        countNotVisited++;
+      }
+    }
+
+    // Update Desktop Header Badges
     const badgeEl = document.getElementById('desktopPaletteAnsweredBadge');
-    if (badgeEl) badgeEl.innerText = `${answeredCount}/${totalCount} Answered`;
+    if (badgeEl) badgeEl.innerText = `${countAnswered}/${totalCount} Answered`;
     const pracBadgeEl = document.getElementById('desktopPracAnsweredBadge');
-    if (pracBadgeEl) pracBadgeEl.innerText = `${answeredCount}/${totalCount} Answered`;
+    if (pracBadgeEl) pracBadgeEl.innerText = `${countAnswered}/${totalCount} Answered`;
+
+    // Update Status Legend Counts (Desktop Test)
+    const cntAns = document.getElementById('cnt-answered');
+    if (cntAns) cntAns.innerText = countAnswered;
+    const cntNotAns = document.getElementById('cnt-not-answered');
+    if (cntNotAns) cntNotAns.innerText = countNotAnswered;
+    const cntRev = document.getElementById('cnt-review');
+    if (cntRev) cntRev.innerText = countReview;
+    const cntNotVis = document.getElementById('cnt-not-visited');
+    if (cntNotVis) cntNotVis.innerText = countNotVisited;
+
+    // Update Status Legend Counts (Desktop Practice)
+    const pracCntAns = document.getElementById('prac-cnt-answered');
+    if (pracCntAns) pracCntAns.innerText = countAnswered;
+    const pracCntNotAns = document.getElementById('prac-cnt-not-answered');
+    if (pracCntNotAns) pracCntNotAns.innerText = countNotAnswered;
+    const pracCntRev = document.getElementById('prac-cnt-review');
+    if (pracCntRev) pracCntRev.innerText = countReview;
+    const pracCntNotVis = document.getElementById('prac-cnt-not-visited');
+    if (pracCntNotVis) pracCntNotVis.innerText = countNotVisited;
+
+    // Update Status Legend Counts (Mobile Modal)
+    const modalCntAns = document.getElementById('modal-cnt-answered');
+    if (modalCntAns) modalCntAns.innerText = countAnswered;
+    const modalCntNotAns = document.getElementById('modal-cnt-not-answered');
+    if (modalCntNotAns) modalCntNotAns.innerText = countNotAnswered;
+    const modalCntRev = document.getElementById('modal-cnt-review');
+    if (modalCntRev) modalCntRev.innerText = countReview;
+    const modalCntNotVis = document.getElementById('modal-cnt-not-visited');
+    if (modalCntNotVis) modalCntNotVis.innerText = countNotVisited;
+
+    // Ensure user's preferred palette side is applied
+    applyCbtPaletteSide(localStorage.getItem('cbt_palette_side') || 'left');
 
     const isSectionedMode = (activeEngineMode === 'flt' || activeEngineMode === 'vyapam_mock' || activeEngineMode === 'teaching_mock');
+
+    function getPaletteBubble(q, i) {
+      let state = 'not-visited';
+      if (userResponses[i] !== undefined) {
+        state = 'answered';
+      } else if (markedForReview[i]) {
+        state = 'review';
+      } else if (visitedQuestions.has(i)) {
+        state = 'not-answered';
+      } else {
+        state = 'not-visited';
+      }
+      const isCur = (i === currentQIdx);
+      return `<div class="palette-box ${state} ${isCur ? 'current' : ''}" onclick="jumpToQuestion(${i})">${i + 1}</div>`;
+    }
+
     let paletteHtml = '';
     if (isSectionedMode && activeTestSections && activeTestSections.length > 1) {
       paletteHtml = activeTestSections.map(sec => {
@@ -4499,12 +4986,12 @@
           </div>
           ${activeQuestions.map((q, i) => {
             if (q.fltSectionId !== sec.id) return '';
-            return `<div class="palette-box ${i === currentQIdx ? 'current' : ''} ${userResponses[i] ? 'answered' : ''}" onclick="jumpToQuestion(${i})">${i + 1}</div>`;
+            return getPaletteBubble(q, i);
           }).join('')}
         `;
       }).join('');
     } else {
-      paletteHtml = activeQuestions.map((_, i) => `<div class="palette-box ${i === currentQIdx ? 'current' : ''} ${userResponses[i] ? 'answered' : ''}" onclick="jumpToQuestion(${i})">${i + 1}</div>`).join('');
+      paletteHtml = activeQuestions.map((q, i) => getPaletteBubble(q, i)).join('');
     }
 
     if (modalGrid) modalGrid.innerHTML = paletteHtml;
@@ -4522,19 +5009,29 @@
 
   function jumpToQuestion(i) {
     currentQIdx = i;
+    visitedQuestions.add(currentQIdx);
     if (activeEngineMode === 'practice') {
       if (typeof renderPracticeView === 'function') renderPracticeView();
     } else {
       renderTestView();
     }
     renderExamPalette();
-    if (window.innerWidth < 992) {
+    if (window.innerWidth < 768) {
       closePaletteModal();
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function moveTestQ(step, e) { if(e) e.preventDefault(); if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) { currentQIdx += step; renderTestView(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+  function moveTestQ(step, e) {
+    if(e) e.preventDefault();
+    if(currentQIdx + step >= 0 && currentQIdx + step < activeQuestions.length) {
+      currentQIdx += step;
+      visitedQuestions.add(currentQIdx);
+      renderTestView();
+      renderExamPalette();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   function exitTestModeConfirm() {
     if(confirm('Submit and evaluate current test attempt?')) submitTestEngine();
@@ -4546,12 +5043,16 @@
     const q = activeQuestions[currentQIdx];
     document.getElementById('p-counter').innerText = `Practice Q ${currentQIdx + 1} of ${activeQuestions.length}`;
     document.getElementById('p-exam-badge').innerText = q.exam || 'PYQ';
-    document.getElementById('p-hier-badge').innerText = `${q.subject || 'GS'} > ${q.topic || 'General'}`;
+    const pHier = document.getElementById('p-hier-badge');
+    if (pHier) {
+      pHier.style.display = 'inline-block';
+      pHier.innerText = `${q.subject || 'GS'} > ${q.topic || 'General'}`;
+    }
 
     // Show bilingual toggle button if bilingual content exists
     updateBilingualToggleBar('p', q);
 
-    const curLang = window.activeQuestionLang || 'hi';
+    const curLang = window.activeQuestionLang || 'en';
     document.getElementById('p-body').innerHTML = formatQuestionBody(q, curLang);
     const chosen = userResponses[currentQIdx];
 
@@ -5045,7 +5546,7 @@
     // Show bilingual toggle button if bilingual content exists
     updateBilingualToggleBar('rq', q);
 
-    const curLang = window.activeQuestionLang || 'hi';
+    const curLang = window.activeQuestionLang || 'en';
     document.getElementById('rq-body').innerHTML = formatQuestionBody(q, curLang);
     const chosen = revQuizResponses[revQuizIdx];
 
@@ -5374,6 +5875,9 @@
     const overlay = document.getElementById('splashScreenVideoOverlay');
     if (!overlay) return;
     overlay.style.opacity = '0';
+    if (window.AndroidAppBridge && typeof window.AndroidAppBridge.onSplashDismissed === 'function') {
+      try { window.AndroidAppBridge.onSplashDismissed(); } catch(e){}
+    }
     setTimeout(() => {
       overlay.style.display = 'none';
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
